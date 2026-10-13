@@ -1,0 +1,12 @@
+node_modules/
+.DS_Store
+.env
+.env.*
+!.env.example
+dist/
+
+# Los resultados de actividad se entregan localmente, no se publican.
+examples/*.csv
+
+# Local editor history
+.Rhistory
