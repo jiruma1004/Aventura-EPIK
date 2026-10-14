@@ -30,7 +30,7 @@ window.SceneActing={
  tea(t,karla=false){
   const speak=karla?t>=3.8&&t<5.5||t>=10&&t<12:t>=.6&&t<3.5||t>=6&&t<9;
   if(karla&&t>=7.2&&t<10)return t<8.4?6:7;
-  if(speak)return Math.floor(t*7)%2?2:0;
+  if(speak)return Math.floor(t*4)%2?2:0;
   const sipAt=karla?1:4;
   if(t>=sipAt&&t<sipAt+1.7)return [3,4,4,5][Math.min(3,Math.floor((t-sipAt)/.425))];
   if(karla&&t>=12)return 7;
