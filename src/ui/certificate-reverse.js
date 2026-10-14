@@ -43,6 +43,14 @@ window.CertificateReverse = class {
     this.flip.setAttribute('aria-pressed', String(!this.back.hidden));
     this.el.classList.toggle('showing-ranks', !this.back.hidden);
   }
+  stars(parent, count) {
+    const group=document.createElement('span');group.className='rating-stars';group.dataset.stars=String(count);
+    group.setAttribute('role','img');group.setAttribute('aria-label',I18n.lang==='en'?`${count} out of 5 stars`:`${count} de 5 estrellas`);
+    for(let i=0;i<5;i++){
+      const star=document.createElement('span');star.className='star '+(i<count?'filled':'empty');star.textContent=i<count?'★':'☆';star.setAttribute('aria-hidden','true');star.style.setProperty('--star-index',i);group.append(star);
+    }
+    parent.append(group);return group;
+  }
   render() {
     this.updateButton();this.back.replaceChildren();
     const en = I18n.lang === 'en', say = (es, english) => en ? english : es;
@@ -54,7 +62,7 @@ window.CertificateReverse = class {
       return;
     }
     const {rooms, score, stars} = this.performance;
-    add(this.back, 'p', `${'★'.repeat(stars)}${'☆'.repeat(5-stars)} · ${score} / 100`, 'rank-total');
+    const total=add(this.back,'p','','rank-total');this.stars(total,stars);add(total,'span',` · ${score} / 100`);
     add(this.back, 'p', say('Puntaje de aventura · Los retos de cálculo tienen doble peso.', 'Adventure score · Calculation challenges carry double weight.'), 'rank-caption');
     const list = add(this.back, 'ol', '', 'rank-list');
     const pageSize=innerWidth<650?2:4,pages=Math.ceil(rooms.length/pageSize);
@@ -63,7 +71,7 @@ window.CertificateReverse = class {
       const index=this.page*pageSize+offset;
       const item = add(list, 'li', '', 'rank-card');item.dataset.room = r.id;
       add(item, 'small', `${index + 1} · ${I18n.t(r.name)}`, 'rank-room');
-      const rating = add(item, 'span', r.stars ? '★'.repeat(r.stars)+'☆'.repeat(5-r.stars) : '—', 'rank-stars');
+      const rating = add(item, 'span', '', 'rank-stars');this.stars(rating,r.stars||0);
       rating.setAttribute('aria-label', say(`${r.stars} de 5 estrellas`, `${r.stars} out of 5 stars`));
       add(item, 'strong', r.titles ? r.titles[en?1:0] : say('Pendiente', 'Pending'), 'rank-title');
       add(item, 'span', `${r.score} / 100`, 'rank-score');

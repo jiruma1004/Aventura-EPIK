@@ -1,4 +1,4 @@
-const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');const w={};w.window=w;vm.createContext(w);vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/rooms/room-05/boss.js'),'utf8'),w);
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');const w={};w.window=w;vm.createContext(w);vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/engine/difficulty.js'),'utf8'),w);vm.runInContext(fs.readFileSync(path.join(__dirname,'../src/rooms/room-05/boss.js'),'utf8'),w);
 assert.equal(w.EricVariants.bank.length,20);const formulas=new Set();
 const expr=(text,x)=>Function('x','return '+text.replaceAll('−','-').replaceAll('x²','(x*x)').replace(/(\d)x/g,'$1*x'))(x);
 for(const support of w.EricVariants.bank){
@@ -14,7 +14,7 @@ assert.equal(formulas.size,20);let prev=null;for(let cycle=0;cycle<3;cycle++){co
 console.log('OK: 20 distinct rendered equations, independent quadratic solutions, rounding, incorrect answers, branch checks and no-repeat bag.');
 
 const events=[],hazards=new w.EricPotions(type=>events.push(type));
-for(let i=0;i<80;i++)hazards.tick(.1,{x:i<68?3:8,y:7.5});hazards.tick(.01,{x:8,y:7.5});assert.equal(hazards.bottles.length,1);assert.equal(hazards.bottles[0].x,3,'Apunta a la posición anterior, no a la actual');
+for(let i=0;i<96;i++)hazards.tick(.1,{x:i<84?3:8,y:7.5});hazards.tick(.01,{x:8,y:7.5});assert.equal(hazards.bottles.length,1);assert.equal(hazards.bottles[0].x,3,'Apunta a la posición anterior, no a la actual');
 for(let i=0;i<16;i++)hazards.tick(.1,{x:8,y:7.5});assert.equal(hazards.pools.length,1);assert(events.includes('splash'));assert(!hazards.caught);
 hazards.tick(.1,{x:3,y:7.5,jumpHeight:.3});assert(!hazards.caught,'Se puede saltar sobre el charco');hazards.tick(.1,{x:3,y:7.5,jumpHeight:0});assert(hazards.caught);assert.equal(events.filter(e=>e==='hit').length,1);hazards.tick(1,{x:3,y:7.5});assert.equal(events.filter(e=>e==='hit').length,1);
 hazards.reset();hazards.pools=[{x:3,y:7.5,expires:2}];hazards.tick(1.99,{x:8,y:7.5});assert.equal(hazards.pools.length,1);hazards.tick(.02,{x:3,y:7.5});assert.equal(hazards.pools.length,0);assert(!hazards.caught);assert.equal(hazards.bottles.length,0);

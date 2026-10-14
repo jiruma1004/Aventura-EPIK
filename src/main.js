@@ -42,12 +42,12 @@ function expireAdventure(){
 }
 const arrival=new CartArrival(saved=>{Object.assign(player,saved);keys.clear();mission.start();classroom.session.start();canvas.focus({preventScroll:true});});
 function enterAdventure(skipArrival=false){
- classroom.session.studentName=prologue.studentName||'';if(recovery)recovery.enabled=true;
+ classroom.session.studentName=prologue.studentName||'';classroom.session.difficulty=EpikDifficulty.mode;companions.showRoomNotice(rooms[index]);companions.updateTrial();if(recovery)recovery.enabled=true;
  const intro=document.querySelector('#adventure-intro');if(intro.open)intro.close();keys.clear();if(skipArrival){mission.start();classroom.session.start();}else arrival.start(player);canvas.focus({preventScroll:true});canvas.scrollIntoView({block:'center'});
 }
 const prologue=new AdventurePrologue(enterAdventure);
 document.querySelector('#adventure-expired').addEventListener('cancel',e=>e.preventDefault());
-document.querySelector('#adventure-restart').onclick=()=>{recovery?.remove();gravityFalls=0;potionDeaths=0;document.querySelector('#adventure-expired').close();StoryRoute.reset();classroom.newSession();load(rooms.findIndex(r=>r.trial),'new');mission.restart();classroom.session.start();canvas.focus({preventScroll:true});};
+document.querySelector('#adventure-restart').onclick=()=>{recovery?.remove();gravityFalls=0;potionDeaths=0;document.querySelector('#adventure-expired').close();StoryRoute.reset();companions.chaseAnnounced=false;classroom.newSession();load(rooms.findIndex(r=>r.trial),'new');mission.restart();classroom.session.start();canvas.focus({preventScroll:true});};
 document.addEventListener('visibilitychange',()=>{keys.clear();classroom?.session.clock(false);mission.tick();});
 setInterval(()=>mission.tick(),250);
 new ResizeObserver(entries=>{const r=entries[0].contentRect;if(r.width&&r.height){canvas.width=960;canvas.height=Math.round(960*r.height/r.width);}}).observe(canvas);
@@ -86,7 +86,7 @@ function trialEvent(type,position){
  if(type==='zipline-end'){opened=true;checkpoint={room:index,stage:5,position:{...position,pitch:0,jumpHeight:0,jumpVelocity:0}};classroom.solve();document.querySelector('#door-status').textContent=I18n.t('CRUCE COMPLETADO');document.querySelector('#question-bubble').hidden=true;companions.toast(I18n.t('Has cruzado en tirolesa. Esta sala se completa con una estrella.'));Sound.click();canvas.focus({preventScroll:true});return;}
 
  if(type==='fall'||type==='break'){die('pit',type==='break'?'wood':null);return;}
- checkpoint={room:index,stage:trial.stage,position:spawnPlayer(rooms[index])};opened=trial.finished;if(opened)classroom.solve();
+ checkpoint={room:index,stage:trial.stage,position:EpikDifficulty.profile.platformCheckpoint?{...position,pitch:0,jumpHeight:0,jumpVelocity:0}:spawnPlayer(rooms[index])};opened=trial.finished;if(opened)classroom.solve();
  document.querySelector('#door-status').textContent=opened?'SENDERO SUPERADO':`SALTO ${trial.stage+1} / 5`;
  companions.updateTrial();Sound.click();if(opened)Sound.success();
  companions.toast(opened?'¡Cinco aciertos! Sigue el camino hacia el bosque.':'Respuesta correcta. Punto seguro guardado.');
@@ -250,7 +250,7 @@ function captureRecovery() {
  if(classroom.session.preview||classroom.session.started===null)return null;
  if(mission.state==='expired')return {expired:true};
  classroom.session.clock(!document.hidden&&canPlay());
- const room=rooms[index], world={room:room.id,opened,checkpoint,gravityFalls,potionDeaths};
+ const room=rooms[index], world={room:room.id,opened,checkpoint,gravityFalls,potionDeaths,chaseAnnounced:!!companions.chaseAnnounced};
  if(trial)world.trial={stage:trial.stage,finished:trial.finished,broken:[...trial.broken]};
  if(room.physics)world.cannon={target:pick(lab.target,['index','misses']),physics:{...room.physics},
   values:[lab.v.value,lab.a.value,lab.az.value],history:lab.history,selected:lab.selected,loaded:lab.loaded,
@@ -269,8 +269,10 @@ function restoreRecovery(saved,away) {
  if(saved.session.states.some(([id,state])=>!ADVENTURE_ORDER.some(room=>room.id===id)||!state||!Number.isFinite(state.active)))throw Error('Invalid metrics');
  classroom.newSession();classroom.session.restoreSnapshot(saved.session,away);
  if(!classroom.session.canEnter(w.room))throw Error('Invalid progression');
+ EpikDifficulty.select(saved.session.difficulty);
  if(saved.language==='en'||saved.language==='es')I18n.set(saved.language);
  StoryRoute.reset();if(saved.session.route)StoryRoute.choose(saved.session.route);
+ companions.chaseAnnounced=!!saved.world.chaseAnnounced;
  prologue.done=true;prologue.speaking=false;prologue.studentName=classroom.session.studentName;
  if(!load(i,'recovery'))throw Error('Cannot restore room');
  opened=!!w.opened;gravityFalls=w.gravityFalls||0;potionDeaths=w.potionDeaths||0;
@@ -331,7 +333,7 @@ function restoreRecovery(saved,away) {
 classroom=new EpikClassroom(ADVENTURE_ORDER,()=>({room:rooms[index],lab,maze,roulette,boss,trial,ignitia,opened}),()=>canPlay());
 document.querySelector('#reset-lab').onclick=()=>load(index);document.querySelector('#reset-roulette').onclick=()=>load(index);load(rooms.findIndex(r=>r.trial),'new');mission.notify();document.querySelector('#adventure-intro').showModal();Sound.enable({automatic:true});requestAnimationFrame(tick);
 recovery=new EpikRecovery({capture:captureRecovery,restore:restoreRecovery,reset:()=>{
- StoryRoute.reset();classroom.newSession();classroom.session.studentName='';
+ StoryRoute.reset();companions.chaseAnnounced=false;classroom.newSession();classroom.session.studentName='';
  mission.state='ready';mission.remaining=ADVENTURE_CONFIG.durationSeconds;mission.deadline=null;mission.pausedAt=null;
  prologue.done=false;prologue.started=false;prologue.step=0;prologue.studentName='';
  document.querySelector('#story-name-box').hidden=false;document.querySelector('#story-student-name').value='';
@@ -358,5 +360,5 @@ window.addEventListener('astralia:language',()=>{
 const controls=document.querySelector('.controls');controls.append(document.querySelector('.audio-controls'),document.querySelector('.language-corner'));
 for(const el of controls.querySelectorAll('button,summary,input'))el.addEventListener('pointerdown',()=>camera.release());
 if(!development){for(const id of ['story-skip','cinematics-open','cinema-skip','cinema-replay','cinema-close'])document.getElementById(id)?.remove();document.querySelector('[data-arrival-skip]')?.remove();}
-if(development){const getters={player:()=>player,index:()=>index,opened:()=>opened,death:()=>death,trial:()=>trial,maze:()=>maze,boss:()=>boss,corridor:()=>corridor,last:()=>last,completed:()=>completed};for(const [k,get] of Object.entries(getters))Object.defineProperty(window,k,{get,configurable:true});Object.assign(window,{rooms,lab,roulette,companions,cinematics,ignitia,mission,camera,cannon,touch,keys,renderer,prologue,arrival,classroom,recovery,tick,jump,shoot,interact,die,respawn,load:(i)=>load(i,'preview'),advanceRoom:(i)=>load(i),newClassroomGame:()=>{StoryRoute.reset();classroom.newSession();load(rooms.findIndex(r=>r.trial),'new');mission.restart();classroom.session.start();}});}
+if(development){const getters={player:()=>player,index:()=>index,opened:()=>opened,death:()=>death,trial:()=>trial,maze:()=>maze,boss:()=>boss,corridor:()=>corridor,last:()=>last,completed:()=>completed};for(const [k,get] of Object.entries(getters))Object.defineProperty(window,k,{get,configurable:true});Object.assign(window,{rooms,lab,roulette,companions,cinematics,ignitia,mission,camera,cannon,touch,keys,renderer,prologue,arrival,classroom,recovery,tick,jump,shoot,interact,die,respawn,load:(i)=>load(i,'preview'),advanceRoom:(i)=>load(i),newClassroomGame:()=>{StoryRoute.reset();companions.chaseAnnounced=false;classroom.newSession();load(rooms.findIndex(r=>r.trial),'new');mission.restart();classroom.session.start();}});}
 })();

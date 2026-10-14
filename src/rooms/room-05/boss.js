@@ -25,13 +25,13 @@ window.ParabolaPuzzle=class {
  get solved(){return this.cuts.every(Boolean);}
 };
 window.EricPotions=class {
- constructor(onEvent){this.onEvent=onEvent;this.reset();}
- reset(){this.time=0;this.nextThrow=8;this.history=[];this.bottles=[];this.pools=[];this.bursts=[];this.caught=false;}
+ constructor(onEvent){this.onEvent=onEvent;this.config=EpikDifficulty.profile;this.reset();}
+ reset(){this.time=0;this.nextThrow=this.config.potionFirst;this.history=[];this.bottles=[];this.pools=[];this.bursts=[];this.caught=false;}
  tick(dt,player,allowThrow=true){if(this.caught)return;this.time+=dt;this.history.push({t:this.time,x:player.x,y:player.y});while(this.history.length>1&&this.history[1].t<this.time-2)this.history.shift();
   this.pools=this.pools.filter(p=>this.time<p.expires);this.bursts=this.bursts.filter(b=>this.time-b.born<.7);
   for(const b of this.bottles){b.age+=dt;if(b.age>=1.6&&!b.landed){b.landed=true;this.pools.push({x:b.x,y:b.y,expires:this.time+2});this.bursts.push({x:b.x,y:b.y,born:this.time});this.onEvent('splash');}}
   this.bottles=this.bottles.filter(b=>!b.landed);
-  if(allowThrow&&this.time>=this.nextThrow){const target=this.history.findLast(p=>p.t<=this.time-1.5)||this.history[0];this.bottles.push({x:target.x,y:target.y,age:0});this.nextThrow=this.time+9;this.onEvent('throw');}
+  if(allowThrow&&this.time>=this.nextThrow){const target=this.history.findLast(p=>p.t<=this.time-1.5)||this.history[0];this.bottles.push({x:target.x,y:target.y,age:0});this.nextThrow=this.time+this.config.potionInterval;this.onEvent('throw');}
   if((player.jumpHeight||0)<.18&&this.pools.some(p=>Math.hypot(player.x-p.x,player.y-p.y)<.7)){this.caught=true;this.onEvent('hit');}
  }
  draw(renderer,player,actors,art){const c=renderer.ctx;

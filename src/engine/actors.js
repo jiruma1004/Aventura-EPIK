@@ -1,5 +1,5 @@
 window.RoomActors=class {
- constructor(){this.ivan=new Image();this.ivan.src='assets/cast/ivan-chase-v2.webp';this.doorArt=new Map();}
+ constructor(){this.ivan=new Image();this.ivan.src='assets/cast/ivan-chase-demonic-v3.webp';this.doorArt=new Map();}
  doorTexture(door){
   const key=(door.dungeon?'dungeon-':'maze-')+door.stage+'-'+door.choice;if(this.doorArt.has(key))return this.doorArt.get(key);
   const art=document.createElement('canvas');art.width=art.height=512;const c=art.getContext('2d');

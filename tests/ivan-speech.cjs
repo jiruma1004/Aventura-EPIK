@@ -1,4 +1,4 @@
-const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),w={};w.window=w;vm.createContext(w);vm.runInContext(fs.readFileSync('src/rooms/room-03/maze.js','utf8'),w);
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),w={};w.window=w;vm.createContext(w);vm.runInContext(fs.readFileSync('src/engine/difficulty.js','utf8'),w);vm.runInContext(fs.readFileSync('src/rooms/room-03/maze.js','utf8'),w);
 const maze=new w.ConceptMaze({spawn:{x:2.5,y:8.5},environment:{kind:'interior'}},()=>{}),player={x:6.5,y:8.5};maze.routeTo=()=>[];
 maze.tick(1,player);assert.equal(maze.speech,null,'Sin perseguidor no hay frases');maze.awaken(true);maze.grace=0;maze.tick(.1,player);assert.equal(maze.speech,'Soy inevitable');assert.equal(maze.speechLeft,3.5);
 maze.tick(3.6,player);assert.equal(maze.speechLeft,0);maze.tick(6.5,player);assert.notEqual(maze.speech,'Soy inevitable');assert.equal(maze.tauntIndex,2);

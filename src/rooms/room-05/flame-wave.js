@@ -1,8 +1,8 @@
 /* A swept plane: collision depends on relative crossing and jump height, not FPS. */
 window.EricFlameWave = class {
   static config = {
-    first: 15,
-    interval: 19,
+    first: 15 * 1.2,
+    interval: 19 * 1.2,
     warning: 2.2,
     speed: 4,
     startX: 16.6,
@@ -12,6 +12,7 @@ window.EricFlameWave = class {
   };
   constructor(onEvent) {
     this.onEvent = onEvent;
+    this.enabled = EpikDifficulty.profile.flameEnabled;
     this.reset();
   }
   reset() {
@@ -31,7 +32,7 @@ window.EricFlameWave = class {
       },
       cfg = EricFlameWave.config;
     this.previousPlayer ??= p;
-    if (this.caught) return;
+    if (!this.enabled || this.caught) return;
     let remaining = Math.max(0, dt);
     while (remaining > 1e-8 && !this.caught) {
       if (this.phase === 'idle') {

@@ -4,6 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),{execFileSync:run}=require
 const root=path.resolve(__dirname,'..'),lib=path.resolve(root,'../astralia-animation-library/actions');
 const temp=path.join(lib,'.build');fs.mkdirSync(temp,{recursive:true});
 const specs={
+ 'ivan-chase-demonic-v3':{columns:4,rows:1,clips:{chase:[0,1,0,1,2,0,3,0],catch:[2]}},
  'karla-ceremony-v2':{columns:4,rows:1,clips:{reserved:[0,0,1,0,2,0,3,3]}},
  'eric-impact-v2':{columns:4,rows:2,clips:{collision:[0,1,2,3,4,5,6,6,7,6]}},
  'ivan-action-v2':{columns:4,rows:3,clips:{panic:[4,5,6,7,6,5],villain:[8,9,8,10,11,10]}},

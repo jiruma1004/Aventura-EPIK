@@ -1072,3 +1072,23 @@ Object.assign(ENGLISH,{
  'Los seis personajes celebran tu esfuerzo bajo el cielo de Ignitia.':'The six characters celebrate your effort beneath the sky of Ignitia.',
  'Gracias por jugar · Aventura EPIK':'Thank you for playing · Aventura EPIK'
 });
+
+Object.assign(window.ENGLISH, {
+  '¿Acostumbras jugar videojuegos?':'Do you usually play video games?',
+  'Sí · Modo normal':'Yes · Normal mode',
+  'No · Modo fácil':'No · Easy mode',
+  'El modo fácil te da más margen para saltar y esquivar. Los ejercicios son los mismos.':'Easy mode gives you more time to jump and dodge. The exercises stay the same.',
+  'regresas al último tablón correcto':'you return to the last correct plank'
+});
+
+Object.assign(window.ENGLISH, {
+  "Botón azul activado. Iván queda congelado durante 8 segundos.": "Blue button activated. Iván is frozen for 8 seconds.",
+  "Pulsa el botón azul de la pared con clic o E: congela a Iván durante 8 segundos. Cada botón se usa una vez; en el calabozo se renueva en cada visita.": "Click the blue wall button or press E: it freezes Iván for 8 seconds. Each button works once; the dungeon button resets on each visit.",
+  "Clic o E · Congelar a Iván · 8 s": "Click or E · Freeze Iván · 8 s",
+  "Tres galerías con una respuesta correcta y una última con dos puertas válidas: azul / partícula y roja / onda. Abre con clic o E. Un error te envía al calabozo; resuélvelo para regresar. Cada acierto guarda un punto seguro. Los botones azules congelan a Iván 8 segundos. H: pista.": "Three galleries have one correct answer; the last has two valid doors: blue / particle and red / wave. Open with a click or E. A mistake sends you to the dungeon; solve its question to return. Each correct answer saves a checkpoint. Blue buttons freeze Iván for 8 seconds. H: hint.",
+});
+
+Object.assign(window.ENGLISH, {
+ 'Salta a la plataforma con tu respuesta. Conservas tus aciertos; si caes, vuelves al último tablón correcto.':'Jump onto the platform with your answer. Your correct answers remain; if you fall, return to your last correct plank.',
+ 'Lee la afirmación y salta a Verdadero o Falso. Shift para correr, Espacio para saltar. Un error rompe la plataforma; regresas al último tablón correcto y conservas tus aciertos. Pulsa H si necesitas una pista.':'Read the statement and jump to True or False. Shift to run, Space to jump. A wrong answer breaks the plank; return to the last correct plank and keep your progress. Press H for a hint.'
+});

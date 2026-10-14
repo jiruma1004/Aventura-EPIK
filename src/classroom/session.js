@@ -13,6 +13,7 @@ window.EpikSession = class {
     this.storage = storage;
     this.id = crypto.randomUUID();
     this.studentName = '';
+    this.difficulty = window.EpikDifficulty?.mode || 'normal';
     this.events = [];
     this.states = new Map();
     this.pending = new Map();
@@ -245,7 +246,7 @@ window.EpikSession = class {
   }
   recoverySnapshot() {
     return {
-      id:this.id, studentName:this.studentName, at:this.now(),
+      id:this.id, studentName:this.studentName, difficulty:this.difficulty, at:this.now(),
       started:this.started, finished:this.finished, seq:this.seq,
       events:this.events, states:[...this.states], pending:[...this.pending],
       current:this.current, route:this.route, preview:this.preview
@@ -255,6 +256,7 @@ window.EpikSession = class {
     // performance.now() starts over on reload. Rebase all absolute timestamps
     // while keeping durations, attempt IDs and the original session ID intact.
     const shift = this.now() - saved.at - away;
+    this.difficulty = saved.difficulty === 'easy' ? 'easy' : 'normal';
     this.id = saved.id; this.studentName = String(saved.studentName || '').slice(0,80);
     this.events = saved.events; this.seq = saved.seq;
     this.states = new Map(saved.states);

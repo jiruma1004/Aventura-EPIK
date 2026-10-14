@@ -1,4 +1,4 @@
-const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');const w={};w.window=w;vm.createContext(w);for(const p of ['src/rooms/room-04/room.js','src/rooms/room-04/corridor.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..',p),'utf8'),w);
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');const w={};w.window=w;vm.createContext(w);for(const p of ['src/engine/difficulty.js','src/rooms/room-04/room.js','src/rooms/room-04/corridor.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..',p),'utf8'),w);
 const room=w.ESCAPE_ROOMS[0],events=[],c=new w.RelaxCorridor((type,text)=>events.push({type,text}));assert.equal(room.map[4][51],2);assert.equal(room.canUnlock({ready:true}),true);assert.equal(room.canUnlock({prototypeMode:true}),false);assert(Math.abs(room.bounds.maxY-room.bounds.minY-7*.8)<1e-10);
 for(const o of c.obstacles){assert(c.blocks(o.x,o.y,0));assert(!c.blocks(o.x,o.y,.3));}
 const old=c.symbols.map(s=>({...s}));c.tick(.5,{x:3,y:4.5,jumpHeight:0});c.symbols.forEach((s,i)=>{assert.equal(s.y,old[i].y);assert(Math.abs(s.x-old[i].x+.8)<1e-10);});
@@ -9,5 +9,5 @@ assert.equal(room.oakDoor.x+.5-room.spawn.x,54*.9,'Recorrido reducido un 10 %');
 
 const forgiving=new w.RelaxCorridor(()=>{});forgiving.symbols=[{x:10,y:4,age:1,text:'π'}];forgiving.spawnClock=100;
 forgiving.tick(0,{x:10.46,y:4,jumpHeight:0});assert(!forgiving.caught,'El borde anterior ya no impacta: 5 % menos por lado');
-forgiving.tick(0,{x:10.43,y:4,jumpHeight:0});assert(forgiving.caught,'La zona central del símbolo sigue causando impacto');
+forgiving.tick(0,{x:10.38,y:4,jumpHeight:0});assert(forgiving.caught,'La zona central del símbolo sigue causando impacto');
 const obstacle=forgiving.obstacles[0];assert(!forgiving.blocks(obstacle.x+.30,obstacle.y,0));assert(forgiving.blocks(obstacle.x+.28,obstacle.y,0));

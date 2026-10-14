@@ -14,7 +14,7 @@ const w = {
 };
 w.window = w;
 vm.createContext(w);
-for (const f of ['classroom/session', 'rooms/room-05/flame-wave', 'rooms/room-06/interception', 'rooms/room-01/projectile', 'classroom/assistance']) vm.runInContext(fs.readFileSync('src/' + f + '.js', 'utf8'), w);
+for (const f of ['engine/difficulty', 'classroom/session', 'rooms/room-05/flame-wave', 'rooms/room-06/interception', 'rooms/room-01/projectile', 'classroom/assistance']) vm.runInContext(fs.readFileSync('src/' + f + '.js', 'utf8'), w);
 let now = 0;
 const rooms = Array.from({
     length: 7
@@ -124,7 +124,7 @@ let wave = new C(e => events.push(e)),
     x: 3,
     jumpHeight: 0
   };
-wave.tick(15, p, true);
+wave.tick(C.config.first, p, true);
 assert.equal(wave.phase, 'warning');
 wave.tick(2.2, p);
 assert.equal(wave.phase, 'wave');
@@ -137,7 +137,7 @@ p = {
   x: 3,
   jumpHeight: .43
 };
-wave.tick(17.2, p);
+wave.tick(C.config.first+C.config.warning, p);
 wave.tick((C.config.startX - C.config.endX) / C.config.speed, p);
 assert.equal(wave.phase, 'cooldown');
 wave.tick(4.999, p);

@@ -22,7 +22,7 @@ window.DUNGEON_QUESTIONS=[
 
 ];
 window.ConceptMaze=class {
- constructor(room,onEvent){this.room=room;this.onEvent=onEvent;this.questionPool=[];this.lastDungeonQuestion=null;this.reset();}
+ constructor(room,onEvent){this.room=room;this.onEvent=onEvent;this.speed=EpikDifficulty.profile.ivanSpeed;this.questionPool=[];this.lastDungeonQuestion=null;this.reset();}
  reset(){
   this.speech=null;this.speechLeft=0;this.tauntClock=0;this.tauntIndex=0;
   this.freezeLeft=0;this.usedFreezeButtons=new Set();this.dungeonVisit=0;this.returnGrace=false;this.dungeon=false;this.room.environment=this.baseEnvironment||this.room.environment;this.baseEnvironment=this.room.environment;this.routeChoice=null;this.stage=0;this.passed=new Set();this.finished=false;this.chasing=false;this.caught=false;this.bite=0;this.path=[];this.pathClock=0;this.doors=[];this.openDoors=new Set();this.grace=0;
@@ -45,7 +45,7 @@ window.ConceptMaze=class {
  get freezeButton(){if(this.finished)return null;if(this.dungeon)return {id:'dungeon-'+this.dungeonVisit,x:8.5,y:1.02};return this.stage>=1&&this.stage<=3?{id:'stage-'+this.stage,x:this.stage*12+6.5,y:1.02}:null;}
  get freezeUsed(){const b=this.freezeButton;return !!b&&this.usedFreezeButtons.has(b.id);}
  nearFreezeButton(player,renderer){const b=this.freezeButton;if(!b||this.caught)return false;const dx=b.x-player.x,dy=b.y-player.y,d=Math.hypot(dx,dy),angle=Math.atan2(dy,dx);return d<2&&Math.cos(angle-player.angle)>.94&&renderer.cast(this.room,player.x,player.y,angle,false).distance+.08>=d;}
- activateFreeze(player,renderer){if(!this.nearFreezeButton(player,renderer))return false;if(this.freezeUsed){this.onEvent('freeze','Este botón ya se usó. Busca otro en la siguiente galería.');return true;}this.usedFreezeButtons.add(this.freezeButton.id);this.freezeLeft=10;this.onEvent('freeze','Botón azul activado. Iván queda congelado durante 10 segundos.');return true;}
+ activateFreeze(player,renderer){if(!this.nearFreezeButton(player,renderer))return false;if(this.freezeUsed){this.onEvent('freeze','Este botón ya se usó. Busca otro en la siguiente galería.');return true;}this.usedFreezeButtons.add(this.freezeButton.id);this.freezeLeft=8;this.onEvent('freeze','Botón azul activado. Iván queda congelado durante 8 segundos.');return true;}
  nextDungeonQuestion(){
   // Bolsa barajada: agotar el banco antes de repetir, incluso después de morir.
   if(!this.questionPool.length){
@@ -115,7 +115,7 @@ window.ConceptMaze=class {
   this.pathClock-=dt;
   const atCenter=Math.hypot(this.enemy.x-Math.floor(this.enemy.x)-.5,this.enemy.y-Math.floor(this.enemy.y)-.5)<.001;
   if(!this.path.length||(this.pathClock<=0&&atCenter)){this.path=this.routeTo(player);this.pathClock=.6;}
-  const target=this.path[0];if(target){const dx=target.x-this.enemy.x,dy=target.y-this.enemy.y,d=Math.hypot(dx,dy),step=Math.min(d,dt*IVAN_CHASE_SPEED);if(d>0){this.enemy.x+=dx/d*step;this.enemy.y+=dy/d*step;}if(d<=step+.00001){this.enemy.x=target.x;this.enemy.y=target.y;this.path.shift();}}
+  const target=this.path[0];if(target){const dx=target.x-this.enemy.x,dy=target.y-this.enemy.y,d=Math.hypot(dx,dy),step=Math.min(d,dt*this.speed);if(d>0){this.enemy.x+=dx/d*step;this.enemy.y+=dy/d*step;}if(d<=step+.00001){this.enemy.x=target.x;this.enemy.y=target.y;this.path.shift();}}
   if(Math.hypot(this.enemy.x-player.x,this.enemy.y-player.y)<.6){this.caught=true;this.bite=1.2;this.onEvent('caught','¡Ñam! EPI Ivan te alcanzó.');}
  }
 };

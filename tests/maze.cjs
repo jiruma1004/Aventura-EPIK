@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
 const world={};world.window=world;vm.createContext(world);
-for(const file of ['src/rooms/room-03/room.js','src/rooms/room-03/maze.js','src/rooms/room-00/approach.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),world);
+for(const file of ['src/engine/difficulty.js','src/rooms/room-03/room.js','src/rooms/room-03/maze.js','src/rooms/room-00/approach.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),world);
 const room=world.ESCAPE_ROOMS[0],events=[],maze=new world.ConceptMaze(room,(type,text)=>events.push({type,text}));
 const door=(stage,choice)=>maze.doors.find(d=>d.stage===stage&&d.choice===choice);
 function pass(){const d=door(maze.stage,[world.CONCEPT_QUESTIONS[maze.stage].correct].flat()[0]);assert.equal(maze.choose(d),true);maze.tick(.016,{x:d.x+5.3,y:d.y+.5});}
