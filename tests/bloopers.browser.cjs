@@ -44,7 +44,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
   if(i===4){
    assert.equal(await page.locator('#blooper-speaker').innerText(),'Angélica');
    assert.match(await page.locator('#blooper-line').innerText(),/Solo falta encontrar al Dr. Eric/);
-   const reactions=await page.evaluate(()=>{const b=cinematics.bloopers,orig=b.fullTeaFrame,frames=[];b.fullTeaFrame=(c,im,f)=>frames.push(f);for(const t of [6,8,11])b.office(b.c,b.assets.images,t);b.fullTeaFrame=orig;return frames});assert.deepEqual(reactions,[0,6,0]);
+   const reactions=await page.evaluate(()=>{const b=cinematics.bloopers,orig=RPGCast.action,keys=[];RPGCast.action=(c,im,f)=>keys.push({karla:im===b.assets.images.karlaTea,frame:f});for(const t of [6,8,11])b.office(b.c,b.assets.images,t);RPGCast.action=orig;return keys});assert.equal(reactions.length,6);assert(reactions[3].karla&&reactions[3].frame===6,'Karla reacts suspiciously to Eric being mentioned');
   }
   if(i===0){assert.match(await page.locator('#blooper-line').innerText(),/Todos mis planes/);}
   await page.evaluate(()=>cinematics.bloopers.tick(6.4));

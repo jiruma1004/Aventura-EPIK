@@ -149,49 +149,11 @@ window.EpikBloopers=class {
   RPGCast.action(c,im.studentsClass,frames[1],808,466,250);
   RPGCast.action(c,im.studentsClass,frames[2],660,523,264);
  }
- // Chairs, legs and posture come from one fixed frame. Only the face or
- // the cup/forearms change; cached layers avoid allocations during playback.
- seatedTea(c,image,frame,x,feet,height,karla){
-  if(!image?.complete||!image.naturalWidth)return;
-  this.teaLayers??=new WeakMap();let frames=this.teaLayers.get(image);
-  if(!frames){frames=new Map();this.teaLayers.set(image,frames);}
-  if(!frames.has(frame)){
-   const tile=document.createElement('canvas');tile.width=384;tile.height=320;
-   tile.complete=true;tile.naturalWidth=384;tile.naturalHeight=320;
-   const ctx=tile.getContext('2d');ctx.drawImage(image,0,0,384,320,0,0,384,320);
-   if(frame!==0){
-    ctx.save();ctx.beginPath();
-    if(frame>=3&&frame<=5){
-     // Stay inside the chair silhouette, preserving every chair leg/armrest.
-     const points=karla?[[168,46],[235,46],[241,111],[255,165],[214,177],[161,173],[150,139]]:[[173,46],[232,46],[240,109],[263,165],[233,184],[170,183],[144,150],[152,110]];
-     points.forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b));ctx.closePath();
-    }else if(frame===2){ctx.rect(karla?190:187,76,30,25);}
-    else {ctx.rect(karla?184:173,45,51,57);}
-    ctx.clip();ctx.clearRect(0,0,384,320);
-    ctx.drawImage(image,frame%4*384,Math.floor(frame/4)*320,384,320,0,0,384,320);ctx.restore();
-   }
-   frames.set(frame,tile);
-  }
-  RPGCast.action(c,frames.get(frame),0,x,feet,height);
- }
- fullTeaFrame(c,image,frame,x,feet,height){
-  if(!image?.complete||!image.naturalWidth)return;
-  this.fullTeaLayers??=new WeakMap();let frames=this.fullTeaLayers.get(image);
-  if(!frames){frames=new Map();this.fullTeaLayers.set(image,frames);}
-  if(!frames.has(frame)){
-   const tile=document.createElement('canvas');tile.width=384;tile.height=320;
-   tile.complete=true;tile.naturalWidth=384;tile.naturalHeight=320;
-   const sw=image.naturalWidth/4,sh=image.naturalHeight/2;
-   tile.getContext('2d').drawImage(image,frame%4*sw,Math.floor(frame/4)*sh,sw,sh,0,0,384,320);
-   frames.set(frame,tile);
-  }
-  RPGCast.action(c,frames.get(frame),0,x,feet,height);
- }
  office(c,im,t){
-  this.seatedTea(c,im.angelicaTea,SceneActing.tea(t),277,520,330,false);
-  // This dedicated sheet already keeps Karla, both legs and the chair aligned.
-  // Drawing its complete frame avoids the cutout artifacts of the prior composite.
-  this.fullTeaFrame(c,im.karlaTea,SceneActing.tea(t,true),693,520,330);
+  RPGCast.action(c,im.angelicaTea,SceneActing.tea(t),277,520,330);
+  RPGCast.action(c,im.karlaTea,SceneActing.tea(t,true),693,520,330,{flip:false});
+  // This atlas already faces inward (left): torso, crossed knees and eyes toward Angélica.
+  // Cups, hands and saucers stay attached in the same left-facing sprite.
   c.fillStyle='#3d271e';c.fillRect(446,417,13,111);c.fillRect(504,417,13,111);
   c.fillStyle='#a37649';c.beginPath();c.ellipse(481,413,72,17,0,0,Math.PI*2);c.fill();
   c.fillStyle='#f0e5d0';c.beginPath();c.ellipse(481,393,19,17,0,0,Math.PI*2);c.fill();c.fillRect(469,374,24,5);
