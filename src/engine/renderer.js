@@ -139,6 +139,14 @@ window.EscapeRenderer = class {
         }
         c.fillStyle='#c4d7ef';c.font='10px Georgia';c.textAlign='center';c.fillText(lab.destroyed?'SOBRECARGA':'TORRETA PRISMA · 200 J',0,59);c.restore();
         this.cannonBounds={x:cx-115*scale,y:cy-165*scale,w:230*scale,h:225*scale};
+        if(!opened&&!lab.destroyed){
+          const label=I18n.t('Acércate y pulsa E'),font=Math.max(12,Math.min(19,scale*16)),pad=12;
+          c.save();c.font=`bold ${font}px Georgia`;c.textAlign='center';
+          const bw=Math.max(150,c.measureText(label).width+pad*2),bh=font+pad*1.45,bx=cx-bw/2,by=cy-175*scale-bh;
+          c.fillStyle='rgba(12,24,52,.72)';c.strokeStyle='#e5c27a';c.lineWidth=2;c.beginPath();c.roundRect(bx,by,bw,bh,9);c.fill();c.stroke();
+          c.beginPath();c.moveTo(cx-9,by+bh);c.lineTo(cx,by+bh+10);c.lineTo(cx+9,by+bh);c.closePath();c.fill();c.stroke();
+          c.fillStyle='#fff2c2';c.fillText(label,cx,by+font+pad*.45);c.restore();
+        }
       }
       const screen=project(p.originX+.3,p.originY+.7,.75);if(screen){const sc=Math.min(1.1,screen.scale/320);c.save();c.translate(screen.x,screen.y);c.scale(sc,sc);c.fillStyle='#111d3bea';c.strokeStyle='#96b7db';c.lineWidth=2;c.fillRect(-75,-55,150,110);c.strokeRect(-75,-55,150,110);c.font='13px Georgia';c.fillStyle='#e4d3a0';c.fillText('ASTROLABIO',-57,-30);c.fillStyle='#bce6ff';c.fillText('Elevación  '+lab.angle+'°',-57,-6);c.fillText(lab.loaded?lab.loaded.mass+' kg · CARGADO':'RECÁMARA VACÍA',-57,38);c.restore();}
       c.fillStyle='rgba(9,17,35,.8)';c.fillRect(20,h-64,315,42);c.fillStyle='#cce099';c.font='12px Arial';c.fillText(opened?'PUENTE DESPLEGADO · AVANZA POR EL CENTRO':'SINGULARIDAD · ACTIVA EL BOTÓN PARA CRUZAR',32,h-39);

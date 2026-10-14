@@ -1090,5 +1090,7 @@ Object.assign(window.ENGLISH, {
 
 Object.assign(window.ENGLISH, {
  'Salta a la plataforma con tu respuesta. Conservas tus aciertos; si caes, vuelves al último tablón correcto.':'Jump onto the platform with your answer. Your correct answers remain; if you fall, return to your last correct plank.',
- 'Lee la afirmación y salta a Verdadero o Falso. Shift para correr, Espacio para saltar. Un error rompe la plataforma; regresas al último tablón correcto y conservas tus aciertos. Pulsa H si necesitas una pista.':'Read the statement and jump to True or False. Shift to run, Space to jump. A wrong answer breaks the plank; return to the last correct plank and keep your progress. Press H for a hint.'
+ 'Lee la afirmación y salta a Verdadero o Falso. Shift para correr, Espacio para saltar. Un error rompe la plataforma; regresas al último tablón correcto y conservas tus aciertos. Pulsa H si necesitas una pista.':'Read the statement and jump to True or False. Shift to run, Space to jump. A wrong answer breaks the plank; return to the last correct plank and keep your progress. Press H for a hint.',
+ 'Acércate y pulsa E':'Approach and press E',
+ 'CASTILLO':'CASTLE'
 });

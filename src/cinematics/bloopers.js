@@ -174,11 +174,24 @@ window.EpikBloopers=class {
   }
   RPGCast.action(c,frames.get(frame),0,x,feet,height);
  }
+ fullTeaFrame(c,image,frame,x,feet,height){
+  if(!image?.complete||!image.naturalWidth)return;
+  this.fullTeaLayers??=new WeakMap();let frames=this.fullTeaLayers.get(image);
+  if(!frames){frames=new Map();this.fullTeaLayers.set(image,frames);}
+  if(!frames.has(frame)){
+   const tile=document.createElement('canvas');tile.width=384;tile.height=320;
+   tile.complete=true;tile.naturalWidth=384;tile.naturalHeight=320;
+   const sw=image.naturalWidth/4,sh=image.naturalHeight/2;
+   tile.getContext('2d').drawImage(image,frame%4*sw,Math.floor(frame/4)*sh,sw,sh,0,0,384,320);
+   frames.set(frame,tile);
+  }
+  RPGCast.action(c,frames.get(frame),0,x,feet,height);
+ }
  office(c,im,t){
   this.seatedTea(c,im.angelicaTea,SceneActing.tea(t),277,520,330,false);
-  this.seatedTea(c,im.karlaTea,SceneActing.tea(t,true),693,520,330,true);
-  // This atlas already faces inward (left): torso, crossed knees and eyes toward Angélica.
-  // Cups, hands and saucers stay attached in the same left-facing sprite.
+  // This dedicated sheet already keeps Karla, both legs and the chair aligned.
+  // Drawing its complete frame avoids the cutout artifacts of the prior composite.
+  this.fullTeaFrame(c,im.karlaTea,SceneActing.tea(t,true),693,520,330);
   c.fillStyle='#3d271e';c.fillRect(446,417,13,111);c.fillRect(504,417,13,111);
   c.fillStyle='#a37649';c.beginPath();c.ellipse(481,413,72,17,0,0,Math.PI*2);c.fill();
   c.fillStyle='#f0e5d0';c.beginPath();c.ellipse(481,393,19,17,0,0,Math.PI*2);c.fill();c.fillRect(469,374,24,5);
