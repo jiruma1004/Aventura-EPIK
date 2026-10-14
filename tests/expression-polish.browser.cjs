@@ -26,12 +26,12 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
  for(const [index,time,name] of [[0,1.8,'ivan-run'],[1,3.13,'eric-impact'],[1,3.35,'eric-recoil'],[1,4.6,'eric-dazed'],[3,2.1,'classroom-listening'],[3,4.3,'student-answer'],[4,1.7,'karla-sipping'],[4,8.7,'karla-suspicious']]){
   await p.evaluate(async({index,time})=>{const b=cinematics.bloopers;b.show(index);await b.ready;b.time=time;b.draw()},{index,time});await p.locator('#epik-bloopers').screenshot({path:path.join(dir,name+'.png')});
  }
- const gait=await p.evaluate(()=>[0,1/4.5].map(t=>IvanRun.pose(t)));
- assert(gait[0].nearLeg>0&&gait[1].nearLeg<0);for(const g of gait){assert.equal(g.nearLeg,-g.farLeg);assert.equal(g.nearArm,-g.farArm)}
+ const gait=await p.evaluate(()=>Array.from({length:8},(_,i)=>IvanRun.frame((i+.01)/12)));
+ assert.deepEqual(gait,[0,1,2,3,4,5,6,7]);
  assert.deepEqual(await p.evaluate(()=>[.01,.2,.8,1.8].map(t=>SceneActing.impact(t))),[4,5,6,7]);
  // Eight exported gait views ensure the rig can be previewed as a GIF as well.
  await p.evaluate(async()=>{await cinematics.bloopers.assets.request('ivanRun')});
- for(let i=0;i<8;i++){const png=await p.evaluate(i=>{const c=document.createElement('canvas');c.width=384;c.height=320;IvanRun.draw(c.getContext('2d'),cinematics.bloopers.assets.images.ivanRun,i/18,192,304,260);return c.toDataURL('image/png').split(',')[1]},i);fs.writeFileSync(path.join(dir,'run-'+i+'.png'),Buffer.from(png,'base64'))}
+ for(let i=0;i<8;i++){const png=await p.evaluate(i=>{const c=document.createElement('canvas');c.width=384;c.height=320;IvanRun.draw(c.getContext('2d'),cinematics.bloopers.assets.images.ivanRun,(i+.01)/12,192,304,260);return c.toDataURL('image/png').split(',')[1]},i);fs.writeFileSync(path.join(dir,'run-'+i+'.png'),Buffer.from(png,'base64'))}
  await p.evaluate(()=>{cinematics.bloopers.close();load(rooms.findIndex(r=>r.conceptual))});
  // The game-over foreground uses exactly ONE cached atlas frame and no world copy.
  const capture=await p.evaluate(async()=>{
@@ -44,5 +44,5 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
  await p.evaluate(async()=>{document.querySelector('#single-capture').remove();load(rooms.findIndex(r=>r.physics));document.querySelector('#maze-notice').hidden=true;await companions.paolaPortrait.decode();companions.help();companions.tickDialogue(.1)});
  assert((await p.locator('#helper-face').boundingBox()).width>=40);assert(await p.locator('#paola-dialog').isVisible());await p.locator('#paola-dialog').screenshot({path:path.join(dir,'paola-help.png')});
  for(const width of [390,844]){await p.setViewportSize({width,height:844});assert(await p.evaluate(()=>{const a=document.querySelector('#paola-dialog').getBoundingClientRect();return a.left>=0&&a.right<=innerWidth+1}),'Help fits mobile');}
- assert.deepEqual(errors,[]);assert.deepEqual(missing,[]);console.log('PASS: restrained ceremonies, serious prison Eric, panic expressions, articulated opposite legs, collision sequence, tea/class reactions, ONE capture sprite, shoulder-up help and mobile fit.');
+ assert.deepEqual(errors,[]);assert.deepEqual(missing,[]);console.log('PASS: restrained ceremonies, serious prison Eric, panic expressions, eight drawn gait poses, collision sequence, tea/class reactions, ONE capture sprite, shoulder-up help and mobile fit.');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});

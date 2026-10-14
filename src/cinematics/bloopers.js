@@ -2,7 +2,7 @@
 Object.assign(CINEMA_ASSETS,{blooperIvan:'assets/cinematics/ivan-forest-leaves.webp',blooperForest:'assets/cinematics/blooper-cabin-trail.webp',bloopersAtlas:'assets/cinematics/bloopers-backgrounds.webp',blooperActors:'assets/cinematics/bloopers-actors.webp',blooperEric:'assets/cinematics/eric-walk-v2.webp',blooperClass:'assets/cinematics/classroom-v2.webp',blooperTea:'assets/cinematics/office-tea.webp',blooperJoseReaction:'assets/cinematics/jose-workshop-reaction.webp',blooperKarlaReaction:'assets/cinematics/karla-tea-reaction.webp'});
 window.EpikBlooperScenes=[
  {id:'blooper-ivan',title:['Una rama inesperada','An unexpected branch'],assets:['blooperForest','ivanForest','ivanRun'],lines:[['Iván','¡Ahora sí, nada me detiene!','Nothing can stop me now!'],['Iván','Todos mis planes, arruinados por una rama.','All my plans, ruined by a branch.'],['Iván','La próxima vez, reviso también el suelo.','Next time, I’m checking the ground too.']],lineTimes:[.6,4,8]},
- {id:'blooper-eric',title:['La ruta secreta','The secret route'],assets:['bloopersAtlas','ericImpact'],lines:[['Eric','Según mis cálculos, la salida está cerca.','According to my calculations, the exit is close.'],['Eric','¿Quién apagó el túnel?','Who turned off the tunnel?'],['Eric','Ay… la salida no era por aquí.','Ow… the exit wasn’t this way.']],lineTimes:[.6,2.4,7.4/2.4+.3]},
+ {id:'blooper-eric',title:['La ruta secreta','The secret route'],assets:['bloopersAtlas','ericImpact','ericRun'],lines:[['Eric','Según mis cálculos, la salida está cerca.','According to my calculations, the exit is close.'],['Eric','¿Quién apagó el túnel?','Who turned off the tunnel?'],['Eric','Ay… la salida no era por aquí.','Ow… the exit wasn’t this way.']],lineTimes:[.6,2.4,7.4/2.4+.3]},
  {id:'blooper-jose',title:['Ingeniería de precisión','Precision engineering'],assets:['bloopersAtlas','joseHammer','ignitiaRocket'],lines:[['José Luis','Solo le falta un pequeño ajuste.','It only needs a small adjustment.'],['José Luis','Ese tornillo… seguro era de repuesto.','That screw… must have been a spare.'],['José Luis','¡No, no! ¡Por ahí no es!','No, no! Not that way!']],lineTimes:[.6,4,5.6]},
  {id:'blooper-paola',title:['La última advertencia','The final warning'],assets:['bloopersAtlas','studentsClass','paolaClass'],lines:[['Paola','¿Y las unidades de tu respuesta?','And the units for your answer?'],['Estudiante','Las dejé… en la otra dimensión.','I left them… in the other dimension.'],['Paola','Pues tráelas de vuelta. Los metros no se entregan por separado.','Then bring them back. Metres aren’t handed in separately.']],lineTimes:[.6,4,8]},
  {id:'blooper-office',title:['Todo bajo control','Everything under control'],assets:['bloopersAtlas','angelicaTea','karlaTea'],lines:[['Angélica','¿Todo tranquilo en el área de Ciencias?','Everything quiet in the Sciences area?'],['Karla','Todo tranquilo.','Everything is quiet.'],['Angélica','Solo falta encontrar al Dr. Eric.','We just need to find Dr. Eric.'],['Karla','Sí… ¿otro té?','Yes… more tea?']],lineTimes:[.6,3.8,6,10]}
@@ -82,7 +82,7 @@ window.EpikBloopers=class {
  ivan(c,im,t){
   const pose=SceneActing.forest(t),x=130+Math.min(t,2.8)*145+pose.slide;
   c.strokeStyle='#674424';c.lineWidth=12;c.beginPath();c.moveTo(535,463);c.lineTo(610,448);c.moveTo(570,456);c.lineTo(589,432);c.stroke();
-  const feet=461+(pose.phase==='run'?Math.sin(t*18)*3:pose.phase==='fall'?-25:0);
+  const feet=461+(pose.phase==='fall'?-25:0);
   if(pose.phase==='run')IvanRun.draw(c,im.ivanRun,t,x,feet,215);
   else RPGCast.action(c,im.ivanForest,pose.frame,x,feet,215);
   if(pose.phase==='ground'){c.fillStyle='#f8dd72';c.font='bold 25px serif';for(let i=0;i<3;i++)c.fillText('✦',x+76+Math.cos(t*3+i*2)*23,375+Math.sin(t*3+i*2)*13);}
@@ -96,16 +96,16 @@ window.EpikBloopers=class {
  ericPose(t){
   const speed=180,hit=7.4/2.4,after=Math.max(0,t-hit),lamp=t<1.7?1:t<2?.12:t<2.15?.7:t<2.4?.06:0;
   const recoil=t<hit?0:Math.min(1,after/.22)*18;
-  return {lamp,hit:t>=hit,x:180+Math.min(t,hit)*speed-recoil,frame:t<hit?Math.floor(t*8*2.4)%4:1,after};
+  return {lamp,hit:t>=hit,x:180+Math.min(t,hit)*speed-recoil,frame:t<hit?SceneActing.ericRun(t):1,after};
  }
  eric(c,im,t){
-  const pose=this.ericPose(t),{x,frame,lamp,hit,after}=pose,feet=478+(hit?0:Math.sin(t*10)*3),h=270;
+  const pose=this.ericPose(t),{x,frame,lamp,hit,after}=pose,feet=478,h=270;
   // Uneven natural rock face instead of regular masonry blocks.
   c.fillStyle=lamp?'#303542':'#101722';c.beginPath();c.moveTo(871,25);c.lineTo(846,81);c.lineTo(827,142);c.lineTo(840,185);c.lineTo(813,239);c.lineTo(827,296);c.lineTo(815,353);c.lineTo(832,415);c.lineTo(820,506);c.lineTo(960,524);c.lineTo(960,20);c.closePath();c.fill();
   for(let i=0;i<9;i++){const y=51+i*50,xx=840+Math.sin(i*2.7)*15;c.fillStyle=lamp?(i%2?'#3a3d47':'#222936'):(i%2?'#19212d':'#0a111d');c.beginPath();c.moveTo(xx,y);c.lineTo(xx+54,y-17);c.lineTo(xx+96,y+19);c.lineTo(xx+58,y+47);c.lineTo(xx-8,y+30);c.closePath();c.fill();}
   const head=feet-h+29,light=x+47;
   if(lamp){c.fillStyle=`rgba(255,235,156,${.2*lamp})`;c.beginPath();c.moveTo(light,head);c.lineTo(815,head-90);c.lineTo(815,head+160);c.closePath();c.fill();}
-  c.save();c.globalAlpha=lamp?1:.36;RPGCast.action(c,im.ericImpact,hit?SceneActing.impact(after):frame,x,feet,h);c.restore();
+  c.save();c.globalAlpha=lamp?1:.36;RPGCast.action(c,hit?im.ericImpact:im.ericRun,hit?SceneActing.impact(after):frame,x,feet,h);c.restore();
   if(hit&&after<1.1){c.fillStyle='#f6d28b';c.font='bold 29px serif';c.fillText('¡PUM!',756,179);
    for(let i=0;i<4;i++){const a=i*Math.PI/2+after*3;c.fillRect(801+Math.cos(a)*after*35,242+Math.sin(a)*after*30,5,5);}}
  }

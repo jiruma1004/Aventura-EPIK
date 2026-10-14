@@ -16,8 +16,8 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
    assert.deepEqual(frames,[6,6],'Ivan uses a real prone pose, never walking legs after falling');
   }
   if(i===1){
-   const frames=await page.evaluate(()=>{const b=cinematics.bloopers,orig=RPGCast.action,frames=[];RPGCast.action=(c,im,frame)=>frames.push(frame);for(const t of [0,.065,.13,.195])b.eric(b.c,b.assets.images,t);RPGCast.action=orig;return frames});
-   assert.deepEqual(frames,[0,1,2,3],'Eric uses four helmet gait poses');
+   const frames=await page.evaluate(()=>{const b=cinematics.bloopers,orig=RPGCast.action,frames=[];RPGCast.action=(c,im,frame)=>frames.push(frame);for(const t of [0,.11,.21,.31])b.eric(b.c,b.assets.images,t);RPGCast.action=orig;return frames});
+   assert.deepEqual(frames,[0,1,3,4],'Eric uses contact, compression and flight poses at 10 fps');
    const poses=await page.evaluate(()=>[2.4,2.8,3.07,3.5,8].map(t=>cinematics.bloopers.ericPose(t)));
    assert.equal(await page.evaluate(()=>cinematics.bloopers.ericPose(2).x-cinematics.bloopers.ericPose(1).x),180,'Eric retains the approved fast cave run at 180 stage pixels/s');
    assert(poses.every(p=>p.lamp===0),'headlamp stays fully off');
@@ -71,5 +71,5 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
  await page.evaluate(()=>{window.requestAnimationFrame=fn=>setTimeout(()=>fn(performance.now()),16);window.cancelAnimationFrame=clearTimeout;window.testCredits=overlayCredits;testCredits.open(()=>{});testCredits.introTime=4.8});
  await page.waitForFunction(()=>testCredits.phase==='reel',null,{polling:50});await page.evaluate(()=>testCredits.bloopers.ready);
  await page.waitForFunction(()=>testCredits.bloopers.time>.2,null,{polling:50});await page.evaluate(()=>{testCredits.close();});assert(await page.locator('#epik-bloopers').isHidden());
- assert.deepEqual(errors,[]);console.log('PASS automatic five-scene reel, hidden-tab pause, frozen fall, four-step gait, retry, cleanup and live RAF');
+ assert.deepEqual(errors,[]);console.log('PASS automatic five-scene reel, hidden-tab pause, frozen fall, drawn run cycle, retry, cleanup and live RAF');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});

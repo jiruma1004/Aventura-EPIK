@@ -1,17 +1,17 @@
-/* A full gait: legs alternate in opposite phases, with counter-swinging arms.
-   Keep the head facing the route; never mirror a whole frame to fake a step. */
+/* Hand-drawn gait frames replace the old rigid limb pivots. The render loop
+   remains smooth; only the sprite pose advances at this deliberate cadence. */
 window.IvanRun={
- pose(time,fps=2.25){const phase=time*Math.PI*2*fps,swing=Math.cos(phase)*.62;return {nearLeg:swing,farLeg:-swing,nearArm:-swing*.9,farArm:swing*.9,bob:Math.abs(Math.sin(phase))*5};},
+ frame(time,fps=12){return Math.floor(Math.max(0,time)*fps)%8;},
  draw(c,image,time,x,feet,height,{speed=2.25,flip=false}={}){
   if(!image?.complete||!image.naturalWidth)return false;
-  const p=this.pose(time,speed),k=height/284;
-  c.save();c.translate(x,feet-p.bob*k);c.scale(flip?-k:k,k);c.imageSmoothingEnabled=false;
-  const part=(i,x,y,h,angle=0,pivot=.4)=>{const [sx,sy,sw,sh]=IvanRunParts[i],w=h*sw/sh;c.save();c.translate(x,y);c.rotate(angle);c.drawImage(image,sx,sy,sw,sh,-w*pivot,0,w,h);c.restore();};
-  part(2,13,-190,94,p.farArm);
-  part(4,8,-131,131,p.farLeg);
-  part(3,-12,-131,131,p.nearLeg);
-  part(0,0,-284,167,.035,.5);
-  part(1,-29,-193,96,p.nearArm);
+  // Existing scenes express speed as cycles: cabin 1.5 -> 8 fps, run 2.25 -> 12.
+  const frame=this.frame(time,speed*16/3);
+  RPGCast.action(c,image,frame,x,feet,height,{flip});
+  // Leaves remain attached to the torso and trousers, also during the new stride.
+  c.save();c.translate(x,feet);c.scale(flip?-1:1,1);
+  for(const [a,b,angle] of [[-.08,-.86,.5],[.10,-.50,-.3],[-.04,-.23,.7],[.01,-.97,-.6]]){
+    c.save();c.translate(a*height,b*height);c.rotate(angle);c.fillStyle='#657b40';c.beginPath();c.ellipse(0,0,height*.028,height*.012,0,0,Math.PI*2);c.fill();c.strokeStyle='#344d26';c.lineWidth=1;c.stroke();c.restore();
+  }
   c.restore();return true;
  }
 };

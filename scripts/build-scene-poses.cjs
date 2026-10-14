@@ -4,6 +4,8 @@ const fs=require('node:fs'),path=require('node:path'),{execFileSync:run}=require
 const root=path.resolve(__dirname,'..'),lib=path.resolve(root,'../astralia-animation-library/actions');
 const temp=path.join(lib,'.build');fs.mkdirSync(temp,{recursive:true});
 const specs={
+ 'ivan-gait-v4':{gait:true,columns:4,rows:2,clips:{walk:[0,1,2,3,4,5,6,7],run:[0,1,2,3,4,5,6,7]}},
+ 'eric-run-v3':{gait:true,columns:4,rows:2,clips:{run:[0,1,3,4,5,7]}},
  'ivan-chase-demonic-v3':{columns:4,rows:1,clips:{chase:[0,1,0,1,2,0,3,0],catch:[2]}},
  'karla-ceremony-v2':{columns:4,rows:1,clips:{reserved:[0,0,1,0,2,0,3,3]}},
  'eric-impact-v2':{columns:4,rows:2,clips:{collision:[0,1,2,3,4,5,6,6,7,6]}},
@@ -49,7 +51,14 @@ for(const [name,spec] of Object.entries(specs).filter(([id])=>process.argv.lengt
  const scale=Math.min(284/Math.max(...bounds.map(b=>b[3])),360/Math.max(...bounds.map(b=>b[2])));
  const metrics=[];
  bounds.forEach(([x,y,w,h],f)=>{
-  const dw=Math.round(w*scale),dh=Math.round(h*scale),dx=Math.round((384-dw)/2),dy=304-dh;
+  const dw=Math.round(w*scale),dh=Math.round(h*scale),dy=304-dh;
+  let anchor=x+w/2;
+  if(spec.gait){
+   let sum=0,count=0;
+   for(let yy=y;yy<y+Math.floor(h*.28);yy++)for(let xx=x;xx<x+w;xx++)if(bytes[(yy*W+xx)*4+3]>160){sum+=xx;count++;}
+   if(count)anchor=sum/count;
+  }
+  const dx=Math.round(spec.gait?192-(anchor-x)*scale:(384-dw)/2);
   ff(['-i',input,'-vf',`crop=${w}:${h}:${x}:${y},scale=${dw}:${dh}:flags=neighbor,format=rgba,pad=384:320:${dx}:${dy}:color=0x00000000`,'-frames:v','1',path.join(dir,f+'.png')]);
   metrics.push({source:[x,y,w,h],destination:[dx,dy,dw,dh]});
  });
@@ -59,7 +68,7 @@ for(const [name,spec] of Object.entries(specs).filter(([id])=>process.argv.lengt
  fs.writeFileSync(path.join(lib,'sprites',name+'.json'),JSON.stringify({cell:[384,320],anchor:[192,304],scale,metrics,clips:spec.clips},null,2));
  const gifs=path.join(lib,'gifs',name);fs.mkdirSync(gifs,{recursive:true});
  for(const [clip,frames] of Object.entries(spec.clips)){
-  const list=path.join(dir,clip+'.txt');fs.writeFileSync(list,frames.map(f=>`file '${path.join(dir,f+'.png')}'\nduration ${clip.startsWith('walk')||clip==='run'?.14:.22}`).join('\n')+'\n');
+  const list=path.join(dir,clip+'.txt');fs.writeFileSync(list,frames.map(f=>`file '${path.join(dir,f+'.png')}'\nduration ${name==='ivan-gait-v4'?(clip==='run'?1/12:1/8):name==='eric-run-v3'?1/10:clip.startsWith('walk')||clip==='run'?.14:.22}`).join('\n')+'\n');
   const prefix=clip==='walk_left'?'[0:v]hflip[v];[v]':'[0:v]';
   ff(['-f','concat','-safe','0','-i',list,'-filter_complex',prefix+'split[a][b];[a]palettegen=reserve_transparent=1[p];[b][p]paletteuse=dither=bayer:alpha_threshold=128','-fps_mode','vfr','-loop','0',path.join(gifs,clip+'.gif')]);
  }

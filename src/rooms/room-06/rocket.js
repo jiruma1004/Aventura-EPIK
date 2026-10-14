@@ -4,7 +4,7 @@ window.IvanLaunchScene={
   // The world path decreases Y. At the launch camera that means screen LEFT.
   const probe=Math.max(4,Math.min(7.45,t)),state=this.state(probe),next=this.state(probe+.02);
   const side=-(next.x-state.x)*Math.sin(angle)+(next.y-state.y)*Math.cos(angle);
-  return {frame:Math.floor(Math.max(0,t-4)*7)%4,flip:side<0};
+  return {frame:SceneActing.walk(t-4),flip:side<0};
  },
  state(t){if(t>=RocketFinaleScene.releaseAt)return RocketFinaleScene.fall(t,this.state(RocketFinaleScene.releaseAt-.000001));const rise=Math.max(0,t-8.5),rocketZ=.16*rise*rise,turnStart=8.5+Math.sqrt(3.4/.16),u=Math.max(0,t-turnStart),turn=Math.min(1,u/1.2),ease=turn*turn*(3-2*turn),swing=.55*Math.cos(u*2.4)*Math.exp(-u*.22);
   const base={x:15.2,y:9.125,footZ:0,rotation:0,rocketZ,visible:true,scream:false};
@@ -19,7 +19,7 @@ window.IgnitiaMission=class {
   document.querySelector('.scene-view').insertAdjacentHTML('beforeend',`<aside id="ignitia-dialog" hidden><canvas id="ignitia-portrait" width="160" height="160" aria-label="José Luis hablando"></canvas><div><p class="eyebrow">JOSÉ LUIS · LÍDER DE IGNITIA</p><p id="ignitia-text"></p><button id="ignitia-next">Mostrar todo</button></div></aside><section id="rocket-console" class="world-console" hidden></section><div id="flight-banner" hidden role="status"></div>`);
   this.simulator=new InterceptionConsole(document.querySelector('#rocket-console'),this.rider,this.rocket,()=>this.startLaunch());this.simulator.canRun=()=>this.canLaunch?.();this.simulator.onFail=()=>this.onEvent('moon');
   document.querySelector('#rocket-close').onclick=()=>this.closeConsole();
-  this.panic=new Image();this.panic.src='assets/cast/ivan-action-v2.webp';this.walk=new Image();this.walk.src='assets/cast/ivan-walk.webp';this.paola=new Image();this.paola.src='assets/cast/paola-portrait.webp';this.speaker='jose';
+  this.panic=new Image();this.panic.src='assets/cast/ivan-action-v2.webp';this.walk=new Image();this.walk.src='assets/cast/ivan-gait-v4.webp';this.paola=new Image();this.paola.src='assets/cast/paola-portrait.webp';this.speaker='jose';
   document.querySelector('.scene-view').insertAdjacentHTML('beforeend','<details id="completion-card" hidden><summary>AVENTURA EPIK · DESAFÍO COMPLETADO</summary><strong>7 / 7</strong><p>¡Muchas felicidades! Has completado todas las pruebas. Toma una captura de esta pantalla y súbela a la actividad junto con tus apuntes y los procedimientos de los ejercicios.</p><button id="completion-continue" class="primary">Continuar</button></details><section id="chapter-ending" hidden aria-label="Epílogo"><p id="chapter-ending-text" tabindex="-1">Continuará en semana 10…</p></section>');
   document.querySelector('#ignitia-next').onclick=()=>{if(this.speaking){this.reveal();return;}document.querySelector('#ignitia-dialog').hidden=true;if(this.mode==='debrief'){this.finishLaunch();}if(this.mode==='briefing'){this.mode='idle';this.onEvent('escapeDone');}document.querySelector('#game').focus({preventScroll:true});};
   document.querySelector('#completion-continue').onclick=()=>this.showEnding();
