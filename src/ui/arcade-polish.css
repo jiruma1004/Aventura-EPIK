@@ -1,11 +1,11 @@
 /* Translucent surfaces use alpha backgrounds, never opacity on the text.
    No backdrop blur: keep the raycaster fluid on tablets. */
 .scene-view :is(#question-bubble,#boss-mission,#paola-dialog,#maze-notice,#ignitia-dialog,.world-toast){
- background:linear-gradient(125deg,rgba(12,24,52,.72),rgba(5,13,31,.65));
+ background:linear-gradient(125deg,rgba(12,24,52,.60),rgba(5,13,31,.53));
  color:#fff8e3;border-color:#bcbdc6;text-shadow:0 1px 2px #000,0 0 4px #061123;
  box-shadow:inset 0 0 0 1px #d5dbf12b,0 3px 12px #0004;
 }
-.scene-view :is(.world-console,#station.cannon-console){background:linear-gradient(125deg,#122340db,#091329cf)}
+.scene-view :is(.world-console,#station.cannon-console){background:linear-gradient(125deg,#122340b8,#091329ad)}
 #question-bubble #problem-card{background:transparent;box-shadow:none;border:0}
 #chase-indicator{left:16px;top:16px;max-width:calc(100% - 48px);box-sizing:border-box;
  font:700 13px/1.35 var(--adventure-lettering);background:#760f23aa;color:#fff2e7;border:1px solid #ff7c80;
@@ -37,3 +37,6 @@
 .rating-stars[data-stars="5"] .star.filled::after{content:'✦';position:absolute;left:55%;top:-14%;color:#fffbe0;font-size:14px;pointer-events:none;animation:star-glint 2.8s ease-in-out infinite;animation-delay:calc(var(--star-index)*.35s);text-shadow:0 0 5px #e7a91c}
 @keyframes star-glint{0%,55%,100%{opacity:0;transform:scale(.3) rotate(0)}70%{opacity:1;transform:scale(1.2) rotate(65deg)}85%{opacity:.3;transform:scale(.6) rotate(100deg)}}
 @media(prefers-reduced-motion:reduce){#chase-indicator{transition:none}.rating-stars[data-stars="5"] .star.filled::after{animation:none;opacity:.8}}
+
+/* The green veil obscures world hints as well as the 3D scene. */
+.scene-view.nova-blind > :not(#game){visibility:hidden!important}

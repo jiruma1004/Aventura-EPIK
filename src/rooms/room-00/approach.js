@@ -41,7 +41,7 @@ window.ApproachTrial=class {
   c.restore();
  }
  get question(){return APPROACH_QUESTIONS[Math.min(this.stage,4)];}
- platforms(){return this.tiles??=APPROACH_QUESTIONS.flatMap((q,stage)=>[true,false].map((answer,lane)=>({stage,answer,x:5+stage*2.3,y:lane?4.05:2.25,w:1.5,h:1.4,key:stage+':'+answer})));}
+ platforms(){const scale=EpikDifficulty.easy?1:.9;return this.tiles??=APPROACH_QUESTIONS.flatMap((q,stage)=>[true,false].map((answer,lane)=>({stage,answer,x:5+stage*2.3+1.5*(1-scale)/2,y:(lane?4.05:2.25)+1.4*(1-scale)/2,w:1.5*scale,h:1.4*scale,key:stage+':'+answer})));}
  platformAt(x,y){return this.platforms().find(p=>x>=p.x&&x<=p.x+p.w&&y>=p.y&&y<=p.y+p.h);}
  supports(x,y){if(x<4.2||x>=16.7)return true;const p=this.platformAt(x,y);return !!p&&!this.broken.has(p.key);}
  land(player){if(this.finished||player.jumpHeight>0)return;const p=this.platformAt(player.x,player.y);if(!p||p.stage<this.stage)return;
@@ -50,7 +50,7 @@ window.ApproachTrial=class {
   this.onAnswer?.(p.answer,p.answer===this.question.answer);if(p.answer!==this.question.answer){this.broken.add(p.key);this.onEvent('break');return;}
   // Al acertar también desaparece la alternativa incorrecta de ese nivel.
   this.broken.add(p.stage+':'+!p.answer);
-  this.stage++;this.finished=this.stage===5;this.onEvent('safe',{x:p.x+.75,y:p.y+.7,angle:0});
+  this.stage++;this.finished=this.stage===5;this.onEvent('safe',{x:p.x+p.w/2,y:p.y+p.h/2,angle:0});
  }
  restore(){/* Los tablones rotos permanecen ausentes hasta reiniciar la sala. */}
  background(r,player,time){
@@ -138,7 +138,7 @@ window.ApproachTrial=class {
   c.restore();
  }
 
- draw(r,player,actors){this.drawZipline(r,player,actors);this.drawLights(r,player,actors);for(const p of [...this.platforms()].reverse()){if(this.zipline||this.broken.has(p.key)||p.stage!==Math.min(this.stage,4))continue;const pos=actors.project(r,player,p.x+.75,p.y+.7,.13);if(!pos)continue;
+ draw(r,player,actors){this.drawZipline(r,player,actors);this.drawLights(r,player,actors);for(const p of [...this.platforms()].reverse()){if(this.zipline||this.broken.has(p.key)||p.stage!==Math.min(this.stage,4))continue;const pos=actors.project(r,player,p.x+p.w/2,p.y+p.h/2,.13);if(!pos)continue;
    const c=r.ctx,label=I18n.t(p.answer?'VERDADERO':'FALSO');c.save();c.textAlign='center';c.font='bold '+Math.max(10,Math.min(34,pos.scale*.14))+'px Trebuchet MS';c.strokeStyle='#071321';c.lineWidth=4;c.strokeText(label,pos.x,pos.y);c.fillStyle='#ffedb9';c.fillText(label,pos.x,pos.y);c.restore();}
  }
  drawLights(r,player,actors){

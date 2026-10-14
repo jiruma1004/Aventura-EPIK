@@ -41,7 +41,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
  }));
  assert.equal(modes[0].speed,.8751645);assert(Math.abs(modes[1].speed-.7001316)<1e-9);
  assert.equal(modes[0].speedSymbols,1.6);assert(Math.abs(modes[1].speedSymbols-1.28)<1e-9);
- assert(Math.abs(modes[1].interval/modes[0].interval-1.25)<1e-9);
+ assert(Math.abs(modes[1].interval/modes[0].interval-1.5625)<1e-9);
  assert(Math.abs(modes[0].throws[1]-modes[0].throws[0]-10.8)<.02);
  assert(Math.abs(modes[1].throws[1]-modes[1].throws[0]-12.96)<.02);
  assert.equal(modes[0].firstPhase,'warning');assert.equal(modes[1].firstPhase,'idle');

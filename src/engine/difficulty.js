@@ -15,7 +15,7 @@ window.EpikDifficulty = {
     }),
     easy: Object.freeze({
       platformCheckpoint: true, ivanSpeed: .8751645 * .8,
-      symbolSpeed: 1.6 * .8, symbolInterval: (28.5 - 1.8) / 1.6 / 3 / 2 / 1.4 / 1.5 * 1.25,
+      symbolSpeed: 1.6 * .8, symbolInterval: (28.5 - 1.8) / 1.6 / 3 / 2 / 1.4 / 1.5 * 1.5625,
       potionFirst: 8 * 1.2 * 1.2, potionInterval: 9 * 1.2 * 1.2, flameEnabled: false
     })
   })

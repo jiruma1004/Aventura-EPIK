@@ -63,13 +63,13 @@ window.ConceptMaze=class {
   this.doors=this.dungeonQuestion.answers.map((text,choice)=>({x:13,y:choice===0?3:9,stage:this.stage,choice,text,letter:'AB'[choice],correct:choice===this.dungeonQuestion.correct,dungeon:true}));
   for(const d of this.doors)this.room.map[d.y][d.x]=2;
   Object.assign(player,{x:6.5,y:6.5,angle:0,pitch:0,jumpHeight:0,jumpVelocity:0});
-  this.chasing=true;this.enemy={x:2.5,y:6.5};this.path=[];this.pathClock=0;this.grace=1.5;
+  this.chasing=true;this.enemy={x:2.5,y:6.5};this.path=[];this.pathClock=0;this.grace=10;
   this.onEvent('dungeon','El portal te arrastra al calabozo. Resuelve el sello de dos puertas para volver al inicio. Cuidado, alguien te persigue.');
  }
  leaveDungeon(){
   this.room.map=this.savedWorld.map;this.doors=this.savedWorld.doors;this.room.environment=this.baseEnvironment;this.dungeon=false;this.freezeLeft=0;this.stage=0;this.savedWorld=null;
-  this.enemy={x:1.5,y:8.5};this.path=[];this.pathClock=0;this.grace=5;this.returnGrace=true;
-  this.onEvent('return','Sello resuelto. Regresas al inicio del laberinto; las puertas que abriste siguen abiertas. Iván esperará 5 segundos: aprovecha para alejarte.');
+  this.enemy={x:1.5,y:8.5};this.path=[];this.pathClock=0;this.grace=10;this.returnGrace=true;
+  this.onEvent('return','Sello resuelto. Regresas al inicio del laberinto; las puertas que abriste siguen abiertas. Iván esperará 10 segundos: aprovecha para alejarte.');
  }
  doorAt(x,y){return this.doors.find(d=>d.x===x&&d.y===y);}
  choose(door,player={}){
@@ -86,7 +86,7 @@ window.ConceptMaze=class {
   this.enterDungeon(player,door);
   return false;
  }
- awaken(silent=false){if(this.chasing)return;this.chasing=true;this.enemy={x:this.stage*12+1.5,y:8.5};this.path=[];this.pathClock=0;this.grace=2.5;if(!silent)this.onEvent('presence','Oyes pasos entre los muros. No estás solo.');}
+ awaken(silent=false){if(this.chasing)return;this.chasing=true;this.enemy={x:this.stage*12+1.5,y:8.5};this.path=[];this.pathClock=0;this.grace=silent?10:2.5;if(!silent)this.onEvent('presence','Oyes pasos entre los muros. No estás solo.');}
  checkpointPosition(stage=this.stage){if(stage===0)return {...this.room.spawn};const previous=this.doors.find(d=>d.stage===stage-1&&d.correct);return {x:stage*12+1.5,y:previous.y+.5,angle:0};}
  restoreCheckpoint(stage){this.reset();this.stage=Math.max(0,Math.min(3,stage));for(const door of this.doors)if(door.stage<this.stage&&door.correct){this.room.map[door.y][door.x]=0;this.passed.add(door.stage);this.openDoors.add(door.stage+':'+door.choice);}if(this.openDoors.size>=2)this.awaken(true);return this.checkpointPosition();}
  routeTo(player){

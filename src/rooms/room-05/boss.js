@@ -42,24 +42,58 @@ window.EricPotions=class {
   c.restore();
  }
 };
+/* One delayed, blinding spectacle with a synchronized flame wave per attempt. Game time pauses with play.
+   A smooth bloom replaces flashing; reduced-motion disables screen shake. */
+window.EricSupernova=class {
+ constructor(enabled){this.enabled=enabled;this.reset();}
+ reset(){this.elapsed=0;this.age=-1;this.used=false;this.canvas?.style.removeProperty('transform');this.canvas?.parentElement?.classList.remove('nova-blind');}
+ get blind(){return this.age>=2&&this.age<7;}
+ get active(){return this.age>=0&&this.age<8;}
+ tick(dt){
+  this.elapsed+=dt;
+  if(this.active)this.age+=dt;
+  if(this.enabled&&!this.used&&this.elapsed>=180){this.used=true;this.age=0;return true;}
+  return false;
+ }
+ draw(renderer,player,actors){
+  this.canvas=renderer.canvas;this.canvas.parentElement?.classList.toggle('nova-blind',this.blind);const c=renderer.ctx,w=this.canvas.width,h=this.canvas.height;
+  if(!this.active){this.canvas.style.removeProperty('transform');return;}
+  const t=this.age,reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const amplitude=reduced?0:Math.sin(Math.min(1,t/8)*Math.PI)*5;
+  this.canvas.style.transform=`translate(${Math.sin(t*31)*amplitude}px,${Math.cos(t*27)*amplitude*.65}px)`;
+  c.save();
+  if(this.blind){c.fillStyle='#54ed35';c.fillRect(0,0,w,h);}
+  else if(t>=7){c.fillStyle=`rgba(84,237,53,${Math.max(0,8-t)})`;c.fillRect(0,0,w,h);}
+  else {
+   // The source is in world space behind Eric, not at the screen center.
+   const origin=actors?.project(renderer,player,23,7.5,2.8)||{x:w/2,y:h*.4};
+   const radius=Math.max(8,Math.hypot(w,h)*Math.pow(t/2,2));
+   const g=c.createRadialGradient(origin.x,origin.y,0,origin.x,origin.y,radius);
+   g.addColorStop(0,'#dcffac');g.addColorStop(.5,'#54ed35');g.addColorStop(1,'rgba(84,237,53,0)');
+   c.fillStyle=g;c.fillRect(0,0,w,h);
+  }
+  c.restore();
+ }
+};
+
 window.EricEncounter=class {
- constructor(onEvent){this.onEvent=onEvent;this.potions=new EricPotions(type=>{if(type==='hit')this.onEvent('potion');else if(type==='splash')Sound.flare();else if(type==='throw'){this.say('¡Ja, ja! ¡Cuidado con la mezcla!',false);Sound.laugh();this.lastLaugh=this.elapsed;this.tauntClock=9;}});this.wave=new EricFlameWave(type=>{if(type==='hit')this.onEvent('flame');else if(type==='warning'){this.say('¡Veamos si puedes elevar tus expectativas!',false);Sound.tone(240,.5,'triangle',.13);this.tauntClock=10;}else if(type==='launch')Sound.flare();else if(type==='resume')this.potions.nextThrow=this.potions.time;});this.puzzle=new ParabolaPuzzle();this.elapsed=0;this.fall=0;this.active=-1;this.speech=null;this.speechLeft=0;this.tauntClock=2;this.tauntIndex=0;this.lastLaugh=-20;this.lasers=[{x:11.5,y:2.2,side:-1},{x:11.5,y:12.8,side:1}];this.eric=new Image();this.eric.src='assets/cast/eric.webp';this.art=new Map();
+ constructor(onEvent){this.onEvent=onEvent;this.supernova=new EricSupernova(!EpikDifficulty.easy);this.potions=new EricPotions(type=>{if(type==='hit')this.onEvent('potion');else if(type==='splash')Sound.flare();else if(type==='throw'){this.say('¡Ja, ja! ¡Cuidado con la mezcla!',false);Sound.laugh();this.lastLaugh=this.elapsed;this.tauntClock=9;}});this.wave=new EricFlameWave(type=>{if(type==='hit')this.onEvent('flame');else if(type==='warning'){this.say('¡Veamos si puedes elevar tus expectativas!',false);Sound.tone(240,.5,'triangle',.13);this.tauntClock=10;}else if(type==='launch')Sound.flare();else if(type==='resume')this.potions.nextThrow=this.potions.time;});this.puzzle=new ParabolaPuzzle();this.elapsed=0;this.fall=0;this.active=-1;this.speech=null;this.speechLeft=0;this.tauntClock=2;this.tauntIndex=0;this.lastLaugh=-20;this.lasers=[{x:11.5,y:2.2,side:-1},{x:11.5,y:12.8,side:1}];this.eric=new Image();this.eric.src='assets/cast/eric.webp';this.art=new Map();
   if(!document.querySelector('#boss-mission'))document.querySelector('.scene-view').insertAdjacentHTML('beforeend',`<aside id="boss-mission" class="world-bubble"><button id="boss-fold" class="bubble-fold" aria-label="Minimizar o mostrar el reto" aria-expanded="true">−</button><div id="boss-mission-content"><p class="eyebrow">EL SOPORTE DE ERIC</p><h3>Dos cortes, una parábola</h3><p>Parábola: <b id="boss-parabola" data-no-translate></b><br>Recta de corte: <b id="boss-line" data-no-translate></b></p><p>Calcula sus dos intersecciones (x, y). Ve a cada láser lateral y pulsa E para programar el corte de su rama.</p><p id="boss-progress">0 / 2 cortes</p><small>X aumenta hacia la derecha; Y es altura. Unidades del plano del soporte.</small></div></aside><section id="boss-panel" class="world-console" hidden><button id="boss-close" class="bubble-fold" aria-label="Cerrar láser">×</button><p class="eyebrow" id="boss-laser-label"></p><h2>Punto de corte</h2><p>Iguala las dos expresiones:</p><p id="boss-equality" data-no-translate></p><p>Escribe las coordenadas de la intersección de esta rama.</p><form id="boss-form"><label>Coordenada x<input id="boss-x" type="number" step="any" required inputmode="decimal"></label><label>Coordenada y<input id="boss-y" type="number" step="any" required inputmode="decimal"></label><button class="primary">Disparar láser</button></form><p id="boss-feedback" role="status"></p></section>`);
   document.querySelector('#boss-parabola').textContent='y = '+this.puzzle.support.parabolaText;document.querySelector('#boss-line').textContent='y = '+this.puzzle.support.lineText;document.querySelector('#boss-equality').textContent=this.puzzle.support.parabolaText+' = '+this.puzzle.support.lineText;
   document.querySelector('#boss-mission').hidden=false;document.querySelector('#boss-mission-content').hidden=false;document.querySelector('#boss-fold').onclick=e=>{const hidden=document.querySelector('#boss-mission-content').hidden=!document.querySelector('#boss-mission-content').hidden;e.target.textContent=hidden?'+':'−';e.target.setAttribute('aria-expanded',String(!hidden));};document.querySelector('#boss-panel').hidden=true;document.querySelector('#boss-progress').textContent='0 / 2 cortes';document.querySelector('#boss-close').onclick=()=>this.close();document.querySelector('#boss-form').onsubmit=e=>{e.preventDefault();this.fire();};
  }
  near(player,renderer,room,opened){return this.lasers.findIndex(l=>{const d=Math.hypot(player.x-l.x,player.y-l.y),a=Math.atan2(l.y-player.y,l.x-player.x);return d<2.2&&Math.cos(a-player.angle)>.80&&renderer.cast(room,player.x,player.y,a,opened).distance+.1>=d;});}
- open(player,renderer,room,opened){const n=this.near(player,renderer,room,opened);if(n<0)return false;this.active=n;window.dispatchEvent(new Event('astralia:ui-open'));document.querySelector('#boss-laser-label').textContent=n===0?'LÁSER IZQUIERDO · RAÍZ NEGATIVA':'LÁSER DERECHO · RAÍZ POSITIVA';document.querySelector('#boss-form').reset();document.querySelector('#boss-feedback').textContent=this.puzzle.cuts[n]?'Este soporte ya está cortado.':'';document.querySelector('#boss-panel').hidden=false;document.querySelector('#boss-x').focus();return true;}
+ open(player,renderer,room,opened){if(this.supernova.active)return false;const n=this.near(player,renderer,room,opened);if(n<0)return false;this.active=n;window.dispatchEvent(new Event('astralia:ui-open'));document.querySelector('#boss-laser-label').textContent=n===0?'LÁSER IZQUIERDO · RAÍZ NEGATIVA':'LÁSER DERECHO · RAÍZ POSITIVA';document.querySelector('#boss-form').reset();document.querySelector('#boss-feedback').textContent=this.puzzle.cuts[n]?'Este soporte ya está cortado.':'';document.querySelector('#boss-panel').hidden=false;document.querySelector('#boss-x').focus();return true;}
  close(){this.active=-1;document.querySelector('#boss-panel').hidden=true;}
- fire(){if(this.active<0||!this.canFire?.())return;const ix=document.querySelector('#boss-x'),iy=document.querySelector('#boss-y'),feedback=document.querySelector('#boss-feedback');if(!ix.value.trim()||!iy.value.trim()){feedback.textContent='Escribe ambas coordenadas.';return;}
+ fire(){if(this.supernova.active||this.active<0||!this.canFire?.())return;const ix=document.querySelector('#boss-x'),iy=document.querySelector('#boss-y'),feedback=document.querySelector('#boss-feedback');if(!ix.value.trim()||!iy.value.trim()){feedback.textContent='Escribe ambas coordenadas.';return;}
   if(this.puzzle.cuts[this.active])return;const side=this.active;const ok=this.puzzle.submit(this.lasers[this.active].side,Number(ix.value),Number(iy.value));this.onAnswer?.({side,x:Number(ix.value),y:Number(iy.value),correct:ok});feedback.textContent=ok?'¡Intersección correcta! El láser corta el soporte.':'Ese punto no pertenece a ambas curvas en esta rama. Sustituye x e y en las dos ecuaciones.';
   if(!ok)this.say('¡Ja, ja! Ese punto no está en mis dos curvas.',true);
   if(ok){this.close();document.querySelector('#game').focus({preventScroll:true});this.say(this.puzzle.solved?'¡Mi soporte! ¡Esto no estaba en la gráfica!':'¿Un corte? Todavía te falta la otra intersección.',false);Sound.tone(900,.25,'sawtooth',.06);document.querySelector('#boss-progress').textContent=this.puzzle.cuts.filter(Boolean).length+' / 2 cortes';if(this.puzzle.solved){this.resetAttacks();this.close();this.onEvent('solved');}}
  }
  say(text,laugh=false){this.speech=text;this.speechLeft=6;if(laugh&&this.elapsed-this.lastLaugh>=12){Sound.laugh();this.lastLaugh=this.elapsed;}}
  stopAttacks(){this.resetAttacks();this.attacksStopped=true;}
- resetAttacks(){this.potions.reset();this.wave.reset();this.attacksStopped=false;}
- tick(dt,player,renderer,room,opened){if(!this.puzzle.solved&&!this.attacksStopped){this.wave.tick(dt,player,!this.potions.bottles.length&&!this.potions.pools.length);if(!this.wave.caught&&!this.attacksStopped)this.potions.tick(dt,player,!this.wave.blocksPotions);} this.elapsed+=dt;this.speechLeft=Math.max(0,this.speechLeft-dt);this.tauntClock-=dt;
+ resetAttacks(){this.supernova.reset();this.potions.reset();this.wave.reset();this.attacksStopped=false;}
+ tick(dt,player,renderer,room,opened){if(!this.puzzle.solved&&!this.attacksStopped){if(this.supernova.tick(dt)){this.close();this.potions.reset();this.wave.reset();this.novaWaveLaunched=false;this.say('¡Tres minutos! Contempla mi SUPERNOVA.',false);Sound.tone(90,1.5,'sine',.12);Sound.tone(360,2,'triangle',.06);this.tauntClock=10;}if(this.supernova.active){if(this.supernova.blind&&!this.novaWaveLaunched){this.novaWaveLaunched=true;this.wave.phase='wave';this.wave.x=EricFlameWave.config.startX;this.wave.previousPlayer=null;Sound.flare();}if(this.novaWaveLaunched)this.wave.tick(dt,player,true);}else{this.wave.tick(dt,player,!this.potions.bottles.length&&!this.potions.pools.length);if(!this.wave.caught&&!this.attacksStopped)this.potions.tick(dt,player,!this.wave.blocksPotions);}} this.elapsed+=dt;this.speechLeft=Math.max(0,this.speechLeft-dt);this.tauntClock-=dt;
   if(!this.puzzle.solved&&this.tauntClock<=0){const lines=['¡Ja, ja, ja! Mi parábola sostiene el futuro.','¿Encontraste x? No olvides calcular también y.','Dos curvas, dos cortes… ¡demuéstralo!','¡Al menos ponle título a esa gráfica!'];this.say(lines[this.tauntIndex++%lines.length],false);this.tauntClock=18;}
  if(this.puzzle.solved)this.fall=Math.min(2,this.fall+dt);if(this.active>=0&&this.near(player,renderer,room,opened)!==this.active)this.close();}
  texture(kind){if(this.art.has(kind))return this.art.get(kind);const a=document.createElement('canvas');a.width=512;a.height=512;const c=a.getContext('2d');
@@ -81,7 +115,7 @@ window.EricEncounter=class {
   if(this.eric.complete&&this.eric.naturalWidth&&this.fall<1.5)WorldBillboard(renderer,player,actors,RPGCast.texture(this.eric,this.fall>0?'surprise':this.wave.phase==='warning'?'explain':this.speechLeft>0?'talk':'idle',this.elapsed),20.9,7.5,.20*this.puzzle.support.parabola(0)-this.fall*.7,2.55*256/320,2.55);
   for(let i=0;i<2;i++){const l=this.lasers[i];WorldBillboard(renderer,player,actors,this.texture(i===0?'left':'right'),l.x,l.y,0,1,1);if(this.puzzle.cuts[i]){const root=this.puzzle.support.intersections[i];line(project(l.x,l.y,1),pt(...root),i===0?'#97f6d0':'#d8a6ff',4);}}
   this.potions.draw(renderer,player,actors,this.texture('potion'));
-  if(!this.puzzle.solved)this.wave.draw(renderer,player,actors,this.elapsed);this.drawSpeech(renderer,player,actors);
+  if(!this.puzzle.solved)this.wave.draw(renderer,player,actors,this.elapsed);this.drawSpeech(renderer,player,actors);this.supernova.draw(renderer,player,actors);
  }
  drawSpeech(renderer,player,actors){
   if(!this.speech||this.speechLeft<=0||this.fall>=1.5||Sound.dead)return;
@@ -90,7 +124,7 @@ window.EricEncounter=class {
   const unit=w/Math.max(320,renderer.canvas.clientWidth),font=15*unit,width=Math.min(w*.56,250*unit),pad=12*unit;
   c.save();c.font=`${font}px Georgia`;const lines=[];let line='';for(const word of this.speech.split(' ')){const test=(line+' '+word).trim();if(c.measureText(test).width>width-2*pad&&line){lines.push(line);line=word;}else line=test;}if(line)lines.push(line);
   const height=lines.length*font*1.35+pad*2,left=Math.max(8,Math.min(w-width-8,head.x-width-20*unit)),top=Math.max(8,Math.min(h-height-8,head.y-height*.7));
-  c.fillStyle='#f3e4c7';c.strokeStyle='#725047';c.lineWidth=2*unit;c.beginPath();c.roundRect(left,top,width,height,13*unit);c.fill();c.stroke();c.beginPath();c.moveTo(left+width-16*unit,top+height*.7);c.lineTo(head.x-4*unit,head.y+6*unit);c.lineTo(left+width-4*unit,top+height*.45);c.fill();c.stroke();c.fillStyle='#342439';c.textAlign='left';lines.forEach((text,i)=>c.fillText(text,left+pad,top+pad+font+i*font*1.35));c.restore();
+  c.fillStyle='#f3e4c7c7';c.strokeStyle='#725047';c.lineWidth=2*unit;c.beginPath();c.roundRect(left,top,width,height,13*unit);c.fill();c.stroke();c.beginPath();c.moveTo(left+width-16*unit,top+height*.7);c.lineTo(head.x-4*unit,head.y+6*unit);c.lineTo(left+width-4*unit,top+height*.45);c.fill();c.stroke();c.fillStyle='#342439';c.textAlign='left';lines.forEach((text,i)=>c.fillText(text,left+pad,top+pad+font+i*font*1.35));c.restore();
  }
 
 };

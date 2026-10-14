@@ -1,6 +1,6 @@
 /* Símbolos en carriles rectos: jamás siguen al jugador. */
 window.RelaxCorridor=class {
- constructor(onEvent){this.onEvent=onEvent;this.time=0;this.readyShown=false;this.caught=false;
+ constructor(onEvent){this.onEvent=onEvent;this.time=0;this.hitboxScale=EpikDifficulty.easy?1:.9;this.readyShown=false;this.caught=false;
   this.obstacles=[{x:8,y:2.9,width:2.2,height:.22},{x:12,y:6.1,width:2.2,height:.22},{x:16,y:4.5,width:1.8,height:.22},{x:20,y:2.9,width:2.2,height:.22},{x:24,y:6.1,width:2.2,height:.22}];
   this.obstacles.push(...this.obstacles.map(o=>({...o,x:o.x+27})));
   this.obstacles.forEach(o=>o.x=2.9+(o.x-2.5)*.9);
@@ -16,7 +16,7 @@ window.RelaxCorridor=class {
  tick(dt,player){if(this.caught)return;this.time+=dt;
   this.spawnClock-=dt;while(this.spawnClock<=0){const band=this.nextLane%3;this.symbols.push({y:2.2+band*1.55+Math.random()*1.4,text:this.glyphs[this.nextLane++%this.glyphs.length],x:this.spawnX,age:0});this.spawnClock+=this.spawnInterval;}
   for(const s of this.symbols){s.age+=dt;s.x-=this.speed*dt;
-   if(s.age>=.65&&player.jumpHeight<.30*.9*.9&&Math.hypot(player.x-s.x,player.y-s.y)<.48*.9*.9){this.caught=true;this.onEvent('hit');return;}
+   if(s.age>=.65&&player.jumpHeight<.30*.9*.9*this.hitboxScale&&Math.hypot(player.x-s.x,player.y-s.y)<.48*.9*.9*this.hitboxScale){this.caught=true;this.onEvent('hit');return;}
   }
   this.symbols=this.symbols.filter(s=>s.x>=1.8);
   if(!this.readyShown&&this.nearExit(player)){this.readyShown=true;this.onEvent('ready');}

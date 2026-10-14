@@ -514,7 +514,7 @@ window.ENGLISH={
   "Resuelve el sello y elige una de las dos puertas para volver al inicio del laberinto. Tus puertas abiertas se conservarán.": "Solve the seal and choose one of the two doors to return to the start of the maze. Opened doors stay open.",
   "Elegir una puerta equivocada te teletransporta de inmediato al calabozo: allí tendrás otra pregunta antes de volver al inicio.": "A wrong door immediately teleports you to the dungeon: solve another question there to return to the start.",
   "El portal te arrastra al calabozo. Resuelve el sello de dos puertas para volver al inicio. Cuidado, alguien te persigue.": "The portal pulls you into the dungeon. Solve the two-door seal to return to the start. Careful, someone is chasing you.",
-  "Sello resuelto. Regresas al inicio del laberinto; las puertas que abriste siguen abiertas. Iván esperará 5 segundos: aprovecha para alejarte.": "Seal solved. You return to the start of the maze; opened doors stay open. Iván will wait 5 seconds: get away while you can.",
+  "Sello resuelto. Regresas al inicio del laberinto; las puertas que abriste siguen abiertas. Iván esperará 10 segundos: aprovecha para alejarte.": "Seal solved. You return to the start of the maze; opened doors stay open. Iván will wait 10 seconds: get away while you can.",
   "Ese sello no responde.": "That seal does not respond.",
   "¡Iván sigue acercándose!": "Iván is still getting closer!",
   "La puerta se abre. Explora el pasaje y cruza hasta la siguiente galería.": "The door opens. Explore the passage and cross into the next gallery.",

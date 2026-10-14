@@ -8,7 +8,7 @@ La pregunta «¿Acostumbras jugar videojuegos?» aparece junto al nombre: Sí se
 | Espera al salir del calabozo | 5 s | 5 s | 5 s |
 | Iván, celdas/s | 0.8751645 | 0.8751645 | 0.7001316 |
 | Símbolos, celdas/s | 1.6 | 1.6 | 1.28 |
-| Intervalo entre símbolos | 1.3244 s | 1.3244 s | 1.6555 s |
+| Intervalo entre símbolos | 1.3244 s | 1.3244 s | 2.0694 s |
 | Radio de colisión del símbolo | 0.432 celdas | 0.3888 celdas | 0.3888 celdas |
 | Altura de colisión del símbolo | 0.27 celdas | 0.243 celdas | 0.243 celdas |
 | Primera poción | 8 s | 9.6 s | 11.52 s |
@@ -26,3 +26,7 @@ Los paneles de juego usan fondos con transparencia sin filtros de desenfoque. El
 El certificado conserva su paginación: 1 estrella roja, 2–3 verdes, 4 amarillas, 5 amarillas con destellos. Se mantienen etiquetas accesibles y no se modifica la puntuación.
 
 Verificación: pruebas de lógica de laberinto, congelamiento, corredor, pociones, onda, progreso, puntuación, traducción y tablones; `tests/arcade.browser.cjs` verifica los modos, recuperación, colisión, ausencia de fuego en fácil, aviso, interfaz móvil y estrellas; `tests/certificate-reverse.browser.cjs` verifica ambas rutas y el CSV.
+
+Ajuste posterior: en fácil, el intervalo entre símbolos sube otro 25 % (20 % menos apariciones). Iván espera 10 s al entrar al calabozo por error, al volver del calabozo y al restaurar un punto de control con persecución activa; su primera aparición normal conserva 2.5 s. Supernova de Eric: solo normal, una vez por intento a los 180 s de juego activo, 8 s de efecto: origen detrás de Eric (0–2 s), verde totalmente opaco (2–7 s), recuperación (7–8 s). Durante el cegamiento se bloquea el desplazamiento y se permite saltar; los láseres quedan bloqueados durante el ataque. Limpia pociones/charcos y lanza una barra de fuego dañina al comenzar el verde opaco; respeta movimiento reducido y se reinicia al morir.
+
+Solo normal: hitbox de símbolos multiplicado por 0.9 (radio 0.34992 y altura 0.2187 celdas); tablones iniciales 1.35 × 1.26 celdas, centrados en los mismos puntos (10 % menos por dimensión). Fácil conserva 1.5 × 1.4 y su hitbox previo.
