@@ -45,6 +45,7 @@ window.EricPotions=class {
 /* One delayed, blinding spectacle with a synchronized flame wave per attempt. Game time pauses with play.
    A smooth bloom replaces flashing; reduced-motion disables screen shake. */
 window.EricSupernova=class {
+ static triggerAt=121.5; // Acento local de final-stand.mp3, alrededor de 2:01.
  constructor(enabled){this.enabled=enabled;this.reset();}
  reset(){this.elapsed=0;this.age=-1;this.used=false;this.canvas?.style.removeProperty('transform');this.canvas?.parentElement?.classList.remove('nova-blind');}
  get blind(){return this.age>=2&&this.age<7;}
@@ -52,7 +53,7 @@ window.EricSupernova=class {
  tick(dt){
   this.elapsed+=dt;
   if(this.active)this.age+=dt;
-  if(this.enabled&&!this.used&&this.elapsed>=180){this.used=true;this.age=0;return true;}
+  if(this.enabled&&!this.used&&this.elapsed>=EricSupernova.triggerAt){this.used=true;this.age=0;return true;}
   return false;
  }
  draw(renderer,player,actors){
@@ -93,7 +94,7 @@ window.EricEncounter=class {
  say(text,laugh=false){this.speech=text;this.speechLeft=6;if(laugh&&this.elapsed-this.lastLaugh>=12){Sound.laugh();this.lastLaugh=this.elapsed;}}
  stopAttacks(){this.resetAttacks();this.attacksStopped=true;}
  resetAttacks(){this.supernova.reset();this.potions.reset();this.wave.reset();this.attacksStopped=false;}
- tick(dt,player,renderer,room,opened){if(!this.puzzle.solved&&!this.attacksStopped){if(this.supernova.tick(dt)){this.close();this.potions.reset();this.wave.reset();this.novaWaveLaunched=false;this.say('¡Tres minutos! Contempla mi SUPERNOVA.',false);Sound.tone(90,1.5,'sine',.12);Sound.tone(360,2,'triangle',.06);this.tauntClock=10;}if(this.supernova.active){if(this.supernova.blind&&!this.novaWaveLaunched){this.novaWaveLaunched=true;this.wave.phase='wave';this.wave.x=EricFlameWave.config.startX;this.wave.previousPlayer=null;Sound.flare();}if(this.novaWaveLaunched)this.wave.tick(dt,player,true);}else{this.wave.tick(dt,player,!this.potions.bottles.length&&!this.potions.pools.length);if(!this.wave.caught&&!this.attacksStopped)this.potions.tick(dt,player,!this.wave.blocksPotions);}} this.elapsed+=dt;this.speechLeft=Math.max(0,this.speechLeft-dt);this.tauntClock-=dt;
+ tick(dt,player,renderer,room,opened){if(!this.puzzle.solved&&!this.attacksStopped){if(this.supernova.tick(dt)){this.close();this.potions.reset();this.wave.reset();this.novaWaveLaunched=false;this.say('¡Dos minutos! Contempla mi SUPERNOVA.',false);Sound.tone(90,1.5,'sine',.12);Sound.tone(360,2,'triangle',.06);this.tauntClock=10;}if(this.supernova.active){if(this.supernova.blind&&!this.novaWaveLaunched){this.novaWaveLaunched=true;this.wave.phase='wave';this.wave.x=EricFlameWave.config.startX;this.wave.previousPlayer=null;Sound.flare();}if(this.novaWaveLaunched)this.wave.tick(dt,player,true);}else{this.wave.tick(dt,player,!this.potions.bottles.length&&!this.potions.pools.length);if(!this.wave.caught&&!this.attacksStopped)this.potions.tick(dt,player,!this.wave.blocksPotions);}} this.elapsed+=dt;this.speechLeft=Math.max(0,this.speechLeft-dt);this.tauntClock-=dt;
   if(!this.puzzle.solved&&this.tauntClock<=0){const lines=['¡Ja, ja, ja! Mi parábola sostiene el futuro.','¿Encontraste x? No olvides calcular también y.','Dos curvas, dos cortes… ¡demuéstralo!','¡Al menos ponle título a esa gráfica!'];this.say(lines[this.tauntIndex++%lines.length],false);this.tauntClock=18;}
  if(this.puzzle.solved)this.fall=Math.min(2,this.fall+dt);if(this.active>=0&&this.near(player,renderer,room,opened)!==this.active)this.close();}
  texture(kind){if(this.art.has(kind))return this.art.get(kind);const a=document.createElement('canvas');a.width=512;a.height=512;const c=a.getContext('2d');

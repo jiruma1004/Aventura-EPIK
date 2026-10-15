@@ -2,6 +2,7 @@
 window.Sound={
  backgroundNames:['grassland','ceremony','music','maze','villain','missing','seal','corridor','stand','transformation','phase'],sceneTrack:'grassland',backgroundLevels:{grassland:1,ceremony:0,music:0,maze:0,villain:0,missing:0,seal:0,corridor:0,stand:0,transformation:0,phase:0},heartbeat:0,
  gameOverReady:false,enabled:false,ctx:null,master:null,dead:false,hiddenPlaying:new Set(),autoPending:true,userDisabled:false,duck:1,entryFade:0,victoryFade:1,playIds:{},
+ loopFadeIn:1.2,loopFadeOut:1.8,
  tracks:{grassland:new Audio('assets/audio/legende-du-royaume.mp3'),ceremony:new Audio('assets/audio/royal-ceremony.mp3'),bridge:new Audio('assets/audio/woodenbridge-2s.wav'),corridor:new Audio('assets/audio/juanillo.mp3'),stand:new Audio('assets/audio/final-stand.mp3'),transformation:new Audio('assets/audio/transformation.mp3'),phase:new Audio('assets/audio/final-phase.mp3'),rocket:new Audio('assets/audio/rocket-ignition.mp3'),seal:new Audio('assets/audio/desbloqueo-magico.mp3'),laugh:new Audio('assets/audio/eric-laugh.mp3?v=short-1500'),music:new Audio('assets/audio/ambiente.mp3'),victory:new Audio('assets/audio/victoria.mp3'),explosion:new Audio('assets/audio/explosion.mp3'),gameover:new Audio('assets/audio/game-over.mp3'),maze:new Audio('assets/audio/relentless-pursuit.mp3'),villain:new Audio('assets/audio/dramatic-villain.mp3'),missing:new Audio('assets/audio/missing-person.mp3')},
  async enable({automatic=false}={}){if(automatic&&this.userDisabled)return;this.userDisabled=false;this.enabled=true;
   // No esperamos a resume(): algunos navegadores lo dejan pendiente hasta un gesto.
@@ -13,6 +14,7 @@ window.Sound={
   catch(e){if(id!==this.playIds[name])return false;if(this.backgroundNames.includes(name)&&e.name==='NotAllowedError'){this.autoPending=!this.userDisabled;this.enabled=false;this.apply();this.ui();document.querySelector('#audio-status').textContent='La música empezará con tu primer clic o tecla.';}else if(e.name!=='AbortError')document.querySelector('#audio-status').textContent='No se pudo reproducir '+name+'. Puedes reintentar con Activar sonido.';return false;}
  },
  gain(id){return document.querySelector('#'+id+'-mute').checked?0:Number(document.querySelector('#'+id).value);},
+ loopGain(track){if(!Number.isFinite(track.duration)||track.duration<=0)return 1;const head=Math.max(0,Math.min(1,track.currentTime/this.loopFadeIn)),tail=Math.max(0,Math.min(1,(track.duration-track.currentTime)/this.loopFadeOut));return Math.min(head,tail);},
  mix(dt){if(document.hidden)return;const v=this.tracks.victory,end=Number.isFinite(v.duration)?Math.min(4.5,v.duration):4.5;if(!v.paused&&v.currentTime>=end)this.stop('victory');const playing=!v.paused&&!v.ended,tail=playing?Math.max(0,Math.min(1,(end-v.currentTime)/.7)):1;
   this.victoryFade=playing?Math.min(1,v.currentTime/.2,tail):0;
   const target=playing?1-.82*tail:1;this.duck+=(target-this.duck)*(1-Math.exp(-dt/(target<this.duck?.25:.45)));
@@ -21,7 +23,9 @@ window.Sound={
  },
  apply(){const main=this.enabled?this.gain('volume'):0,effects=main*this.gain('effects-volume');
   if(this.master&&this.effectLevel!==effects){this.master.gain.setTargetAtTime(effects,this.ctx.currentTime,.03);this.effectLevel=effects;}
-  for(const name of this.backgroundNames)this.tracks[name].volume=main*this.gain('music-volume')*this.duck*this.entryFade*this.backgroundLevels[name];this.tracks.victory.volume=main*this.gain('victory-volume')*this.victoryFade;this.tracks.bridge.volume=effects;this.tracks.explosion.volume=effects;this.tracks.laugh.volume=effects;this.tracks.rocket.volume=effects;this.tracks.gameover.volume=main*this.gain('gameover-volume');
+  // Cada pista baja suavemente antes de terminar y vuelve a entrar desde cero.
+  // Conservamos loop nativo para que el retorno siga siendo fiable en móviles.
+  for(const name of this.backgroundNames){const track=this.tracks[name];track.volume=main*this.gain('music-volume')*this.duck*this.entryFade*this.backgroundLevels[name]*this.loopGain(track);}this.tracks.victory.volume=main*this.gain('victory-volume')*this.victoryFade;this.tracks.bridge.volume=effects;this.tracks.explosion.volume=effects;this.tracks.laugh.volume=effects;this.tracks.rocket.volume=effects;this.tracks.gameover.volume=main*this.gain('gameover-volume');
   for(const id of ['volume','music-volume','victory-volume','effects-volume','gameover-volume']){const output=document.querySelector('#'+id+'-value'),text=Math.round(Number(document.querySelector('#'+id).value)*100)+' %';if(output.textContent!==text)output.textContent=text;}
  },
  ui(){const b=document.querySelector('#sound-toggle');b.textContent=this.enabled?'♫ Sonido activado':'♫ Activar sonido';b.setAttribute('aria-pressed',String(this.enabled));},
