@@ -4,7 +4,7 @@ window.makeWallArt=()=>{
   const portrait=make(320,360,(c,w,h)=>{
     c.fillStyle='#302b3a';c.fillRect(0,0,w,h);c.strokeStyle='#d6bc7c';c.lineWidth=12;c.strokeRect(8,8,w-16,h-16);c.lineWidth=2;c.strokeRect(22,22,w-44,h-44);
     const bg=c.createLinearGradient(0,30,w,300);bg.addColorStop(0,'#374c6b');bg.addColorStop(1,'#16283b');c.fillStyle=bg;c.fillRect(27,27,w-54,278);
-    c.fillStyle='#c0cdd1';c.font='italic 22px Georgia';c.fillText('E = mc²',42,65);
+    c.fillStyle='#c0cdd1';c.font='italic 22px Georgia';c.fillText('x = v·t',42,65);
     // Chaqueta, cabello despeinado y rostro: un retrato ilustrado de Einstein.
     c.fillStyle='#6a737e';c.beginPath();c.moveTo(57,302);c.quadraticCurveTo(62,241,137,229);c.lineTo(183,229);c.quadraticCurveTo(251,244,265,302);c.fill();
     c.fillStyle='#d6d9d4';c.beginPath();c.moveTo(127,231);c.lineTo(161,274);c.lineTo(193,231);c.closePath();c.fill();

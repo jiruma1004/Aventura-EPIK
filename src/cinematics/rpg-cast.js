@@ -23,9 +23,13 @@ window.RPGCast={
     Their getters match the Image checks without allocating a new image each tick. */
  textures:new WeakMap(),
  texture(image,pose,t=0,cell=this.cell){
+  const f=pose==='chase'?[0,1,0,1,2,0,3,0][Math.floor(t*6)%8]:pose==='catch'?2:this.frame(pose,t);
+  return this.textureFrame(image,f,cell);
+ },
+ textureFrame(image,f,cell=this.cell){
   if(!image?.complete||!image.naturalWidth)return null;
   let frames=this.textures.get(image);if(!frames){frames=new Map();this.textures.set(image,frames);}
-  const f=pose==='chase'?[0,1,0,1,2,0,3,0][Math.floor(t*6)%8]:pose==='catch'?2:this.frame(pose,t);if(!frames.has(f)){const a=document.createElement('canvas');a.width=cell.w;a.height=cell.h;a.complete=true;a.naturalWidth=cell.w;a.naturalHeight=cell.h;a.getContext('2d').drawImage(image,f%4*cell.w,Math.floor(f/4)*cell.h,cell.w,cell.h,0,0,cell.w,cell.h);frames.set(f,a);}return frames.get(f);
+  if(!frames.has(f)){const a=document.createElement('canvas');a.width=cell.w;a.height=cell.h;a.complete=true;a.naturalWidth=cell.w;a.naturalHeight=cell.h;a.getContext('2d').drawImage(image,f%4*cell.w,Math.floor(f/4)*cell.h,cell.w,cell.h,0,0,cell.w,cell.h);frames.set(f,a);}return frames.get(f);
  },
  /* Accessories stay attached to the new bodies and inherit rotation. */
  leaves(c,x,feet,h,rotation=0){c.save();c.translate(x,feet);c.rotate(rotation);for(const [a,b,r] of [[-.15,-.78,.3],[.13,-.46,-.4],[-.12,-.23,.7],[.08,-.96,-.7]]){c.save();c.translate(a*h,b*h);c.rotate(r);c.fillStyle='#607849';c.beginPath();c.ellipse(0,0,h*.03,h*.012,0,0,7);c.fill();c.restore();}c.restore();},

@@ -17,8 +17,8 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
   await p.locator('#cinema-canvas').screenshot({path:path.join(dir,karla?'ceremony-karla.png':'ceremony-paola.png')});await p.evaluate(()=>cinematics.close());
  }
  // Descent remains stern, and mouth animation begins only for the captured dialogue.
- const ericPoses=await p.evaluate(async()=>{cinematics.play('intercepcion-espacial');await cinematics.ready;const original=RPGCast.draw,poses=[];RPGCast.draw=function(c,im,pose,...rest){if(im===cinematics.images.castEric)poses.push(pose);return original.call(this,c,im,pose,...rest)};for(const t of [21,29,35]){cinematics.time=t;cinematics.draw()}RPGCast.draw=original;return poses});
- assert.deepEqual(ericPoses,['idle','idle','talk']);await p.locator('#cinema-canvas').screenshot({path:path.join(dir,'prison-serious.png')});await p.evaluate(()=>cinematics.close());
+ const ericPoses=await p.evaluate(async()=>{cinematics.play('intercepcion-espacial');await cinematics.ready;const original=RPGCast.action,poses=[];RPGCast.action=function(c,im,frame,...rest){if(im===cinematics.images.ericAir)poses.push(frame);return original.call(this,c,im,frame,...rest)};for(const t of [21,29,35]){cinematics.time=t;cinematics.draw()}RPGCast.action=original;return poses});
+ assert.deepEqual(ericPoses,[1,2,4]);await p.locator('#cinema-canvas').screenshot({path:path.join(dir,'prison-serious.png')});await p.evaluate(()=>cinematics.close());
  // Launch facial frames change while the original cable/rotation path stays active.
  const panic=await p.evaluate(async()=>{cinematics.play('ignitia-intercepcion');await cinematics.ready;const original=RPGCast.action,frames=[];RPGCast.action=function(c,im,f,...rest){if(im===cinematics.images.ivanAction)frames.push(f);return original.call(this,c,im,f,...rest)};for(const t of [8,9.3,12.2,14.3]){cinematics.time=t;cinematics.draw()}RPGCast.action=original;return frames});
  assert.equal(panic.length,4);assert(new Set(panic).size>=3);assert(panic.every(f=>f>=4&&f<=7));await p.locator('#cinema-canvas').screenshot({path:path.join(dir,'rocket-panic.png')});await p.evaluate(()=>cinematics.close());

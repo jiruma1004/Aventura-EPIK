@@ -32,7 +32,7 @@ const assert=require('node:assert/strict');
    assert.equal(result.start,result.end,id+' must not request images while changing poses');
   }
   // An empty/opaque tile or a missing mouth frame is visible even if playback does not throw.
-  const frames=await page.evaluate(()=>{
+  const frames=await page.evaluate(async()=>{
    const results=[],canvas=document.createElement('canvas');canvas.width=256;canvas.height=320;
    const c=canvas.getContext('2d',{willReadFrequently:true});
    for(const key of ['castAngelica','castPaola','castKarla','castEric','castIvan','castJose']){
@@ -40,6 +40,18 @@ const assert=require('node:assert/strict');
     for(let frame=0;frame<16;frame++){
      c.clearRect(0,0,256,320);RPGCast.draw(c,im,'idle',0,128,304,284,{frame});
      const rgba=c.getImageData(0,0,256,320).data;let solid=0,clear=0;
+     for(let i=3;i<rgba.length;i+=4){solid+=rgba[i]>160;clear+=rgba[i]===0}
+     results.push({key,frame,solid,clear});
+    }
+   }
+   canvas.width=384;canvas.height=320;
+   // The new action sheets use wider cells than the dialogue/base cast.
+   for(const key of ['ericAir','ericRun','ericImpact','paolaClass']){
+    const im=await cinematics.assets.request(key);
+    if(im.naturalWidth!==1536||im.naturalHeight!==640)throw Error(key+' action atlas dimensions');
+    for(let frame=0;frame<8;frame++){
+     c.clearRect(0,0,384,320);RPGCast.action(c,im,frame,192,304,284);
+     const rgba=c.getImageData(0,0,384,320).data;let solid=0,clear=0;
      for(let i=3;i<rgba.length;i+=4){solid+=rgba[i]>160;clear+=rgba[i]===0}
      results.push({key,frame,solid,clear});
     }
@@ -70,6 +82,6 @@ const assert=require('node:assert/strict');
    await page.evaluate(()=>cinematics.close());
   }
   assert.deepEqual(errors,[]);assert.deepEqual(missing,[]);
-  console.log('PASS: eight scene variants, 96 transparent frames, mouth/idle, all five bloopers, no draw-time downloads, gallery metrics unchanged, mobile radio, no browser errors.');
+  console.log('PASS: eight scene variants, 128 transparent frames including the four new action sheets, mouth/idle, all five bloopers, no draw-time downloads, gallery metrics unchanged, mobile radio, no browser errors.');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

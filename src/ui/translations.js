@@ -1108,3 +1108,15 @@ Object.assign(ENGLISH, {
  'Mover desarrollo: arrastra o usa las flechas':'Move working: drag or use the arrow keys',
  'Palma IA · Desarrollo guiado':'Palma AI · Guided working'
 });
+
+Object.assign(window.ENGLISH, {
+  "Una carga excesiva puede hacer explotar la torreta. Revisa el aviso antes de disparar.": "An excessive load can make the turret explode. Check the warning before firing.",
+  "Acércate al cañón y pulsa E. Elige y carga una bala; calcula la rapidez y el ángulo. Busca las ecuaciones a tu espalda. Al acertar el botón se abrirá la verja y aparecerá el puente. H: pista.": "Approach the cannon and press E. Choose and load a ball; calculate the speed and angle. Look for the equations behind you. Hit the button to open the gate and reveal the bridge. H: hint.",
+  "La torreta se sobrecargó.": "The turret overloaded.",
+  "Prueba con una bala más ligera o reduce la rapidez.": "Try a lighter ball or reduce the speed.",
+  "Nuevo intento: conservas el registro. Revisa el aviso de carga antes de disparar.": "New attempt: your log is preserved. Check the load warning before firing.",
+  "Introduce la rapidez y el ángulo antes de disparar.": "Enter the speed and angle before firing.",
+  "SOBRECARGA: usa una bala más ligera o reduce la rapidez. Disparar así hará explotar la torreta.": "OVERLOAD: use a lighter ball or reduce the speed. Firing like this will make the turret explode.",
+  "Carga dentro de la capacidad de la torreta.": "Load within turret capacity.",
+  "Carga una bala para comprobar la capacidad de la torreta.": "Load a ball to check turret capacity."
+});

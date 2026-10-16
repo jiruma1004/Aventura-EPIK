@@ -25,15 +25,22 @@ window.SpaceInterception={
 window.SpaceCinematic=class {
  constructor(library){this.library=library;this.plan=SpaceInterception.plan(library.legacySource?.simulator);}
  sprite(key,x,y,height,rotation=0,alpha=1){
-  if(key==='ericBody'){const c=this.library.ctx;c.save();c.globalAlpha*=alpha;RPGCast.draw(c,this.library.images.castEric,this.currentTime>=34?'talk':'idle',this.currentTime||0,x,y+height/2,height,{rotation});c.restore();return;}
+  if(key==='ericBody'){
+   const c=this.library.ctx,t=this.currentTime||0;
+   // The ejection, landing and prison speech have distinct villain poses.
+   const frame=t<20?6:t<32.4?3:Math.floor(t*6)%3===1?5:4;
+   c.save();c.globalAlpha*=alpha;RPGCast.action(c,this.library.images.ericAir,frame,x,y+height/2,height,{rotation});c.restore();return;
+  }
   const {ctx:c,images}=this.library,image=images[key];if(!image?.complete||!image.naturalWidth)return;
   const width=height*image.naturalWidth/image.naturalHeight;c.save();c.globalAlpha*=alpha;c.translate(x,y);c.rotate(rotation);c.drawImage(image,-width/2,-height/2,width,height);c.restore();
  }
  parachute(x,feet,height,opening=1){
-  const c=this.library.ctx;this.sprite('ericBody',x,feet-height/2,height);
+  const c=this.library.ctx,t=this.currentTime||0;
+  const frame=t>21.2&&Math.floor(t*6)%4===2?2:Math.floor(t*3)%2;
+  RPGCast.action(c,this.library.images.ericAir,frame,x,feet,height);
   const top=feet-height*1.9,radius=height*.83*opening;
   c.save();c.strokeStyle='#dce3d6';c.lineWidth=Math.max(1,height*.014);
-  for(const k of [-1,-.5,0,.5,1]){c.beginPath();c.moveTo(x+radius*k,top);c.lineTo(x+height*.15*k,feet-height*.7);c.stroke();}
+  for(const k of [-1,-.5,.5,1]){c.beginPath();c.moveTo(x+radius*k,top);c.lineTo(x+Math.sign(k)*height*.22,feet-height*.88);c.stroke();}
   c.fillStyle='#e2cd92';c.strokeStyle='#43384b';c.lineWidth=3;c.beginPath();c.ellipse(x,top,radius,height*.59*opening,0,Math.PI,Math.PI*2);c.closePath();c.fill();c.stroke();
   c.strokeStyle='#8d5966';for(const k of [-.5,0,.5]){c.beginPath();c.moveTo(x+radius*k,top);c.quadraticCurveTo(x+radius*k*.5,top-height*.5*opening,x,top-height*.59*opening);c.stroke();}c.restore();
  }
@@ -81,7 +88,7 @@ window.SpaceCinematic=class {
    caption='El paracaídas se abre. Una corriente lo lleva directo al patio de una prisión.';speech=t>21.2?'¡Esto no termina aquí!':'';
   }else{
    this.prison(1);const u=Math.min(1,(t-27)/4),body=Math.min(h*.62,w*.72),feet=-body*.3+(h*.85+body*.3)*(1-(1-u)**2),x=w*.5;
-   if(t<32)this.parachute(x,feet,body,Math.max(0,Math.min(1,(32-t)/1.2))); else this.sprite('ericBody',x,h*.85-body/2+Math.sin(t*4)*2,body);
+   if(t<32)this.parachute(x,feet,body,Math.max(0,Math.min(1,(32-t)/1.2))); else this.sprite('ericBody',x,h*.85-body/2,body);
    // La reja cae por delante del personaje, sin cambiar la imagen de la celda.
    if(t>=31){const closed=Math.min(1,(t-31)/1.1),top=-h*(1-closed);c.save();c.translate(0,top);const bar=Math.max(5,size*.012),gap=w*.095;
     for(let bx=w*.12,n=0;bx<w*.92;bx+=gap,n++){c.fillStyle='#3a302b';c.fillRect(bx,0,bar,h);c.fillStyle='#8b7260';c.fillRect(bx+1,0,2,h);

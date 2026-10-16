@@ -9,7 +9,7 @@ window.SceneActing={
  students(t){return [t>=2&&t<8?3:0,t>=8?4:1,t>=4&&t<8&&Math.floor(t*5)%2?5:2];},
  impact(after){return after<.12?4:after<.4?5:after<1.3?6:Math.floor(after*4)%4===3?7:6;},
  walk(t){return Math.floor(Math.max(0,t)*8)%8;},
- ericRun(t){return [0,1,3,4,5,7][Math.floor(Math.max(0,t)*10)%6];},
+ ericRun(t){return Math.floor(Math.max(0,t)*10)%8;},
  step(t,fps=7){return Math.floor(Math.max(0,t)*fps)%4;},
  forest(t,fallAt=2.8){
   const age=t-fallAt;

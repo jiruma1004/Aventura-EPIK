@@ -16,7 +16,7 @@ window.RoomCompanions=class {
   document.querySelector('#question-fold').setAttribute('aria-label','Minimizar o mostrar la pregunta');
   document.querySelector('#roulette-panel').hidden=true;
   view.insertAdjacentHTML('beforeend','<button id="ask-paola" class="paola-bubble" aria-controls="paola-dialog" aria-expanded="false"><canvas id="helper-face" width="48" height="48" aria-hidden="true"></canvas> <b id="helper-name">Epi Paola</b> <small>Una pista · H</small></button>');
-  this.paolaPortrait=new Image();this.paolaPortrait.src='assets/cast/paola-help-close.webp';this.josePortrait=new Image();this.josePortrait.src='assets/cast/jose-medieval-portrait.webp';this.portrait=this.paolaPortrait;this.dialogue=null;this.paolaPortrait.onload=()=>this.drawHelpButton();this.josePortrait.onload=()=>this.drawHelpButton();
+  this.paolaPortrait=new Image();this.paolaPortrait.src='assets/cast/paola-b-v1-help.webp';this.josePortrait=new Image();this.josePortrait.src='assets/cast/jose-medieval-portrait.webp';this.portrait=this.paolaPortrait;this.dialogue=null;this.paolaPortrait.onload=()=>this.drawHelpButton();this.josePortrait.onload=()=>this.drawHelpButton();
   document.querySelector('#ask-paola').onclick=()=>this.help();
   document.querySelector('#paola-close').onclick=()=>this.closeHelp();
   document.querySelector('#paola-skip').onclick=()=>{if(this.dialogue?.speaking)this.finishDialogue();else this.closeHelp();};
@@ -48,7 +48,7 @@ window.RoomCompanions=class {
  showRoomNotice(room){
   const notice=document.querySelector('#maze-notice');
   const texts=room.trial?['El puente viejo cruza un cráter. Cinco afirmaciones deciden qué tablones resistirán tu peso.','Lee la afirmación y salta a Verdadero o Falso. Shift para correr, Espacio para saltar. Un error rompe la plataforma; '+(EpikDifficulty.easy?'regresas al último tablón correcto':'regresas al inicio del puente')+' y conservas tus aciertos. Pulsa H si necesitas una pista.']
-   :room.physics?['Un sello protege la entrada al bosque del castillo. Actívalo con un proyectil.','Acércate al cañón y pulsa E. Elige y carga una bala; calcula la energía y los ángulos. Busca las ecuaciones a tu espalda. Al acertar el botón se abrirá la verja y aparecerá el puente. H: pista.']
+   :room.physics?['Un sello protege la entrada al bosque del castillo. Actívalo con un proyectil.','Acércate al cañón y pulsa E. Elige y carga una bala; calcula la rapidez y el ángulo. Busca las ecuaciones a tu espalda. Al acertar el botón se abrirá la verja y aparecerá el puente. H: pista.']
    :room.roulette?['La rueda de la sala elige tu problema de física.','Acércate a la mesa y pulsa el cristal con clic o E. Lee el problema; cuando tengas tu resultado, mira el sello de la puerta y pulsa E para escribirlo. H: pista.']
    :room.conceptual?['Al cruzar el umbral sientes una presencia. El eco de tus pasos parece llegar un instante tarde…','Tres galerías y una última elección: puerta azul o puerta roja. Abre con clic o E. Un error te envía al calabozo; resuélvelo para regresar. Conservas tus aciertos; si caes, vuelves al inicio del puente. Los botones azules congelan a Iván 8 segundos. H: pista.']
    :room.corridor?['Cuidado, el Dr. Eric te está lanzando ecuaciones desde el otro lado.','Esquiva los símbolos moviéndote a los lados. Usa Shift para correr y Espacio para saltar obstáculos y plataformas sobre la lava. Llega a la puerta del fondo. H: pista.']

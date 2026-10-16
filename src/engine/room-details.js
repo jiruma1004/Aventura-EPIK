@@ -9,7 +9,7 @@ window.RoomDetails={
   {room:'room-02',text:'Sin unidades no hay respuesta',axis:'y',face:1,start:2,end:4.2,z:.48,h:.23},
   {room:'room-03',text:'La inercia no perdona',axis:'y',face:1,start:13.5,end:16.5,z:.9,h:.3},
   {room:'room-04',text:'La velocidad tiene dirección',axis:'y',face:1.7,start:8,end:11,z:.47,h:.23},
-  {room:'room-05',text:'La energía se transforma',axis:'y',face:14,start:6,end:10,z:.85,h:.33},
+  {room:'room-05',text:'El movimiento es relativo',axis:'y',face:14,start:6,end:10,z:.85,h:.33},
   {room:'room-06',text:'Todo impulso cuenta',axis:'y',face:1,start:10,end:13,z:.85,h:.3}
  ],
  props:[

@@ -65,12 +65,11 @@ window.EpikSolutions = {
     if (room.trial) return say('La respuesta es ', 'The answer is ') + (trial.question.answer ? say('Verdadero.', 'True.') : say('Falso.', 'False.')) + ' ' + I18n.t(trial.question.hint) + say(' Salta tú a esa plataforma.', ' Jump onto that platform yourself.');
     if (room.physics) {
       const p=lab.room.physics,D=(p.targetX-p.originX)*p.metersPerCell,dy=p.targetHeight-p.height;
-      const mass=lab.loaded?.mass ?? lab.ammo[lab.selected ?? 0].mass;
       return say(`Elige y fija tú un ángulo θ. La rapidez inicial queda despejada así:
 v₀ = √[(${p.gravity}·${D}²) / (2·cos²(θ)·(${D}·tan(θ) − (${dy})))]
-Después comprueba E = ½·${mass}·v₀² ≤ ${p.maxEnergy} J. Si lo supera, elige una masa menor. Usa grados en tu calculadora.`, `Choose and fix an angle θ yourself. The initial speed is isolated as follows:
+Usa grados en tu calculadora.`, `Choose and fix an angle θ yourself. The initial speed is isolated as follows:
 v₀ = √[(${p.gravity}·${D}²) / (2·cos²(θ)·(${D}·tan(θ) − (${dy})))]
-Then check E = ½·${mass}·v₀² ≤ ${p.maxEnergy} J. If it exceeds the limit, choose a smaller mass. Set your calculator to degrees.`);
+Set your calculator to degrees.`);
     }
     if (room.roulette) {
       const q = roulette.current;

@@ -137,7 +137,7 @@ window.EscapeRenderer = class {
           c.fillStyle='#dfcb95';for(const x of [-72,62])c.fillRect(x,-12-lift,10,22);
           if(recoil){c.strokeStyle='#fff1b1';c.lineWidth=4;c.beginPath();c.arc(0,-42-lift,35,0,Math.PI*2);c.stroke();}c.restore();
         }
-        c.fillStyle='#c4d7ef';c.font='10px Georgia';c.textAlign='center';c.fillText(lab.destroyed?'SOBRECARGA':'TORRETA PRISMA · 200 J',0,59);c.restore();
+        c.fillStyle='#c4d7ef';c.font='10px Georgia';c.textAlign='center';c.fillText(lab.destroyed?'SOBRECARGA':'TORRETA PRISMA',0,59);c.restore();
         this.cannonBounds={x:cx-115*scale,y:cy-165*scale,w:230*scale,h:225*scale};
         if(!opened&&!lab.destroyed){
           const label=I18n.t('Acércate y pulsa E'),font=Math.max(12,Math.min(19,scale*16)),pad=12;
