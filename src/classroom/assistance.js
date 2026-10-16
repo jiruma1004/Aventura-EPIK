@@ -65,11 +65,11 @@ window.EpikSolutions = {
     if (room.physics) {
       const p=lab.room.physics,D=(p.targetX-p.originX)*p.metersPerCell,dy=p.targetHeight-p.height;
       const mass=lab.loaded?.mass ?? lab.ammo[lab.selected ?? 0].mass;
-      return say(`Prueba con θ = 45°. Despeja v₀ y calcula:
-${dy} = ${D}·tan(45°) − (${p.gravity}·${D}²)/(2·v₀²·cos²(45°))
-Después comprueba E = ½·${mass}·v₀² ≤ ${p.maxEnergy} J. Si lo supera, elige una masa menor. Usa grados en la calculadora. Tú calculas la rapidez y realizas el disparo.`, `Try θ = 45°. Solve for v₀ and calculate:
-${dy} = ${D}·tan(45°) − (${p.gravity}·${D}²)/(2·v₀²·cos²(45°))
-Then check E = ½·${mass}·v₀² ≤ ${p.maxEnergy} J. If it exceeds the limit, choose a smaller mass. Set your calculator to degrees. Calculate the speed yourself and fire.`);
+      return say(`Hay dos incógnitas: θ y v₀. Elige y fija tú un ángulo θ; después despeja v₀ con los datos del blanco:
+${dy} = ${D}·tan(θ) − (${p.gravity}·${D}²)/(2·v₀²·cos²(θ))
+Después comprueba E = ½·${mass}·v₀² ≤ ${p.maxEnergy} J. Si lo supera, elige una masa menor. Usa grados en la calculadora. Si no obtienes una rapidez real y positiva, revisa el ángulo elegido. Tú calculas la rapidez y realizas el disparo.`, `There are two unknowns: θ and v₀. Choose and fix an angle θ yourself, then solve for v₀ using the target data:
+${dy} = ${D}·tan(θ) − (${p.gravity}·${D}²)/(2·v₀²·cos²(θ))
+Then check E = ½·${mass}·v₀² ≤ ${p.maxEnergy} J. If it exceeds the limit, choose a smaller mass. Set your calculator to degrees. If you do not obtain a real, positive speed, reconsider your chosen angle. Calculate the speed yourself and fire.`);
     }
     if (room.roulette) {
       const q = roulette.current;
