@@ -25,3 +25,18 @@ for(let attempt=1;attempt<=33;attempt++){
  }
 }
 console.log('PASS: 33 consecutive misses cycle the target every third shot; isolated speed formula hits at three chosen angles.');
+
+// Substitute the validator's physical answers into the equations actually displayed.
+// This catches transcription/sign errors when simplifying the ten guided setups.
+const rouletteVariables={1:['d','t'],2:['t','x'],3:['v','h'],4:['t','R'],5:['y','v_y'],6:['h_max','t'],7:['D','v_media'],8:['θ₁','θ₂'],9:['v','Δx'],10:['t','v']};
+for(const q of w.PHYSICS_PROBLEMS){
+ const vars=Object.fromEntries(rouletteVariables[q.id].map((name,i)=>[name,q.fields[i][2]]));
+ const evaluate=side=>{
+  const expr=side.replace(new RegExp(Object.keys(vars).sort((a,b)=>b.length-a.length).join('|'),'g'),name=>'('+vars[name]+')').replaceAll('·','*').replaceAll('−','-').replaceAll('²','**2').replaceAll('°','').replace(/(\d|\))\(/g,'$1*(');
+  return Function('sen','return ('+expr+')')(degrees=>Math.sin(degrees*Math.PI/180));
+ };
+ for(const line of w.EpikSolutions.rouletteSetups[q.id].split('\n')){
+  const [left,right]=line.split(';')[0].split('=');assert(Math.abs(evaluate(left)-evaluate(right))<1e-4,'Simplified roulette equation '+q.id+': '+line);
+ }
+}
+console.log('PASS: all 20 simplified roulette equations agree with the ten challenges’ validated answers.');

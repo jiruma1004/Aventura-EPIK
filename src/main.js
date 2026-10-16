@@ -78,7 +78,7 @@ if(arrival.active)arrival.finish();cinematics.close();measurement.reset(rooms[i]
  cannon.load(room);document.querySelector('#trajectory-toggle').hidden=!room.physics;lab.hologram.hide();document.querySelector('#roulette-panel').hidden=true;
  document.querySelector('.scene-layout').classList.remove('has-station');document.querySelector('#equipment').textContent=room.trial?'VERDADERO O FALSO':room.measurement?'REGLAS · ÁREA E INCERTIDUMBRE':room.physics?'CAÑÓN ASTRAL':room.roulette?'MESA DEL DESTINO':room.conceptual?'LABERINTO CONCEPTUAL':room.corridor?'SALTO Y SPRINT':room.boss?'DOS LÁSERES · DOS RAÍCES':'CONTROL DE VUELO';
 
- if(room.physics)lab.reset(room);if(room.roulette)roulette.reset();
+ if(room.physics)lab.reset(room);if(room.roulette){roulette.reset();roulette.syncReset(classroom.session.state(room.id));}
  boss=room.boss?new EricEncounter(bossEvent):null;if(boss)boss.canFire=()=>canPlay()&&boss.active===boss.near(player,renderer,rooms[index],opened);
  trial=room.trial?new ApproachTrial(room,trialEvent):null;room.approach=trial;
  corridor=room.corridor?new RelaxCorridor(corridorEvent):null;
@@ -338,7 +338,7 @@ function restoreRecovery(saved,away) {
 }
 
 classroom=new EpikClassroom(ADVENTURE_ORDER,()=>({room:rooms[index],lab,maze,roulette,boss,trial,ignitia,opened}),()=>canPlay());
-document.querySelector('#reset-lab').onclick=()=>load(index);document.querySelector('#reset-roulette').onclick=()=>load(index);load(rooms.findIndex(r=>r.trial),'new');mission.notify();document.querySelector('#adventure-intro').showModal();Sound.enable({automatic:true});requestAnimationFrame(tick);
+document.querySelector('#reset-lab').onclick=()=>load(index);document.querySelector('#reset-roulette').onclick=()=>{if(!rooms[index].roulette||!roulette.requestReset())return;classroom.session.event('roulette_reset');load(index,classroom.session.preview?'preview':'transition');recovery?.save();};load(rooms.findIndex(r=>r.trial),'new');mission.notify();document.querySelector('#adventure-intro').showModal();Sound.enable({automatic:true});requestAnimationFrame(tick);
 recovery=new EpikRecovery({capture:captureRecovery,restore:restoreRecovery,reset:()=>{
  StoryRoute.reset();companions.chaseAnnounced=false;classroom.newSession();classroom.session.studentName='';
  mission.state='ready';mission.remaining=ADVENTURE_CONFIG.durationSeconds;mission.deadline=null;mission.pausedAt=null;

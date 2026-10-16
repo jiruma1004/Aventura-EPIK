@@ -36,18 +36,19 @@ window.EpikSolutions = {
     }
     return null;
   },
-  // Final substitution only: answer keys remain in the validator, not in this panel.
+  // Operaciones intermedias resueltas; quedan los despejes, nunca las respuestas.
+  // Los coeficientes trigonométricos se conservan con seis decimales.
   rouletteSetups: {
-    1: 'd = 27·0.65 + 27²/(2·4.5)\nt = 0.65 + 27/4.5',
-    2: '0.6t² + 4t − 60 = 0; t > 0\nx = 60 + 4t',
-    3: '12 = 0.40v + ½·9.81·0.40²\nv² = 2·9.81·h',
-    4: '0 = 35 + (22·sen(32°))t − ½·9.81·t²; t > 0\nR = (22·cos(32°))t',
-    5: 't = 30/(25·cos(40°))\ny = (25·sen(40°))t − ½·9.81·t²\nv_y = 25·sen(40°) − 9.81t',
-    6: 'v₀ = 3 + 7\nh_max = 20 + v₀²/(2·9.81)\n0 = 20 + v₀t − ½·9.81·t²; t > 0',
-    7: 'v = 2.4·8\nD = ½·2.4·8² + v·5 + v²/(2·3.2)\nT = 8 + 5 + v/3.2\nv_media = D/T',
-    8: 'sen(2θ) = 9.81·40/24²\nθ₁ = ½·arcsen(9.81·40/24²)\nθ₂ = 90° − θ₁',
-    9: 'v = 0 + 2·6\nΔx = 0·6 + ½·2·6²',
-    10: '19.62 = ½·9.81·t²; t > 0\nv = 9.81t'
+    1: '4.5·(d − 17.55) = 364.5\n4.5·(t − 0.65) = 27',
+    2: '0.6t² + 4t − 60 = 0; t > 0\nx − 4t = 60',
+    3: '0.40v = 11.2152\n19.62h = v²',
+    4: '4.905t² − 11.658224t − 35 = 0; t > 0\nR − 18.657058t = 0',
+    5: 'y + 12.036316 = 25.172989\nv_y + 15.367255 = 16.06969',
+    6: '19.62·(h_max − 20) = 100\n4.905t² − 10t − 20 = 0; t > 0',
+    7: 'D − 76.8 − 96 = 57.6\n19·v_media = D',
+    8: 'sen(2θ₁) = 0.68125; 0° < θ₁ < 45°\nθ₁ + θ₂ = 90°',
+    9: 'v/6 = 2\nΔx/18 = 2',
+    10: '4.905t² = 19.62; t > 0\nv − 9.81t = 0'
   },
   text(g) {
     const {
@@ -75,7 +76,7 @@ Then check E = ½·${mass}·v₀² ≤ ${p.maxEnergy} J. If it exceeds the limit
       const q = roulette.current;
       if(!q)return say('Primero gira la rueda.','Spin the wheel first.');
       const setup=this.rouletteSetups[q.id];
-      return say('Los datos ya están sustituidos. Despeja las incógnitas y calcula los resultados; conserva decimales hasta el final. Usa grados para los ángulos.\n', 'The values are substituted. Solve for the unknowns and calculate the results; keep precision until the end. Use degrees for angles.\n')+setup;
+      return say('Ya hice las operaciones intermedias. Solo te toca despejar los valores pedidos, en el orden de las ecuaciones. Conserva decimales hasta el final y usa grados en tu calculadora.\n', 'The intermediate calculations are done. Isolate the requested values in the order shown. Keep precision until the end and set your calculator to degrees.\n')+setup;
     }
     if (room.conceptual) {
       const q = maze.question;

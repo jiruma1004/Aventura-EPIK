@@ -10,7 +10,7 @@ window.RoomCompanions=class {
   const bubble=document.querySelector('#question-content');
   bubble.append(document.querySelector('#roulette-status'),document.querySelector('#problem-card'));
   const panel=document.querySelector('#answer-console');
-  for(const id of ['answer-form','answer-feedback','hint-details','solution-details'])panel.append(document.getElementById(id));
+  for(const id of ['answer-form','answer-feedback','solution-details'])panel.append(document.getElementById(id));
   panel.append(document.querySelector('.source-note'),document.querySelector('#reset-roulette'));
   const credits=document.createElement('details');credits.innerHTML='<summary>Acerca de estos problemas</summary>';credits.append(document.querySelector('.source-note'));panel.append(credits);
   document.querySelector('#question-fold').setAttribute('aria-label','Minimizar o mostrar la pregunta');
