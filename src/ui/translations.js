@@ -1,5 +1,5 @@
 window.ENGLISH={
-  "Bienvenido a Astralia. Soy EPI Paola y voy a acompañarte. Antes de cruzar las puertas, hay algo que debes saber: todo empezó con el Dr. Eric… y unas gráficas sin título.": "Welcome to Astralia. I’m EPI Paola, and I’ll be your guide. Before you cross the gates, there is something you should know: it all began with Dr. Eric… and some untitled graphs.",
+  "Bienvenido al reino de Epithea. Soy EPI Paola y voy a acompañarte. Antes de cruzar las puertas, hay algo que debes saber: todo empezó con el Dr. Eric… y unas gráficas sin título.": "Welcome to the kingdom of Epithea. I’m EPI Paola, and I’ll be your guide. Before you cross the gates, there is something you should know: it all began with Dr. Eric… and some untitled graphs.",
   "El Dr. Eric era un químico respetado. Hasta que se cansó de corregir gráficas sin título. Ahora ha tomado el castillo y prepara una máquina capaz de distorsionar el tiempo y el espacio. Sí… se lo tomó bastante mal.": "Dr. Eric was a respected chemist. Until he grew tired of marking untitled graphs. Now he has taken the castle and is building a machine that can distort time and space. Yes… he took it rather badly.",
   "Tenemos una hora para detenerlo. El reloj empezará cuando entres al mundo. Lleva tus apuntes contigo: observar, calcular y volver a intentar será más útil que correr sin mirar.": "We have one hour to stop him. The clock starts when you enter the world. Keep your notes close: observing, calculating and trying again will help more than running blindly.",
   "Si te atoras, pulsa H o toca mi globo de ayuda. Te daré una pista para empezar. Respira, revisa tus cálculos y confía en lo que sabes. Ah… esta vez sí ponles título a tus gráficas.": "If you get stuck, press H or tap my help bubble. I’ll give you a hint to get started. Take a breath, check your calculations and trust what you know. Oh… do title your graphs this time.",
@@ -1093,4 +1093,11 @@ Object.assign(window.ENGLISH, {
  'Lee la afirmación y salta a Verdadero o Falso. Shift para correr, Espacio para saltar. Un error rompe la plataforma; regresas al último tablón correcto y conservas tus aciertos. Pulsa H si necesitas una pista.':'Read the statement and jump to True or False. Shift to run, Space to jump. A wrong answer breaks the plank; return to the last correct plank and keep your progress. Press H for a hint.',
  'Acércate y pulsa E':'Approach and press E',
  'CASTILLO':'CASTLE'
+});
+
+Object.assign(ENGLISH, {
+"Aquí José Luis. Prueba una trayectoria en la consola: ajusta rapidez y ángulo para acercarte a Eric. Después afina el retraso y el tiempo de vuelo. ¡Los dos cohetes deben llegar al mismo punto al mismo tiempo!":"José Luis here. Test a trajectory at the console: adjust speed and angle to approach Eric. Then fine-tune the delay and flight time. Both rockets must reach the same point at the same time!",
+"¡Ojo! Esquiva las ecuaciones y busca tu siguiente apoyo antes de saltar. ¡Tú puedes!":"Watch out! Dodge the equations and find your next foothold before jumping. You can do it!",
+"¡Vamos a cortar su soporte! Iguala las dos ecuaciones y resuelve para x. Sustituye cada raíz en la recta para hallar y. Programa el punto con x negativa en el láser izquierdo y el de x positiva en el derecho. Acércate a cada láser y pulsa E, o toca para interactuar. ¡No te quedes sobre los charcos!":"Let’s cut his support! Set the two equations equal and solve for x. Substitute each root into the line to find y. Enter the point with negative x at the left laser and the positive one at the right laser. Approach each laser and press E, or tap to interact. Stay off the puddles!",
+" Elige la puerta que corresponda.":" Choose the matching door."
 });
