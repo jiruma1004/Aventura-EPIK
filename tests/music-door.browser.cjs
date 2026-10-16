@@ -22,7 +22,7 @@ const assert=require('node:assert/strict');
    await page.evaluate(kind=>load(rooms.findIndex(r=>r[kind])),kind);assert.equal(await page.evaluate(()=>Sound.sceneTrack),track);
   }
   for(const name of ['grassland','ceremony','seal','maze']){
-   const result=await page.evaluate(async name=>{const a=Sound.tracks[name];await new Promise((resolve,reject)=>{if(a.readyState>=1)return resolve();a.addEventListener('loadedmetadata',resolve,{once:true});a.addEventListener('error',()=>reject(new Error(name+' decode error')),{once:true});a.load()});return {duration:a.duration,loop:a.loop,src:a.src};},name);
+   const result=await page.evaluate(async name=>{const a=Sound.prepare(name);await new Promise((resolve,reject)=>{if(a.readyState>=1)return resolve();a.addEventListener('loadedmetadata',resolve,{once:true});a.addEventListener('error',()=>reject(new Error(name+' decode error')),{once:true});a.load()});return {duration:a.duration,loop:a.loop,src:a.src};},name);
    assert(result.duration>0);assert(result.loop);if(name==='grassland')assert(result.src.endsWith('/legende-du-royaume.mp3'));
   }
   for(const id of ['ceremonia-ignitia','ceremonia-karla']){

@@ -8,3 +8,6 @@
 @media(max-width:700px){.control-tutorial-choice[open]{display:block;padding:18px}.tutorial-paola{display:flex;align-items:center;gap:12px;text-align:left}.tutorial-paola canvas{width:72px;height:72px;margin:0}.control-tutorial-choice h2{font-size:25px}.control-tutorial-choice p:not(.eyebrow){font-size:15px}.control-tutorial{left:10px;top:10px;width:min(330px,calc(100% - 20px));padding:12px 15px}.control-tutorial h3{font-size:21px}.control-tutorial>p:not(.eyebrow){font-size:14px}.touch-mode .control-tutorial{width:min(300px,42%);max-height:calc(100% - 20px);overflow:auto}.touch-mode .control-tutorial h3{font-size:18px;margin:5px 0}.touch-mode .control-tutorial>p:not(.eyebrow),.touch-mode .tutorial-finish p{font-size:12px;line-height:1.35}.touch-mode .tutorial-status{font-size:10px;margin-top:8px}.touch-mode .tutorial-cancel{margin-top:7px}}
 @media(orientation:portrait) and (max-width:700px){.touch-mode .control-tutorial{width:calc(100% - 20px);max-height:42%;}.touch-mode .control-tutorial-choice .tutorial-choice-actions button{width:100%}}
 @media(prefers-reduced-motion:reduce){.tutorial-pulse{animation:none}}
+
+/* Correr tiene su propia práctica y permanece accesible en la zona de acciones. */
+.control-tutorial-active.touch-mode:has(#control-tutorial[data-step="run"]) #touch-run{filter:brightness(1.45);box-shadow:0 0 0 4px #ffe094,0 0 25px #f5d36ab8}

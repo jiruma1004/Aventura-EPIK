@@ -20,6 +20,6 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
  const balance=await p.evaluate(()=>{
  const result=[];for(const mode of ['normal','easy']){EpikDifficulty.select(mode);load(rooms.findIndex(r=>r.trial),'preview');const tile=trial.platforms()[0];const dimensions=[tile.w,tile.h];load(rooms.findIndex(r=>r.corridor),'preview');result.push({dimensions,hitbox:corridor.hitboxScale});}
  EpikDifficulty.select('normal');let hits=0;const w=new EricFlameWave(type=>{if(type==='hit')hits++});w.phase='wave';for(let i=0;i<50;i++)w.tick(.1,{x:10,jumpHeight:0});return {result,hits};
- });assert.deepEqual(balance.result[0].dimensions,[1.35,1.26]);assert.deepEqual(balance.result[1].dimensions,[1.5,1.4]);assert.equal(balance.result[0].hitbox,.9);assert.equal(balance.result[1].hitbox,1);assert.equal(balance.hits,1);
+ });assert.deepEqual(balance.result[0].dimensions,[1.35,1.26]);balance.result[1].dimensions.forEach((v,i)=>assert(Math.abs(v-[1.575,1.47][i])<1e-10));assert.equal(balance.result[0].hitbox,.9);assert.equal(balance.result[1].hitbox,1);assert.equal(balance.hits,1);
  console.log('PASS: opaque green nova, synchronized damaging wave, normal-only hitbox/planks, cleanup/reset, 10s maze grace and easy spawn interval.');
 }finally{await b.close()}})().catch(e=>{console.error(e);process.exit(1)});

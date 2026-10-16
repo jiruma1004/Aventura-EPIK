@@ -41,7 +41,7 @@ window.ApproachTrial=class {
   c.restore();
  }
  get question(){return APPROACH_QUESTIONS[Math.min(this.stage,4)];}
- platforms(){const scale=EpikDifficulty.easy?1:.9;return this.tiles??=APPROACH_QUESTIONS.flatMap((q,stage)=>[true,false].map((answer,lane)=>({stage,answer,x:5+stage*2.3+1.5*(1-scale)/2,y:(lane?4.05:2.25)+1.4*(1-scale)/2,w:1.5*scale,h:1.4*scale,key:stage+':'+answer})));}
+ platforms(){const scale=EpikDifficulty.easy?1.05:.9;return this.tiles??=APPROACH_QUESTIONS.flatMap((q,stage)=>[true,false].map((answer,lane)=>({stage,answer,x:5+stage*2.3+1.5*(1-scale)/2,y:(lane?4.05:2.25)+1.4*(1-scale)/2,w:1.5*scale,h:1.4*scale,key:stage+':'+answer})));}
  platformAt(x,y){return this.platforms().find(p=>x>=p.x&&x<=p.x+p.w&&y>=p.y&&y<=p.y+p.h);}
  supports(x,y){if(x<4.2||x>=16.7)return true;const p=this.platformAt(x,y);return !!p&&!this.broken.has(p.key);}
  land(player){if(this.finished||player.jumpHeight>0)return;const p=this.platformAt(player.x,player.y);if(!p||p.stage<this.stage)return;

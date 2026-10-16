@@ -12,3 +12,9 @@
 
 .prologue .story-portrait.full-body{background:transparent;border:0;padding:0}.prologue .full-body canvas{display:block;width:224px;height:auto;margin:auto}
 @media(max-width:750px){.prologue .story-portrait.full-body{width:140px}.prologue .full-body canvas{width:136px;height:auto}}
+
+/* El periódico completo ya contiene sus titulares y conserva sus colores originales. */
+.prologue .story-portrait.missing-newspaper{padding:0;border:0;background:none;box-shadow:none;transform:none}
+.prologue .missing-newspaper canvas{width:100%;height:auto;filter:none;border:0;outline:0;background:transparent;image-rendering:auto}
+.prologue .missing-newspaper #story-person{display:none}
+@media(max-width:750px){.prologue .story-portrait.missing-newspaper{width:168px;padding:0}}

@@ -226,7 +226,7 @@ function tick(time){const simulationActive=ignitia.simulator.running&&ignitia.si
  touch.sync();
  if(canPlay()){player.angle+=((keys.has('arrowright')?1:0)-(keys.has('arrowleft')?1:0))*dt*1.8;const f=(keys.has('w')?1:0)-(keys.has('s')?1:0)+touch.forward,s=(keys.has('d')?1:0)-(keys.has('a')?1:0)+touch.strafe,speed=(boss?.supernova.blind?0:dt)*2.3*((keys.has('shift')||touch.sprinting)?1.55:1)/Math.max(1,Math.hypot(f,s));const nx=player.x+(Math.cos(player.angle)*f-Math.sin(player.angle)*s)*speed,ny=player.y+(Math.sin(player.angle)*f+Math.cos(player.angle)*s)*speed;
  if(walkable(nx,player.y))player.x=nx;if(walkable(player.x,ny))player.y=ny;
- controlTutorial?.tick(player);
+ controlTutorial?.tick(player,keys.has('shift')||touch.sprinting);
  // Altura en celdas (2 m en Galileo): salto corto, sin doble salto ni apoyo sobre el vacío.
  if(player.jumpHeight>0||player.jumpVelocity>0){player.jumpVelocity-=4.905*dt;player.jumpHeight=Math.max(0,player.jumpHeight+player.jumpVelocity*dt);if(player.jumpHeight===0)player.jumpVelocity=0;}
  if(trial&&player.jumpHeight===0)trial.land(player);
