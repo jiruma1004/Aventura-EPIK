@@ -36,6 +36,19 @@ window.EpikSolutions = {
     }
     return null;
   },
+  // Final substitution only: answer keys remain in the validator, not in this panel.
+  rouletteSetups: {
+    1: 'd = 27·0.65 + 27²/(2·4.5)\nt = 0.65 + 27/4.5',
+    2: '0.6t² + 4t − 60 = 0; t > 0\nx = 60 + 4t',
+    3: '12 = 0.40v + ½·9.81·0.40²\nv² = 2·9.81·h',
+    4: '0 = 35 + (22·sen(32°))t − ½·9.81·t²; t > 0\nR = (22·cos(32°))t',
+    5: 't = 30/(25·cos(40°))\ny = (25·sen(40°))t − ½·9.81·t²\nv_y = 25·sen(40°) − 9.81t',
+    6: 'v₀ = 3 + 7\nh_max = 20 + v₀²/(2·9.81)\n0 = 20 + v₀t − ½·9.81·t²; t > 0',
+    7: 'v = 2.4·8\nD = ½·2.4·8² + v·5 + v²/(2·3.2)\nT = 8 + 5 + v/3.2\nv_media = D/T',
+    8: 'sen(2θ) = 9.81·40/24²\nθ₁ = ½·arcsen(9.81·40/24²)\nθ₂ = 90° − θ₁',
+    9: 'v = 0 + 2·6\nΔx = 0·6 + ½·2·6²',
+    10: '19.62 = ½·9.81·t²; t > 0\nv = 9.81t'
+  },
   text(g) {
     const {
         room,
@@ -50,12 +63,19 @@ window.EpikSolutions = {
       say = (a, b) => es ? a : b;
     if (room.trial) return say('La respuesta es ', 'The answer is ') + (trial.question.answer ? say('Verdadero.', 'True.') : say('Falso.', 'False.')) + ' ' + I18n.t(trial.question.hint) + say(' Salta tú a esa plataforma.', ' Jump onto that platform yourself.');
     if (room.physics) {
-      const q = this.cannon(lab);
-      return say(`Blanco a ${q.distance} m y ${q.height} m de altura. Usa elevación 45°, giro 0° y rapidez ${q.speed.toFixed(3)} m/s. Con ${q.mass} kg, E = ½mv² = ${q.energy.toFixed(2)} J. `, `Target: ${q.distance} m away, ${q.height} m high. Use elevation 45°, bearing 0°, speed ${q.speed.toFixed(3)} m/s. With ${q.mass} kg, E = ½mv² = ${q.energy.toFixed(2)} J. `) + (q.overload ? say(`Esa masa sobrecarga la torreta: elige el orbe Saphir de 0.5 kg y conserva la rapidez; con ese orbe usa ${(0.25 * q.speed * q.speed).toFixed(2)} J.`, `That mass overloads the cannon: choose the 0.5 kg Saphir orb and keep the speed; with that orb use ${(0.25 * q.speed * q.speed).toFixed(2)} J.`) : say('Carga el orbe y realiza el disparo.', 'Load the orb and fire.'));
+      const p=lab.room.physics,D=(p.targetX-p.originX)*p.metersPerCell,dy=p.targetHeight-p.height;
+      const mass=lab.loaded?.mass ?? lab.ammo[lab.selected ?? 0].mass;
+      return say(`Prueba con θ = 45°. Despeja v₀ y calcula:
+${dy} = ${D}·tan(45°) − (${p.gravity}·${D}²)/(2·v₀²·cos²(45°))
+Después comprueba E = ½·${mass}·v₀² ≤ ${p.maxEnergy} J. Si lo supera, elige una masa menor. Usa grados en la calculadora. Tú calculas la rapidez y realizas el disparo.`, `Try θ = 45°. Solve for v₀ and calculate:
+${dy} = ${D}·tan(45°) − (${p.gravity}·${D}²)/(2·v₀²·cos²(45°))
+Then check E = ½·${mass}·v₀² ≤ ${p.maxEnergy} J. If it exceeds the limit, choose a smaller mass. Set your calculator to degrees. Calculate the speed yourself and fire.`);
     }
     if (room.roulette) {
       const q = roulette.current;
-      return q ? I18n.t(q.solution) + '\n' + q.fields.map(f => I18n.t(f[0]) + ': ' + Number(f[2].toFixed(4)) + ' ' + f[1]).join('\n') : say('Primero gira la rueda.', 'Spin the wheel first.');
+      if(!q)return say('Primero gira la rueda.','Spin the wheel first.');
+      const setup=this.rouletteSetups[q.id];
+      return say('Los datos ya están sustituidos. Despeja las incógnitas y calcula los resultados; conserva decimales hasta el final. Usa grados para los ángulos.\n', 'The values are substituted. Solve for the unknowns and calculate the results; keep precision until the end. Use degrees for angles.\n')+setup;
     }
     if (room.conceptual) {
       const q = maze.question;
@@ -66,7 +86,11 @@ window.EpikSolutions = {
     if (room.corridor) return say('En la lava puedes seguir los apoyos de la izquierda: primero el central izquierdo, luego los dos cercanos al muro izquierdo y después vuelve hacia el centro para salir. Corre con Shift, suelta el avance al aterrizar y salta con Espacio. Los símbolos avanzan rectos: cambia de carril.', 'Across the lava, follow the left supports: start on the middle-left stone, then the two near the left wall, then return towards the center to exit. Sprint with Shift, release forward movement on landing, and jump with Space. Symbols travel straight: change lanes.');
     if (room.boss) {
       const s = boss.puzzle.support;
-      return say('Iguala ', 'Set ') + s.parabolaText + ' = ' + s.lineText + say('. Las raíces son ', '. The roots are ') + s.intersections.map(([x, y], i) => (i === 0 ? say('láser izquierdo', 'left laser') : say('láser derecho', 'right laser')) + `: (${x}, ${Number(y.toFixed(6))})`).join('; ') + say('. Sustituye cada x en la recta para obtener y. Introduce las coordenadas en cada láser.', '. Substitute each x in the line to get y. Enter the coordinates at each laser.');
+      const sum=s.intersections[0][0]+s.intersections[1][0],constant=s.intersections[0][0]*s.intersections[1][0];
+      const term=(n,variable='')=>(n<0?' − ':' + ')+Math.abs(n)+variable;
+      return say('Iguala las dos curvas: ', 'Set the two curves equal: ')+s.parabolaText+' = '+s.lineText+'\n'+say(`Multiplica por ${s.d} y reúne términos:
+`, `Multiply by ${s.d} and collect terms:
+`)+'x²'+term(-sum,'x')+term(constant)+' = 0\n'+say('Resuelve esta cuadrática: puedes factorizar o usar la fórmula general. Sustituye cada raíz en y = ', 'Solve this quadratic by factoring or using the quadratic formula. Substitute each root into y = ')+s.lineText+'\n'+say('Calcula ambas coordenadas. La raíz negativa corresponde al láser izquierdo y la positiva al derecho.', 'Calculate both coordinates. The negative root belongs to the left laser and the positive root to the right laser.');
     }
     const q = this.intercept(ignitia.simulator);
     return q ? say(`Solución actualizada para t₀ = ${q.epoch.toFixed(1)} s: v₀ = ${q.speed} km/s, θ = ${q.angle}°, retraso = 0 s y vuelo = ${q.duration} s. Usa x = v₀ cosθ τ e y = v₀ senθ τ − ½gτ². Eric sigue avanzando: esta propuesta se recalcula mientras lees. Introduce los valores y ensaya de inmediato.`, `Updated solution for t₀ = ${q.epoch.toFixed(1)} s: v₀ = ${q.speed} km/s, θ = ${q.angle}°, delay = 0 s, flight = ${q.duration} s. Use x = v₀ cosθ τ and y = v₀ sinθ τ − ½gτ². Eric keeps moving: these values update while you read. Enter them and run the trial promptly.`) : say('Ya no queda tiempo para interceptarlo con los límites disponibles. Tras el game over, vuelve a intentarlo desde el punto seguro.', 'There is not enough time for an intercept within the available limits. After game over, try again from the checkpoint.');
@@ -79,8 +103,8 @@ window.EpikAssistance = class {
     this.context = getContext;
     this.revealed = false;
     this.elapsed = 0;
-    document.querySelector('.controls').insertAdjacentHTML('beforeend', '<button id="extra-help" hidden title="Revelar la solución limita esta sala a una estrella"><img src="assets/ui/palma-ia.webp" width="52" height="52" alt="" aria-hidden="true"><span><b>Palma IA</b><small>Máximo 1 estrella</small></span></button>');
-    document.querySelector('.scene-view').insertAdjacentHTML('beforeend', '<section id="extra-help-panel" class="world-console" hidden aria-label="Solución automática"><header id="extra-help-handle" tabindex="0" aria-label="Mover solución: arrastra o usa las flechas"><strong>Palma IA · Solución</strong><small>Arrastra para mover · Ajusta desde la esquina</small></header><button id="extra-help-close" class="bubble-fold" aria-label="Cerrar ayuda">×</button><p id="extra-help-copy"></p><pre id="extra-help-answer"></pre></section>');
+    document.querySelector('.controls').insertAdjacentHTML('beforeend', '<button id="extra-help" hidden title="Consultar el desarrollo limita esta sala a una estrella"><img src="assets/ui/palma-ia.webp" width="52" height="52" alt="" aria-hidden="true"><span><b>Palma IA</b><small>Máximo 1 estrella</small></span></button>');
+    document.querySelector('.scene-view').insertAdjacentHTML('beforeend', '<section id="extra-help-panel" class="world-console" hidden aria-label="Desarrollo guiado"><header id="extra-help-handle" tabindex="0" aria-label="Mover desarrollo: arrastra o usa las flechas"><strong>Palma IA · Desarrollo guiado</strong><small>Arrastra para mover · Ajusta desde la esquina</small></header><button id="extra-help-close" class="bubble-fold" aria-label="Cerrar ayuda">×</button><p id="extra-help-copy"></p><pre id="extra-help-answer"></pre></section>');
     this.button = document.querySelector('#extra-help');
     this.panel = document.querySelector('#extra-help-panel');
     this.handle = document.querySelector('#extra-help-handle');
@@ -130,7 +154,7 @@ window.EpikAssistance = class {
     if (!hidden) {
       const trial = this.game().room.trial;
       this.button.querySelector('b').textContent = I18n.t('Palma IA');
-      this.button.title = I18n.t(trial ? 'Cruzar en tirolesa limita esta sala a una estrella' : 'Revelar la solución limita esta sala a una estrella');
+      this.button.title = I18n.t(trial ? 'Cruzar en tirolesa limita esta sala a una estrella' : 'Consultar el desarrollo limita esta sala a una estrella');
       const text = I18n.t(this.session.state(this.game().room.id).assisted ? '1 estrella · Palma IA' : 'Máximo 1 estrella');
       const label=this.button.querySelector('small');
       if(label.textContent!==text)label.textContent=text;
@@ -139,7 +163,7 @@ window.EpikAssistance = class {
   open() {
     if (!this.eligible() || !this.canUse?.() || !this.session.available(this.context().objective_id)) return;
     const context=this.context();
-    // The visible button states the penalty; one click reveals the answer.
+    // The visible button states the penalty; one click reveals the setup, never the final numeric answer.
     // assist() is idempotent: reopening never deducts another point.
     if (!this.session.assist(context, this.game().snapshot())) return;
     if (this.game().room.trial) {

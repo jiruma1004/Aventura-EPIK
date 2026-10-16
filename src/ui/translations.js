@@ -1101,3 +1101,10 @@ Object.assign(ENGLISH, {
 "¡Vamos a cortar su soporte! Iguala las dos ecuaciones y resuelve para x. Sustituye cada raíz en la recta para hallar y. Programa el punto con x negativa en el láser izquierdo y el de x positiva en el derecho. Acércate a cada láser y pulsa E, o toca para interactuar. ¡No te quedes sobre los charcos!":"Let’s cut his support! Set the two equations equal and solve for x. Substitute each root into the line to find y. Enter the point with negative x at the left laser and the positive one at the right laser. Approach each laser and press E, or tap to interact. Stay off the puddles!",
 " Elige la puerta que corresponda.":" Choose the matching door."
 });
+
+Object.assign(ENGLISH, {
+ 'Consultar el desarrollo limita esta sala a una estrella':'Viewing the worked setup limits this room to one star',
+ 'Desarrollo guiado':'Guided working',
+ 'Mover desarrollo: arrastra o usa las flechas':'Move working: drag or use the arrow keys',
+ 'Palma IA · Desarrollo guiado':'Palma AI · Guided working'
+});
