@@ -23,8 +23,8 @@ Solo se puede responder desde esa baldosa. Los tres retos son de elección múlt
    - Dron: componentes de velocidad a t=3. Solución (6,-2) m/s.
 
 Las voces se sortean independientemente para cada sello y se guardan: una
-estatua puede acertar o engañar en cualquier prueba. No se vuelven a sortear al
-fallar, reabrir o recuperar la partida. La inscripción advierte que hay que juzgar
+estatua puede acertar o engañar en cualquier prueba. Al fallar se elige otra pregunta y se asignan de nuevo las voces; reabrir o
+recuperar no las cambia. La inscripción advierte que hay que juzgar
 cada afirmación, sin anunciar quién es confiable. Los datos y la respuesta siguen
 siendo inequívocos; la ambigüedad está en la intención de los guardianes. Los errores mantienen los sellos previos.
 Tras un acierto, un botón separado presenta la siguiente pregunta; doble envío no
@@ -42,14 +42,14 @@ existente de una estrella para el corredor. Intentos y errores se registran por 
 los cálculos y respuestas pesan 80%, las muertes 20%. Una sola fila en el CSV.
 
 Guardado local existente de siete minutos: al entrar al jardín, pisar la baldosa,
-responder y abrir la puerta. Guarda sellos, asignación de voces por pregunta, variante, selección actual y avance
+responder y abrir la puerta. Guarda sellos, asignación de voces por pregunta, variantes, bolsas restantes, selección actual y avance
 de apertura. Una recuperación a mitad de apertura continúa desde allí, sin repetir
 respuestas. Compatibilidad con el guardado anterior: quien ya había completado el
 antiguo acertijo conserva el acceso; quien aún no lo hizo inicia los tres sellos.
 
 ## Arte y pruebas
 
-assets/garden: luis-sentinel.webp, rodrigo-sentinel.webp, fountain.webp, gate-frame.webp,
+assets/garden: luis-monument.webp, rodrigo-monument.webp, fountain.webp, gate-frame.webp,
 gate-leaves.webp, castle-16bit.webp. Todas son imágenes locales con alpha.
 Fuentes y prompts ImageGen en outputs/guardian-garden-2026-10-16/twin-guardians
 (del workspace). Puerta separada en marco y hojas mediante recorte técnico FFmpeg;
@@ -63,3 +63,20 @@ local-transitions.browser.cjs y recovery.browser.cjs cubren las regresiones rele
 Ambas estatuas levantan la palma izquierda hacia delante, como los Argonath. Se acercaron 0.95 unidades al plano de
 la puerta y 0.60 al centro; conservan libre el paso central y sus colisiones usan
 las mismas coordenadas que el dibujo. Sprites WebP 384x576 con transparencia.
+
+Volumen visual: estatuas de 3.3294 unidades sobre un basamento de 0.16: altura
+total 3.4894: figura reducida un 7% respecto a la versión monumental;
+sigue siendo más alta que la puerta (3.25). Escala proporcional, caras del basamento
+proyectadas en perspectiva y sombra de contacto.
+Globos con letra de 18px (15px en móvil) y mayor anchura. Se anclan a la nueva altura y al iniciar el diálogo la cámara mira
+ligeramente hacia arriba (pitch 0.24). El halo verde de divergencia es una
+textura Canvas de 384x320 creada una vez y dibujada detrás del castillo; no modifica
+el arte aprobado ni añade descargas.
+
+## Banco por sello
+Cada sello tiene tres preguntas: tres de juicio conceptual, tres sobre magnitudes
+y movimiento, y las tres variantes de cálculo originales. Un error selecciona
+una distinta de la bolsa restante, limpia la respuesta y conserva los sellos.
+El identificador de objetivo es estable por sello; las variantes se registran
+por separado, sin reiniciar el conteo de fallos ni el umbral de Palma. Guardado v4
+preserva la bolsa; v1–v3 conservan el avance y reciben bolsas compatibles.

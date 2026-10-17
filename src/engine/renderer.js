@@ -5,6 +5,7 @@ window.EscapeRenderer = class {
     for(let i=0;i<900;i++){const x=(i*173)%512,y=(i*97+Math.floor(i/7)*31)%512;m.fillStyle=['#42613a99','#67804c88','#1a3026aa'][i%3];m.fillRect(x,y,3+i%13,5+i%27);}this.art.moss=moss; }
   decorate(room,hit,x,top,height,player){
     RoomDetails.wall(this,room,hit,x,top,height,player);
+    if(room.boss)EricArena.wall(this,room,hit,x,top,height);
     if(room.conceptual&&!room.maze?.dungeon&&hit.axis==='x'&&hit.cx===44&&hit.py>=7.95&&hit.py<8.95&&this.choiceMeme){
       // Cache pequeña creada una sola vez. Una tira por rayo, igual que los muros.
       const art=this.choiceMeme,u=hit.py-7.95,sourceX=Math.min(art.width-1,Math.floor(u*art.width));
@@ -58,8 +59,9 @@ window.EscapeRenderer = class {
           const tile=room.floorTile?room.floorTile(wx,wy):room.map[Math.floor(wy)]?.[Math.floor(wx)];
           if(room.trial){c.fillStyle=room.approach.color(wx,wy);}
           else if(room.lava?.contains(wx,wy)){c.fillStyle=room.lava.rayColor(player,Math.cos(player.angle)-Math.sin(player.angle)*lateral,Math.sin(player.angle)+Math.cos(player.angle)*lateral,depth,eye,time);}
-          else if(tile===3&&room.boss){const bridge=opened&&Math.floor(wy)===7;c.fillStyle=bridge?'#758c8b':((Math.floor(wx*3)+Math.floor(wy*3))%2?'#060c1c':'#091425');}
+          else if(tile===3&&room.boss){c.fillStyle=EricArena.pitColor(player,Math.cos(player.angle)-Math.sin(player.angle)*lateral,Math.sin(player.angle)+Math.cos(player.angle)*lateral,depth,eye,time,opened);}
           else if(tile===3){const bridge=opened&&Math.floor(wy)===3;if(bridge)c.fillStyle=wx%1<.08?'#a6d6f8':'#4b6586';else{const bx=(wx-(room.bridge.start+room.bridge.end)/2)/((room.bridge.end-room.bridge.start)*.367),by=(wy-3.5)/1.65,r=Math.hypot(bx,by),swirl=Math.sin(Math.atan2(by,bx)*3-r*25+time*.001);c.fillStyle=r<.53?'#010208':r<.62?'#c1a2e1':r<1.05&&swirl>.3?(r<.8?'#895d9c':'#504775'):'#070b18';}}
+          else if(room.boss)c.fillStyle=EricArena.floor(wx,wy);
           else if(room.environment?.shop)c.fillStyle=InteriorAtmosphere.shopFloor(wx,wy);
           else if(room.environment?.kind==='forest'){const noise=Math.sin(Math.floor(wx*9)*12.9898+Math.floor(wy*9)*78.233)*43758.5453,grain=noise-Math.floor(noise);c.fillStyle=grain>.85?'#405435':grain>.4?'#344a30':'#293f2c';}
           else if(room.guardian&&wx>=GUARDIAN_GARDEN.start)c.fillStyle=room.guardian.floor(wx,wy);

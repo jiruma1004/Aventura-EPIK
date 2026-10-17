@@ -1,9 +1,9 @@
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=require('node:assert/strict');
 (async()=>{const b=await chromium.launch({headless:true,executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});try{
 const p=await b.newPage({viewport:{width:1440,height:1000}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.addInitScript(()=>window.requestAnimationFrame=()=>0);await p.goto('http://127.0.0.1:8767/?dev=1');await p.evaluate(()=>{document.querySelector('#epik-dev')?.close();prologue.finish(true);mission.restart();classroom.session.start()});
-async function enter(calc,truth){await p.evaluate(({calc,truth})=>{classroom.newSession();classroom.session.start();load(rooms.findIndex(r=>r.corridor));document.querySelector('#maze-notice').hidden=true;Object.assign(corridor.guardian,{calculationId:calc,truthful:truth});Object.assign(player,{x:60,y:4.5,angle:0});corridor.tick(.01,player)},{calc,truth});assert(await p.locator('#guardian-panel').isHidden());await p.evaluate(()=>{Object.assign(player,{x:61.5,y:4.5});corridor.tick(.01,player)});assert(await p.locator('#guardian-panel').isVisible());}
+async function enter(calc,truth){await p.evaluate(({calc,truth})=>{classroom.newSession();classroom.session.start();load(rooms.findIndex(r=>r.corridor));document.querySelector('#maze-notice').hidden=true;Object.assign(corridor.guardian,{calculationId:calc,truthful:truth});corridor.guardian.questionBags[2]=GUARDIAN_QUESTIONS.map(q=>q.id).filter(id=>id!==calc);Object.assign(player,{x:60,y:4.5,angle:0});corridor.tick(.01,player)},{calc,truth});assert(await p.locator('#guardian-panel').isHidden());await p.evaluate(()=>{Object.assign(player,{x:61.5,y:4.5});corridor.tick(.01,player)});assert(await p.locator('#guardian-panel').isVisible());}
 async function answer(value){await p.locator(`#guardian-fields input[value="${value}"]`).check();await p.locator('#guardian-form button').click();}
-// Every seal can use either speaker independently. Retries and saves never reroll.
+// Every seal can use either speaker independently. Reopening and saves never reroll.
 await enter('circle','book');
 await p.evaluate(()=>{
  const g=corridor.guardian;
@@ -30,9 +30,9 @@ for(const calc of ['circle','position','drone'])for(const truth of ['book','rodr
  await p.evaluate(()=>{player.x=60;document.querySelector('#guardian-form').elements.choice.value=corridor.guardian.truthful;corridor.guardian.submit()});assert.equal(await p.evaluate(()=>corridor.guardian.stage),0);
  await p.evaluate(()=>player.x=61.5);
  await answer(truth==='book'?'rodrigo':'book');assert.equal(await p.evaluate(()=>corridor.guardian.stage),0);
- await answer(truth);assert.equal(await p.evaluate(()=>corridor.guardian.stage),1);
+ await answer(await p.evaluate(()=>corridor.guardian.question.answer));assert.equal(await p.evaluate(()=>corridor.guardian.stage),1);
  await p.evaluate(()=>corridor.guardian.submit());assert.equal(await p.evaluate(()=>corridor.guardian.stage),1,'duplicate submit cannot skip a seal');
- await p.locator('#guardian-next').click();await answer('distance');assert.equal(await p.evaluate(()=>corridor.guardian.stage),1,'earned seal persists');await answer('displacement');
+ await p.locator('#guardian-next').click();await answer('distance');assert.equal(await p.evaluate(()=>corridor.guardian.stage),1,'earned seal persists');await answer(await p.evaluate(()=>corridor.guardian.question.answer));
  await p.locator('#guardian-next').click();assert.equal(await p.locator('#guardian-fields input[type=radio]').count(),4);assert.equal(await p.locator('#guardian-fields input[type=number]').count(),0);
  const right={circle:'c',position:'b',drone:'d'}[calc];await answer(right);assert.equal(await p.evaluate(()=>corridor.guardian.stage),3);assert.equal(await p.evaluate(()=>opened),false,'collision closed while gate animates');
  await p.evaluate(()=>corridor.tick(1.4,player));assert.equal(await p.evaluate(()=>opened),false);assert(Math.abs(await p.evaluate(()=>corridor.guardian.gateProgress)-.5)<.001);
@@ -40,8 +40,8 @@ for(const calc of ['circle','position','drone'])for(const truth of ['book','rodr
 }
 // Recover the exact seal, voices, calculation variant and penalty.
 await enter('drone','rodrigo');await p.evaluate(()=>{for(const r of ADVENTURE_ORDER){if(r.corridor)break;classroom.session.state(r.id).solved=true;}classroom.session.preview=false;recovery.enabled=true;});await answer('rodrigo');await p.locator('#guardian-next').click();
-for(let i=0;i<3;i++)await answer('distance');assert(await p.locator('#guardian-palma').isVisible());await p.locator('#guardian-palma').click();assert(await p.locator('#extra-help-panel').isVisible());await p.evaluate(()=>{classroom.aid.close();recovery.save()});await p.reload();await p.evaluate(()=>document.querySelector('#epik-dev')?.close());await p.locator('#recovery-yes').click();
-assert.equal(await p.evaluate(()=>corridor.guardian.stage),1);assert.equal(await p.evaluate(()=>corridor.guardian.truthful),'rodrigo');assert.equal(await p.evaluate(()=>player.x),61.5);assert(await p.evaluate(()=>classroom.session.state('room-04').assisted));await p.evaluate(()=>corridor.tick(.01,player));await answer('displacement');await p.locator('#guardian-next').click();
+for(let i=0;i<3;i++)await answer(await p.evaluate(()=>{const q=corridor.guardian.question;return q.choices.find(([id])=>id!==q.answer)[0]}));assert(await p.locator('#guardian-palma').isVisible());await p.locator('#guardian-palma').click();assert(await p.locator('#extra-help-panel').isVisible());await p.evaluate(()=>{classroom.aid.close();recovery.save()});await p.reload();await p.evaluate(()=>document.querySelector('#epik-dev')?.close());await p.locator('#recovery-yes').click();
+assert.equal(await p.evaluate(()=>corridor.guardian.stage),1);assert.equal(await p.evaluate(()=>corridor.guardian.truthful),'rodrigo');assert.equal(await p.evaluate(()=>player.x),61.5);assert(await p.evaluate(()=>classroom.session.state('room-04').assisted));await p.evaluate(()=>corridor.tick(.01,player));await answer(await p.evaluate(()=>corridor.guardian.question.answer));await p.locator('#guardian-next').click();
 async function draw(){await p.evaluate(async()=>{const g=corridor.guardian;await Promise.all([g.statue,g.rodrigo,g.frame,g.leaves,g.fountain].map(i=>i.decode()));renderer.draw(rooms[index],player,opened,0,0);if(renderer.outdoor.rpgCastle)await renderer.outdoor.rpgCastle.decode();renderer.draw(rooms[index],player,opened,0,0);corridor.draw(renderer,player,renderer.actors);renderer.outdoor.draw(renderer,rooms[index],player,renderer.actors,0);});}
 await draw();await p.locator('.scene-view').screenshot({path:'/tmp/epik-twin-dialogue.png'});
 await p.evaluate(()=>corridor.guardian.close());await draw();await p.locator('#game').screenshot({path:'/tmp/epik-twin-gate.png'});

@@ -48,7 +48,7 @@ window.EpikClassroom = class {
       question = g.maze.question.title;
       variant = g.maze.dungeon ? 'visit-' + g.maze.dungeonVisit : objective;
     } else if (r.corridor && g.corridor.guardian.arrived) {
-      question=g.corridor.guardian.question.id;objective='guardian-'+question;
+      question=g.corridor.guardian.question.id;objective='guardian-seal-'+Math.min(g.corridor.guardian.stage,2);
     } else if (r.boss) {
       objective = 'cut-' + (g.boss.active < 0 ? g.boss.puzzle.cuts[0] ? 1 : 0 : g.boss.active);
       variant = String(g.boss.puzzle.support.id);

@@ -80,7 +80,7 @@ if(arrival.active)arrival.finish();cinematics.close();measurement.reset(rooms[i]
  document.querySelector('.scene-layout').classList.remove('has-station');document.querySelector('#equipment').textContent=room.trial?'VERDADERO O FALSO':room.measurement?'REGLAS · ÁREA E INCERTIDUMBRE':room.physics?'CAÑÓN ASTRAL':room.roulette?'MESA DEL DESTINO':room.conceptual?'LABERINTO CONCEPTUAL':room.corridor?'SALTO Y SPRINT':room.boss?'DOS LÁSERES · DOS RAÍCES':'CONTROL DE VUELO';
 
  if(room.physics)lab.reset(room);if(room.roulette){roulette.reset();roulette.syncReset(classroom.session.state(room.id));}
- boss=room.boss?new EricEncounter(bossEvent):null;if(boss)boss.canFire=()=>canPlay()&&boss.active===boss.near(player,renderer,rooms[index],opened);
+ boss=room.boss?new EricEncounter(bossEvent):null;if(boss){boss.canFire=()=>canPlay()&&boss.active===boss.near(player,renderer,rooms[index],opened);boss.canAutoOpen=()=>canPlay()&&document.querySelector('#paola-dialog').hidden&&document.querySelector('#extra-help-panel').hidden;boss.onAutoOpen=()=>{keys.clear();touch?.reset();};}
  trial=room.trial?new ApproachTrial(room,trialEvent):null;room.approach=trial;
  corridor=room.corridor?new RelaxCorridor(corridorEvent):null;room.guardian=corridor?.guardian;
  if(corridor){const g=corridor.guardian;g.canUse=canPlay;g.canAnswer=()=>g.near(player);g.onPaola=()=>companions.help();g.onPalma=()=>classroom.aid.open();g.canPalma=()=>classroom.aid.eligible()&&classroom.session.available(classroom.context().objective_id)&&canPlay();if(gardenState)g.restore(gardenState);}
@@ -131,9 +131,9 @@ function ignitiaEvent(type){
 function corridorEvent(type,text){
  if(type==='hit'){die('symbol');return;}
  if(type==='garden'){checkpoint={room:index,stage:1,position:{...spawnPlayer(rooms[index]),...GUARDIAN_GARDEN.checkpoint}};document.querySelector('#door-status').textContent=I18n.t('EL GUARDIÁN DE EPITHEA');classroom.session.event('checkpoint',classroom.context());companions.toast('Has llegado al jardín. Punto seguro guardado. Pisa la baldosa de piedra frente a las dos estatuas.');recovery?.save();return;}
- if(type==='guardian-speaking'){keys.clear();camera.release();companions.closeHelp();Object.assign(player,{angle:0,pitch:.10});checkpoint={room:index,stage:1,position:{...spawnPlayer(rooms[index]),...GUARDIAN_GARDEN.tile,angle:0,pitch:.10}};recovery?.save();return;}
+ if(type==='guardian-speaking'){keys.clear();camera.release();companions.closeHelp();Object.assign(player,{angle:0,pitch:.24});checkpoint={room:index,stage:1,position:{...spawnPlayer(rooms[index]),...GUARDIAN_GARDEN.tile,angle:0,pitch:.24}};recovery?.save();return;}
  if(type==='guardian-progress'){classroom.aid.close();recovery?.save();return;}
- if(type==='guardian-answer'){recovery?.save();return;}
+ if(type==='guardian-answer'){classroom.aid.close();companions.closeHelp();recovery?.save();return;}
  if(type==='guardian-gate-open'){opened=rooms[index].canUnlock({ready:true,guardianSolved:corridor.guardian.solved,gateOpened:corridor.guardian.gateOpened});classroom.solve();document.querySelector('#door-status').textContent=I18n.t('PUERTA ABIERTA · TRES SELLOS');companions.toast('«El pacto se ha cumplido. Cruza el umbral, viajero.»');recovery?.save();return;}
  if(type==='guardian-solved'){classroom.aid.close();Sound.click();document.querySelector('#door-status').textContent=I18n.t('ACERTIJO RESUELTO');keys.clear();companions.toast('Tres sellos encendidos. Las puertas de Epithea se están abriendo…');recovery?.save();return;}
  if(type==='guardian-reminder'){companions.toast('«Has ganado el paso. La puerta está detrás de mí, viajero.»');return;}

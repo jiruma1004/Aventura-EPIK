@@ -5,5 +5,5 @@ window.ESCAPE_ROOMS.push({
  spawn:{x:3,y:7.5,angle:0},oakDoor:{x:25,y:7},exitX:25.65,
  challenge:{id:'challenge-05',title:'Dos cortes, una parábola',implemented:true},
  canUnlock(context){return context.parabolaCut===true;},
- map:Array.from({length:15},(_,y)=>Array.from({length:28},(_,x)=>x===0||x===27||y===0||y===14||x===25?(x===25&&y===7?2:1):(x>=17&&x<=23&&y>=2&&y<=12?3:0)))
+ map:Array.from({length:15},(_,y)=>Array.from({length:28},(_,x)=>x===0||x===27||y===0||y===14||x===25?(x===25&&y===7?2:1):(x>=17&&x<=23?3:0)))
 });

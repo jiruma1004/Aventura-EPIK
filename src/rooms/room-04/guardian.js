@@ -1,5 +1,5 @@
 /* Three multiple-choice seals inside the corridor, not an eighth room.
-   Saved statements remain stable across retries; no statue has a fixed role. */
+   Saved statements survive reloads; wrong answers draw a new variant. */
 window.GUARDIAN_QUESTIONS=[
  {id:'circle',title:'El instante del movimiento',
   text:'Un objeto se mueve según x(t) = −5 sen(ωt), y(t) = 4 − 5 cos(ωt), con ω = 1 rad/s. x e y están en metros y t en segundos. Calcula las componentes de velocidad y aceleración en t = 0 s.',
@@ -31,9 +31,10 @@ window.GardenGuardian=class {
   this.onEvent=onEvent;this.arrived=false;this.solved=false;this.stage=0;this.truthful=Math.random()<.5?'book':'rodrigo';
   this.voiceOrder=Array.from({length:2},()=>Math.random()<.5?'book':'rodrigo');
   this.calculationId=GUARDIAN_QUESTIONS[Math.floor(Math.random()*GUARDIAN_QUESTIONS.length)].id;
+  this.conceptVariants=[0,0];this.questionBags=[[1,2],[1,2],GUARDIAN_QUESTIONS.map(q=>q.id).filter(id=>id!==this.calculationId)];
   this.draft={};this.pendingNext=false;this.onTile=false;this.gateProgress=0;this.gateOpened=false;
   const load=file=>{const img=new Image();img.src='assets/garden/'+file;return img;};
-  this.statue=load('luis-sentinel.webp');this.rodrigo=load('rodrigo-sentinel.webp');this.fountain=load('fountain.webp');this.frame=load('gate-frame.webp');this.leaves=load('gate-leaves.webp');
+  this.statue=load('luis-monument.webp');this.rodrigo=load('rodrigo-monument.webp');this.fountain=load('fountain.webp');this.frame=load('gate-frame.webp');this.leaves=load('gate-leaves.webp');
   let panel=document.querySelector('#guardian-panel');
   if(!panel){document.querySelector('.scene-view').insertAdjacentHTML('beforeend',`<section id="guardian-panel" class="world-console" hidden aria-label="Acertijos de los guardianes"><button id="guardian-close" class="bubble-fold" aria-label="Cerrar acertijo">×</button><p class="eyebrow">LOS GUARDIANES DE EPITHEA · <span id="guardian-progress"></span></p><h2 id="guardian-title"></h2><p id="guardian-rule">Inscripción de la baldosa: ni el libro ni el pergamino garantizan sabiduría. Juzga cada afirmación; una voz acertada puede extraviarte en el siguiente sello.</p><p id="guardian-question"></p><form id="guardian-form"><div id="guardian-fields"></div><p id="guardian-note" class="guardian-note"></p><button class="primary" type="submit">Presentar mi respuesta</button></form><p id="guardian-feedback" role="status"></p><button id="guardian-next" class="primary" type="button" hidden>Escuchar la siguiente pregunta</button><div class="guardian-help"><button id="guardian-paola" type="button">Pedir una pista a Paola</button><button id="guardian-palma" type="button" hidden>Palma IA · Máximo 1 estrella</button></div></section><aside id="guardian-voice-book" class="guardian-voice" hidden><strong>Luis · Guardián del libro</strong><p></p></aside><aside id="guardian-voice-rodrigo" class="guardian-voice" hidden><strong>Rodrigo · Guardián del pergamino</strong><p></p></aside>`);panel=document.querySelector('#guardian-panel');}
   this.panel=panel;this.panel.hidden=true;this.hideVoices();
@@ -43,12 +44,27 @@ window.GardenGuardian=class {
   document.querySelector('#guardian-next').onclick=()=>{if(!this.pendingNext||!this.canUse?.()||!this.canAnswer?.())return;this.pendingNext=false;this.renderQuestion();};
   document.querySelector('#guardian-form').onsubmit=e=>{e.preventDefault();this.submit();};
  }
- get question(){
+ get baseQuestion(){
   if(this.stage===0)return {id:'identity',title:'Primer sello · El instante inmóvil',text:'Una esfera tiene velocidad cero en un instante. Sin más datos sobre su movimiento, ¿qué afirmación está justificada?',choices:[['book','La del guardián del libro'],['rodrigo','La de Rodrigo']],answer:this.truthful,hint:'Escucha con cuidado lo que cada uno da por hecho.',setup:'La velocidad describe cómo cambia la posición; la aceleración, cómo cambia la velocidad. ¿Conocer un valor en un solo instante permite saber cómo está cambiando?',trueLine:'La quietud de un instante no demuestra que la aceleración haya cesado.',falseLine:'Si en ese instante no avanza, tampoco cambia su velocidad: su aceleración debe ser cero.'};
   if(this.stage===1)return {id:'displacement',title:'Segundo sello · El regreso del viajero',text:'Un viajero da una vuelta completa a la fuente y vuelve al punto exacto donde empezó. ¿Qué magnitud necesariamente es cero?',choices:[['displacement','El desplazamiento'],['distance','La distancia recorrida'],['speed','La rapidez al llegar']],answer:'displacement',hint:'Dos relatos del mismo viaje no siempre hablan de lo mismo.',setup:'Desplazamiento = posición final − posición inicial. Al regresar, ambas posiciones coinciden. La distancia suma el camino recorrido. Decide cuál de las opciones cumple esto.',trueLine:'Las huellas permanecen, aunque el punto de partida y el de llegada sean uno solo.',falseLine:'Cada paso añadió distancia; por eso también dejó un desplazamiento distinto de cero al regresar.'};
   const q=GUARDIAN_QUESTIONS.find(q=>q.id===this.calculationId);
   const lines={circle:['La velocidad se obtiene derivando la posición respecto al tiempo.','La velocidad se obtiene sumando la posición y el tiempo.'],position:['La velocidad media se calcula restando las posiciones y dividiendo entre el tiempo transcurrido.','La velocidad media se calcula sumando las posiciones y dividiendo entre el tiempo transcurrido.'],drone:['En este problema, la aceleración vertical es negativa. Conserva ese signo.','En este problema, la aceleración vertical es positiva. Cambia ese signo.']}[q.id];
   return {...q,...GUARDIAN_CALCULATIONS[q.id],id:'calculation-'+q.id,title:'Tercer sello · '+q.title,trueLine:lines[0],falseLine:lines[1]};
+ }
+ get question(){
+  const base=this.baseQuestion,index=this.conceptVariants[Math.min(this.stage,1)];
+  if(this.stage>1||index===0)return base;
+  const variant=GUARDIAN_CONCEPT_POOL[this.stage][index-1];
+  return {...base,...variant,id:variant.id};
+ }
+ nextQuestion(){
+  const stage=this.stage,current=stage<2?this.conceptVariants[stage]:this.calculationId;
+  let bag=this.questionBags[stage];
+  if(!bag.length)bag=this.questionBags[stage]=(stage<2?[0,1,2]:GUARDIAN_QUESTIONS.map(q=>q.id)).filter(id=>id!==current);
+  const next=bag.splice(Math.floor(Math.random()*bag.length),1)[0];
+  if(stage<2)this.conceptVariants[stage]=next;else this.calculationId=next;
+  const speaker=Math.random()<.5?'book':'rodrigo';if(stage===0)this.truthful=speaker;else this.voiceOrder[stage-1]=speaker;
+  this.draft={};this.renderQuestion();
  }
  near(player){const t=GUARDIAN_GARDEN.tile;return this.arrived&&Math.abs(player.x-t.x)<=t.size/2&&Math.abs(player.y-t.y)<=t.size/2&&(player.jumpHeight||0)<.05;}
  blocks(x,y){return Math.hypot(x-56,y-4.5)<1.22||[GUARDIAN_GARDEN.statue,GUARDIAN_GARDEN.rodrigo].some(p=>Math.hypot(x-p.x,y-p.y)<.48);}
@@ -85,19 +101,24 @@ window.GardenGuardian=class {
    this.stage++;this.draft={};Sound.tone(440+this.stage*90,.16,'sine',.07);
    if(this.stage===3){this.solved=true;this.close();Sound.tone(95,.7,'triangle',.06);this.onEvent('guardian-solved');}
    else {this.pendingNext=true;document.querySelector('#guardian-form').hidden=true;document.querySelector('#guardian-next').hidden=false;document.querySelector('#guardian-feedback').textContent=I18n.t('Un sello se ha encendido. Escucha la siguiente prueba.');document.querySelector('#guardian-progress').textContent=`${this.stage} / 3 sellos`;this.onEvent('guardian-progress');this.updateAid();}
-  }else{document.querySelector('#guardian-feedback').textContent=I18n.t('El sello permanece apagado. Contrasta las voces con tus conocimientos y vuelve a intentar.');Sound.tone(170,.15,'triangle',.07);this.updateAid();this.onEvent('guardian-answer');}
+  }else{this.nextQuestion();document.querySelector('#guardian-feedback').textContent=I18n.t('Respuesta incorrecta. El sello propone otra pregunta; conservas los sellos anteriores.');Sound.tone(170,.15,'triangle',.07);this.updateAid();this.onEvent('guardian-answer');}
  }
  updateAid(){document.querySelector('#guardian-palma').hidden=this.pendingNext||!this.canPalma?.();}
  hideVoices(){for(const who of ['book','rodrigo']){const e=document.querySelector('#guardian-voice-'+who);if(e)e.hidden=true;}}
  close(){this.hideVoices();if(!this.panel.hidden){this.panel.hidden=true;document.querySelector('#game').focus({preventScroll:true});}}
- snapshot(){return {version:3,voiceOrder:[...this.voiceOrder],arrived:this.arrived,solved:this.solved,stage:this.stage,truthful:this.truthful,calculationId:this.calculationId,draft:{...this.draft},gateProgress:this.gateProgress};}
+ snapshot(){return {version:4,conceptVariants:[...this.conceptVariants],questionBags:this.questionBags.map(b=>[...b]),voiceOrder:[...this.voiceOrder],arrived:this.arrived,solved:this.solved,stage:this.stage,truthful:this.truthful,calculationId:this.calculationId,draft:{...this.draft},gateProgress:this.gateProgress};}
  restore(data){
   if(typeof data?.arrived!=='boolean'||typeof data.solved!=='boolean')throw Error('Invalid guardian checkpoint');
-  if(data.version!==2&&data.version!==3){if(!GUARDIAN_QUESTIONS.some(q=>q.id===data.questionId))throw Error('Invalid old guardian question');this.calculationId=data.questionId;this.stage=data.solved?3:0;this.arrived=data.arrived;this.solved=data.solved;this.draft={};this.gateProgress=data.solved?1:0;}
-  else{if(!Number.isInteger(data.stage)||data.stage<0||data.stage>3||data.solved!==(data.stage===3)||data.solved&&!data.arrived||!['book','rodrigo'].includes(data.truthful)||!GUARDIAN_QUESTIONS.some(q=>q.id===data.calculationId))throw Error('Invalid guardian seals');Object.assign(this,{stage:data.stage,arrived:data.arrived,solved:data.solved,truthful:data.truthful,calculationId:data.calculationId});const ids=this.question.choices?['choice']:this.question.fields.map(f=>f[0]);this.draft=Object.fromEntries(ids.map(id=>[id,String(data.draft?.[id]??'').slice(0,40)]));this.gateProgress=this.solved?Math.max(0,Math.min(1,Number(data.gateProgress)||0)):0;}
-  if(data.version===3){if(!Array.isArray(data.voiceOrder)||data.voiceOrder.length!==2||!data.voiceOrder.every(w=>['book','rodrigo'].includes(w)))throw Error('Invalid guardian voices');this.voiceOrder=[...data.voiceOrder];}
+  if(![2,3,4].includes(data.version)){if(!GUARDIAN_QUESTIONS.some(q=>q.id===data.questionId))throw Error('Invalid old guardian question');this.calculationId=data.questionId;this.stage=data.solved?3:0;this.arrived=data.arrived;this.solved=data.solved;this.draft={};this.gateProgress=data.solved?1:0;}
+  else{if(!Number.isInteger(data.stage)||data.stage<0||data.stage>3||data.solved!==(data.stage===3)||data.solved&&!data.arrived||!['book','rodrigo'].includes(data.truthful)||!GUARDIAN_QUESTIONS.some(q=>q.id===data.calculationId))throw Error('Invalid guardian seals');Object.assign(this,{stage:data.stage,arrived:data.arrived,solved:data.solved,truthful:data.truthful,calculationId:data.calculationId});const ids=this.question.choices?['choice']:this.question.fields.map(f=>f[0]);this.draft=Object.fromEntries(ids.filter(id=>Object.prototype.hasOwnProperty.call(data.draft||{},id)).map(id=>[id,String(data.draft[id]).slice(0,40)]));this.gateProgress=this.solved?Math.max(0,Math.min(1,Number(data.gateProgress)||0)):0;}
+  if(data.version>=3){if(!Array.isArray(data.voiceOrder)||data.voiceOrder.length!==2||!data.voiceOrder.every(w=>['book','rodrigo'].includes(w)))throw Error('Invalid guardian voices');this.voiceOrder=[...data.voiceOrder];}
+  if(data.version===4){
+   if(!Array.isArray(data.conceptVariants)||data.conceptVariants.length!==2||!data.conceptVariants.every(n=>Number.isInteger(n)&&n>=0&&n<=2)||!Array.isArray(data.questionBags)||data.questionBags.length!==3)throw Error('Invalid guardian question pool');
+   for(let i=0;i<3;i++){const bag=data.questionBags[i],allowed=i<2?[0,1,2]:GUARDIAN_QUESTIONS.map(q=>q.id);if(!Array.isArray(bag)||bag.length>2||new Set(bag).size!==bag.length||!bag.every(v=>allowed.includes(v))||bag.includes(i<2?data.conceptVariants[i]:this.calculationId))throw Error('Invalid guardian question bag');}
+   this.conceptVariants=[...data.conceptVariants];this.questionBags=data.questionBags.map(b=>[...b]);
+  }else{this.conceptVariants=[0,0];this.questionBags=[[1,2],[1,2],GUARDIAN_QUESTIONS.map(q=>q.id).filter(id=>id!==this.calculationId)];}
   // Old first-seal drafts refer to a different question; keep earned seals.
-  if(data.version!==3&&this.stage===0)this.draft={};
+  if(data.version<3&&this.stage===0)this.draft={};
   this.gateOpened=this.gateProgress===1;this.pendingNext=false;this.onTile=false;this.close();
  }
  floor(x,y){
@@ -120,19 +141,42 @@ window.GardenGuardian=class {
   c.drawImage(this.frame,0,0,512,640);return this.gateCanvas;
  }
  draw(r,player,actors,time){
-  const props=[{x:56,y:4.5,image:this.fountain,w:2.55,h:1.2},{...GUARDIAN_GARDEN.statue,image:this.statue,w:1.1,h:1.9},{...GUARDIAN_GARDEN.rodrigo,image:this.rodrigo,w:1.1,h:1.9}];
+  const props=[{x:56,y:4.5,image:this.fountain,w:2.55,h:1.2},{...GUARDIAN_GARDEN.statue,image:this.statue,w:1.928,h:3.3294,z:.16,plinth:true},{...GUARDIAN_GARDEN.rodrigo,image:this.rodrigo,w:1.928,h:3.3294,z:.16,plinth:true}];
   const gate=this.gateTexture();if(gate)props.push({...GUARDIAN_GARDEN.gate,image:gate,w:3.05,h:3.25});
   const shrub=this.shrub||(this.shrub=this.makeShrub()),bench=this.bench||(this.bench=this.makeOrnament('bench')),orb=this.orb||(this.orb=this.makeOrnament('orb'));
   for(const x of [50.5,53,59,62])for(const y of [2.05,6.95])props.push({x,y,image:shrub,w:1.05,h:.7});
   for(const y of [2.35,6.65]){props.push({x:58.5,y,image:bench,w:1.2,h:.5});props.push({x:51,y,image:orb,w:.5,h:1.1});}
   props.sort((a,b)=>Math.hypot(b.x-player.x,b.y-player.y)-Math.hypot(a.x-player.x,a.y-player.y));
-  for(const p of props)if(p.image.width&&p.image.complete!==false)WorldBillboard(r,player,actors,p.image,p.x,p.y,0,p.w,p.h);
+  for(const p of props)if(p.image.width&&p.image.complete!==false){if(p.plinth)this.drawPlinth(r,player,actors,p);WorldBillboard(r,player,actors,p.image,p.x,p.y,p.z||0,p.w,p.h);}
   const c=r.ctx;for(let i=0;i<7;i++){const a=i*.89,t=(time*.00045+i*.17)%1,p=actors.project(r,player,56+Math.cos(a)*.5,4.5+Math.sin(a)*.5,1.05+.25*Math.sin(t*Math.PI));if(!p||p.depth<.1||p.depth>(r.depths[Math.floor(p.x/3)*3]??Infinity)+.05)continue;c.fillStyle='#b9f8ee';c.globalAlpha=.35+.4*Math.sin(t*Math.PI);c.fillRect(p.x,p.y,Math.max(1,p.scale*.015),Math.max(2,p.scale*.035));}c.globalAlpha=1;
   // Projected UI remains anchored to each statue; responsive bounds prevent clipping.
-  for(const [who,pos] of [['book',GUARDIAN_GARDEN.statue],['rodrigo',GUARDIAN_GARDEN.rodrigo]]){const e=document.querySelector('#guardian-voice-'+who),p=actors.project(r,player,pos.x,pos.y,2.05);if(this.panel.hidden||!p||p.depth<.1){e.hidden=true;continue;}e.hidden=false;const view=r.canvas.getBoundingClientRect(),vw=r.canvas.clientWidth,vh=r.canvas.clientHeight,ew=e.offsetWidth,eh=e.offsetHeight;const px=p.x/r.canvas.width*vw,py=p.y/r.canvas.height*vh;const minX=who==='book'?8:vw/2+4,maxX=who==='book'?vw/2-ew-4:vw-ew-8;e.style.left=Math.max(minX,Math.min(maxX,px-ew/2))+'px';e.style.top=Math.max(8,Math.min(vh*.40-eh,py-eh-12))+'px';e.style.setProperty('--tail',Math.max(12,Math.min(ew-12,px-parseFloat(e.style.left)))+'px');}
+  for(const [who,pos] of [['book',GUARDIAN_GARDEN.statue],['rodrigo',GUARDIAN_GARDEN.rodrigo]]){const e=document.querySelector('#guardian-voice-'+who),p=actors.project(r,player,pos.x,pos.y,3.61);if(this.panel.hidden||!p||p.depth<.1){e.hidden=true;continue;}e.hidden=false;const view=r.canvas.getBoundingClientRect(),vw=r.canvas.clientWidth,vh=r.canvas.clientHeight,ew=e.offsetWidth,eh=e.offsetHeight;const px=p.x/r.canvas.width*vw,py=p.y/r.canvas.height*vh;const minX=who==='book'?8:vw/2+4,maxX=who==='book'?vw/2-ew-4:vw-ew-8;e.style.left=Math.max(minX,Math.min(maxX,px-ew/2))+'px';e.style.top=Math.max(8,Math.min(vh*.40-eh,py-eh-12))+'px';e.style.setProperty('--tail',Math.max(12,Math.min(ew-12,px-parseFloat(e.style.left)))+'px');}
   const t=GUARDIAN_GARDEN.tile;
   for(let i=0;i<3;i++){const p=actors.project(r,player,t.x-.4+i*.4,t.y,.025);if(!p||p.depth<.1)continue;c.fillStyle=i<this.stage?'#ffdc7d':'#323b46';c.beginPath();c.arc(p.x,p.y,Math.max(2,p.scale*.07),0,7);c.fill();}
   if(this.arrived&&!this.onTile&&!this.solved){const p=actors.project(r,player,t.x,t.y,.25);if(p&&p.depth>.5&&p.depth<12){c.save();c.textAlign='center';c.font='16px Georgia';c.fillStyle='#102030d9';c.fillRect(p.x-160,p.y-28,320,35);c.fillStyle='#ffe2a4';c.fillText(I18n.t('Pisa la baldosa · Escucha a los guardianes'),p.x,p.y-5,300);c.restore();}}
+ }
+ // World-space stone footing: top and side faces retain perspective as the player moves.
+ drawPlinth(r,player,actors,pos){
+  const c=r.ctx,face=(points,color)=>{
+   const projected=points.map(([x,y,z])=>actors.project(r,player,pos.x+x,pos.y+y,z));
+   if(projected.some(p=>!p||p.depth<.12))return;
+   const middle=projected.reduce((a,p)=>a+p.x,0)/projected.length;
+   if(middle<0||middle>=r.canvas.width)return;
+   if(Math.min(...projected.map(p=>p.depth))>(r.depths[Math.floor(middle/3)*3]??Infinity)+.15)return;
+   c.fillStyle=color;c.beginPath();projected.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fill();
+  };
+  c.save();
+  // A soft contact shadow lies on the ground, rather than moving with the sprite.
+  for(const [rx,ry,color] of [[.72,.75,'#101c2018'],[.59,.64,'#101c2028'],[.48,.55,'#101c2040']]){
+   face(Array.from({length:16},(_,i)=>{const a=i*Math.PI/8;return [Math.cos(a)*rx-.13,Math.sin(a)*ry,.012];}),color);
+  }
+  const x=.24,y=.36,z=.16;
+  face([[-x,-y,z],[x,-y,z],[x,y,z],[-x,y,z]],'#bab29e');
+  if(player.x<pos.x)face([[-x,-y,0],[-x,y,0],[-x,y,z],[-x,-y,z]],'#8f897a');
+  else face([[x,y,0],[x,-y,0],[x,-y,z],[x,y,z]],'#777267');
+  const side=player.y<pos.y?-y:y;
+  face([[-x,side,0],[x,side,0],[x,side,z],[-x,side,z]],'#a39c8b');
+  c.restore();
  }
  makeShrub(){const a=document.createElement('canvas');a.width=160;a.height=140;const c=a.getContext('2d');c.fillStyle='#686757';c.fillRect(15,96,130,40);for(let i=0;i<17;i++){c.fillStyle=['#344d36','#496544','#6b7950'][i%3];c.beginPath();c.arc(22+i*7,72-Math.sin(i*.7)*18,20,0,7);c.fill();}for(let i=0;i<10;i++){c.fillStyle=i%2?'#e2bd81':'#c1a4d3';c.fillRect(25+i*11,57+Math.sin(i*4)*23,5,5);}return a;}
  makeOrnament(kind){const a=document.createElement('canvas');a.width=240;a.height=260;const c=a.getContext('2d');if(kind==='bench'){c.fillStyle='#858375';c.fillRect(14,160,212,28);c.fillRect(24,188,30,60);c.fillRect(186,188,30,60);c.fillStyle='#b5ab90';c.fillRect(8,145,224,25);c.fillRect(20,72,200,64);c.strokeStyle='#6c675c';c.lineWidth=5;for(let x=30;x<220;x+=30)c.strokeRect(x,78,22,48);c.fillStyle='#d2bd83';c.fillRect(16,67,208,10);}else{c.fillStyle='#8f8d80';c.fillRect(86,166,68,70);c.fillRect(58,232,124,20);c.fillStyle='#c7baa0';c.fillRect(70,155,100,20);c.strokeStyle='#c6a660';c.lineWidth=9;c.beginPath();c.ellipse(120,91,75,72,0,0,7);c.stroke();c.lineWidth=5;for(const rotation of [-.6,.6]){c.beginPath();c.ellipse(120,91,35,72,rotation,0,7);c.stroke();}c.fillStyle='#74bcb3';c.beginPath();c.arc(120,91,14,0,7);c.fill();}return a;}

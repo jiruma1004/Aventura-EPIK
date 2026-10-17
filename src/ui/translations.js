@@ -1229,3 +1229,30 @@ Object.assign(window.ENGLISH, {
 });
 
 Object.assign(window.ENGLISH, {"Luis · Guardián del libro":"Luis · Book guardian"});
+
+Object.assign(window.ENGLISH,{"Coordenadas de corte":"Cut coordinates","Láser":"Laser","Láser · Listo":"Laser · Ready","Láser · E / tocar":"Laser · E / tap"});
+Object.assign(window.ENGLISH,{
+ 'Respuesta incorrecta. El sello propone otra pregunta; conservas los sellos anteriores.':'Incorrect answer. The seal offers another question; you keep your previous seals.',
+ 'Primer sello · El giro del mensajero':'First seal · The messenger’s turn',
+ 'Un mensajero gira alrededor de la fuente con rapidez constante. ¿Qué afirmación está justificada?':'A messenger circles the fountain at constant speed. Which statement is justified?',
+ 'Aunque mantenga el ritmo, su velocidad cambia al doblar.':'Even at a steady pace, the messenger’s velocity changes when turning.',
+ 'Si mantiene el ritmo, su velocidad permanece idéntica durante todo el giro.':'At a steady pace, the messenger’s velocity stays identical throughout the turn.',
+ 'La velocidad es un vector: considera tanto su magnitud como su dirección. Compara qué cambia durante el giro.':'Velocity is a vector: consider both its magnitude and its direction. Compare what changes during the turn.',
+ 'Primer sello · El camino de vuelta':'First seal · The way back',
+ 'Una viajera tiene velocidad negativa sobre el eje x. ¿Qué afirmación está justificada?':'A traveller has negative velocity along the x axis. Which statement is justified?',
+ 'El signo indica hacia dónde viaja; no dice por sí solo si está frenando.':'The sign indicates direction; by itself, it does not tell you whether the traveller is slowing down.',
+ 'Una velocidad negativa demuestra que la viajera está perdiendo rapidez.':'Negative velocity proves that the traveller is losing speed.',
+ 'El signo de la velocidad indica dirección respecto al eje elegido. Para saber si la rapidez disminuye necesitas información sobre su cambio.':'The sign of velocity indicates direction relative to the chosen axis. To know whether speed decreases, you need information about its change.',
+ 'Segundo sello · La crónica del viaje':'Second seal · The travel chronicle',
+ 'Divides la distancia total recorrida por el tiempo total del viaje. ¿Qué magnitud has calculado?':'You divide the total distance travelled by the total travel time. Which quantity have you calculated?',
+ 'La rapidez media':'Average speed','La velocidad instantánea':'Instantaneous velocity','La aceleración media':'Average acceleration',
+ 'Ese cociente resume todo el trayecto; no revela lo ocurrido en cada instante.':'That ratio summarises the whole journey; it does not reveal what happened at each instant.',
+ 'Al dividir el camino entre el tiempo, conoces exactamente la velocidad al llegar.':'Dividing distance by time tells you the exact velocity upon arrival.',
+ 'La distancia es una magnitud escalar. El cociente distancia total / tiempo total describe el viaje completo, no un instante.':'Distance is a scalar quantity. Total distance / total time describes the entire journey, not a single instant.',
+ 'Segundo sello · La flecha del patio':'Second seal · The courtyard arrow',
+ 'Una flecha vuela sin resistencia del aire, bajo gravedad vertical constante. ¿Qué componente de su velocidad permanece constante?':'An arrow flies without air resistance, under constant vertical gravity. Which component of its velocity stays constant?',
+ 'La componente horizontal':'The horizontal component','La componente vertical':'The vertical component','Ambas componentes':'Both components',
+ 'La gravedad modifica la caída, pero no empuja la flecha hacia los lados.':'Gravity changes the fall, but does not push the arrow sideways.',
+ 'Como la caída es libre, las dos componentes conservan su valor inicial.':'Because it is in free fall, both components retain their initial values.',
+ 'Separa los ejes. Con gravedad solo vertical, aₓ = 0 y aᵧ = −g. Decide en qué eje no cambia la velocidad.':'Separate the axes. With purely vertical gravity, aₓ = 0 and aᵧ = −g. Decide along which axis velocity does not change.'
+});
