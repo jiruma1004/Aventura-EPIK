@@ -23,6 +23,12 @@ window.GUARDIAN_CALCULATIONS={
  position:{text:'Con a = 1 m/s, b = 1 m, c = 0.125 m/s² y d = 1 m, las funciones quedan x(t) = t + 1; y(t) = 0.125t² + 1. ¿Cuál es la velocidad media entre t = 2 s y t = 4 s?',choices:[['a','v̄ = (1, 0.50) m/s'],['b','v̄ = (1, 0.75) m/s'],['c','v̄ = (4, 2.25) m/s'],['d','v̄ = (0.75, 1) m/s']],answer:'b',hint:'Calcula la posición en los dos instantes. Resta posición final menos inicial y divide cada componente entre 4 − 2.',setup:'v̄ₓ = [(4 + 1) − (2 + 1)] / (4 − 2)\nv̄ᵧ = [(0.125·4² + 1) − (0.125·2² + 1)] / (4 − 2)\nTermina las operaciones y compara el vector con las opciones.'},
  drone:{text:'Un dron tiene velocidad inicial v₀ = (3, 4) m/s y aceleración constante a = (1, −2) m/s². ¿Cuáles son las componentes de su velocidad en t = 3 s?',choices:[['a','v = (6, 2) m/s'],['b','v = (4, 2) m/s'],['c','v = (3, 4) m/s'],['d','v = (6, −2) m/s']],answer:'d',hint:'Aplica v = v₀ + at por separado en x e y. Conserva el signo negativo de la aceleración vertical.',setup:'vₓ = 3 + 1·3\nvᵧ = 4 + (−2)·3\nCalcula las dos componentes y elige el vector correspondiente.'}
 };
+// A second subsection of the same exercise: the two calculation seals stay distinct.
+window.GUARDIAN_FOLLOWUPS={
+ circle:{text:'El mismo movimiento: x(t) = −5 sen(ωt), y(t) = 4 − 5 cos(ωt), con ω = 1 rad/s. Ahora calcula las componentes de la aceleración en t = 0 s.',choices:[['a','a = (0, 5) m/s²'],['b','a = (−5, 0) m/s²'],['c','a = (0, −5) m/s²'],['d','a = (5, 4) m/s²']],answer:'a',hint:'Deriva cada coordenada dos veces. Evalúa en t = 0; cuida los signos y recuerda el factor ω².',setup:'aₓ = 5·1²·sen(1·0)\naᵧ = 5·1²·cos(1·0)\nEvalúa en radianes y elige el vector resultante.'},
+ position:{text:'Con a = 1 m/s, b = 1 m, c = 0.125 m/s² y d = 1 m: x(t) = t + 1; y(t) = 0.125t² + 1. Ahora calcula la rapidez instantánea en t = 2 s.',choices:[['a','1.25 m/s'],['b','0.50 m/s'],['c','1.12 m/s'],['d','1.50 m/s']],answer:'c',hint:'Deriva x(t) e y(t) para obtener las componentes de velocidad. La rapidez es √(vₓ² + vᵧ²); no es la suma de las componentes.',setup:'vₓ = 1\nvᵧ = 2·0.125·2\nrapidez = √(1² + (2·0.125·2)²)\nTermina el cálculo y redondea a dos decimales.'},
+ drone:{text:'El dron parte de r₀ = (2, 1) m, con v₀ = (3, 4) m/s y a = (1, −2) m/s² constantes. Ahora calcula su posición en t = 3 s.',choices:[['a','r = (15.5, 22) m'],['b','r = (15.5, 4) m'],['c','r = (6, −2) m'],['d','r = (11, 13) m']],answer:'b',hint:'Aplica r = r₀ + v₀t + ½at² por componentes. Incluye la posición inicial y conserva el signo de aᵧ.',setup:'x = 2 + 3·3 + ½·1·3²\ny = 1 + 4·3 + ½·(−2)·3²\nResuelve ambas operaciones y elige la posición.'}
+};
 window.GUARDIAN_GARDEN={start:49,checkpoint:{x:50,y:4.5,angle:0},fountain:{x:56,y:4.5},tile:{x:61.5,y:4.5,size:1.7},statue:{x:66.15,y:3.15},rodrigo:{x:66.15,y:5.85},gate:{x:66.85,y:4.5},exit:67.65};
 /* Each seal assigns its own statements. `truthful` is the first seal speaker
    retained for checkpoint compatibility, never a permanent role. */
@@ -31,7 +37,7 @@ window.GardenGuardian=class {
   this.onEvent=onEvent;this.arrived=false;this.solved=false;this.stage=0;this.truthful=Math.random()<.5?'book':'rodrigo';
   this.voiceOrder=Array.from({length:2},()=>Math.random()<.5?'book':'rodrigo');
   this.calculationId=GUARDIAN_QUESTIONS[Math.floor(Math.random()*GUARDIAN_QUESTIONS.length)].id;
-  this.conceptVariants=[0,0];this.questionBags=[[1,2],[1,2],GUARDIAN_QUESTIONS.map(q=>q.id).filter(id=>id!==this.calculationId)];
+  this.conceptVariants=[0,0];this.questionBags=[[1,2],...Array.from({length:2},()=>GUARDIAN_QUESTIONS.map(q=>q.id).filter(id=>id!==this.calculationId))];
   this.draft={};this.pendingNext=false;this.onTile=false;this.gateProgress=0;this.gateOpened=false;
   const load=file=>{const img=new Image();img.src='assets/garden/'+file;return img;};
   this.statue=load('luis-monument.webp');this.rodrigo=load('rodrigo-monument.webp');this.fountain=load('fountain.webp');this.frame=load('gate-frame.webp');this.leaves=load('gate-leaves.webp');
@@ -46,23 +52,23 @@ window.GardenGuardian=class {
  }
  get baseQuestion(){
   if(this.stage===0)return {id:'identity',title:'Primer sello · El instante inmóvil',text:'Una esfera tiene velocidad cero en un instante. Sin más datos sobre su movimiento, ¿qué afirmación está justificada?',choices:[['book','La del guardián del libro'],['rodrigo','La de Rodrigo']],answer:this.truthful,hint:'Escucha con cuidado lo que cada uno da por hecho.',setup:'La velocidad describe cómo cambia la posición; la aceleración, cómo cambia la velocidad. ¿Conocer un valor en un solo instante permite saber cómo está cambiando?',trueLine:'La quietud de un instante no demuestra que la aceleración haya cesado.',falseLine:'Si en ese instante no avanza, tampoco cambia su velocidad: su aceleración debe ser cero.'};
-  if(this.stage===1)return {id:'displacement',title:'Segundo sello · El regreso del viajero',text:'Un viajero da una vuelta completa a la fuente y vuelve al punto exacto donde empezó. ¿Qué magnitud necesariamente es cero?',choices:[['displacement','El desplazamiento'],['distance','La distancia recorrida'],['speed','La rapidez al llegar']],answer:'displacement',hint:'Dos relatos del mismo viaje no siempre hablan de lo mismo.',setup:'Desplazamiento = posición final − posición inicial. Al regresar, ambas posiciones coinciden. La distancia suma el camino recorrido. Decide cuál de las opciones cumple esto.',trueLine:'Las huellas permanecen, aunque el punto de partida y el de llegada sean uno solo.',falseLine:'Cada paso añadió distancia; por eso también dejó un desplazamiento distinto de cero al regresar.'};
   const q=GUARDIAN_QUESTIONS.find(q=>q.id===this.calculationId);
   const lines={circle:['La velocidad se obtiene derivando la posición respecto al tiempo.','La velocidad se obtiene sumando la posición y el tiempo.'],position:['La velocidad media se calcula restando las posiciones y dividiendo entre el tiempo transcurrido.','La velocidad media se calcula sumando las posiciones y dividiendo entre el tiempo transcurrido.'],drone:['En este problema, la aceleración vertical es negativa. Conserva ese signo.','En este problema, la aceleración vertical es positiva. Cambia ese signo.']}[q.id];
-  return {...q,...GUARDIAN_CALCULATIONS[q.id],id:'calculation-'+q.id,title:'Tercer sello · '+q.title,trueLine:lines[0],falseLine:lines[1]};
+  const followup=this.stage>=2,exercise=(followup?GUARDIAN_FOLLOWUPS:GUARDIAN_CALCULATIONS)[q.id];
+  return {...q,...exercise,id:(followup?'followup-':'calculation-')+q.id,title:(followup?'Tercer':'Segundo')+' sello · '+q.title,trueLine:followup?'Cada inciso pide una magnitud distinta: revisa las unidades antes de elegir.':lines[0],falseLine:followup?'La respuesta del inciso anterior sirve igual, aunque ahora pidan otra magnitud.':lines[1]};
  }
  get question(){
   const base=this.baseQuestion,index=this.conceptVariants[Math.min(this.stage,1)];
-  if(this.stage>1||index===0)return base;
+  if(this.stage>0||index===0)return base;
   const variant=GUARDIAN_CONCEPT_POOL[this.stage][index-1];
   return {...base,...variant,id:variant.id};
  }
  nextQuestion(){
-  const stage=this.stage,current=stage<2?this.conceptVariants[stage]:this.calculationId;
-  let bag=this.questionBags[stage];
-  if(!bag.length)bag=this.questionBags[stage]=(stage<2?[0,1,2]:GUARDIAN_QUESTIONS.map(q=>q.id)).filter(id=>id!==current);
+  const stage=this.stage,current=stage===0?this.conceptVariants[0]:this.calculationId;
+  let bag=this.questionBags[stage]=this.questionBags[stage].filter(id=>id!==current);
+  if(!bag.length)bag=this.questionBags[stage]=(stage===0?[0,1,2]:GUARDIAN_QUESTIONS.map(q=>q.id)).filter(id=>id!==current);
   const next=bag.splice(Math.floor(Math.random()*bag.length),1)[0];
-  if(stage<2)this.conceptVariants[stage]=next;else this.calculationId=next;
+  if(stage===0)this.conceptVariants[0]=next;else this.calculationId=next;
   const speaker=Math.random()<.5?'book':'rodrigo';if(stage===0)this.truthful=speaker;else this.voiceOrder[stage-1]=speaker;
   this.draft={};this.renderQuestion();
  }
@@ -82,7 +88,7 @@ window.GardenGuardian=class {
   document.querySelector('#guardian-progress').textContent=`${this.stage} / 3 sellos`;
   document.querySelector('#guardian-title').textContent=I18n.t(q.title);document.querySelector('#guardian-question').textContent=I18n.t(q.text);
   document.querySelector('#guardian-note').textContent=I18n.t(q.choices?'Elige una respuesta. Conservas los sellos que ya has ganado.':'Escribe números sin unidades; puedes redondear a dos decimales.');
-  const fields=document.querySelector('#guardian-fields');fields.replaceChildren();fields.classList.toggle('choices',!!q.choices);fields.classList.toggle('calculation',this.stage===2);document.querySelector('#guardian-rule').hidden=this.stage>0;
+  const fields=document.querySelector('#guardian-fields');fields.replaceChildren();fields.classList.toggle('choices',!!q.choices);fields.classList.toggle('calculation',this.stage>=1);document.querySelector('#guardian-rule').hidden=this.stage>0;
   if(q.choices){for(const [id,text] of q.choices){const l=document.createElement('label'),i=document.createElement('input'),span=document.createElement('span');i.type='radio';i.name='choice';i.value=id;i.required=true;i.checked=this.draft.choice===id;i.onchange=()=>{this.draft.choice=id;};span.textContent=I18n.t(text);l.append(i,span);fields.append(l);}}
   else for(const [id,label] of q.fields){const l=document.createElement('label'),i=document.createElement('input');l.textContent=I18n.t(label);i.name=id;i.type='number';i.step='any';i.inputMode='decimal';i.required=true;i.value=this.draft[id]??'';i.oninput=()=>{this.draft[id]=i.value;};l.append(i);fields.append(l);}
   document.querySelector('#guardian-feedback').textContent='';document.querySelector('#guardian-form').hidden=this.pendingNext;document.querySelector('#guardian-next').hidden=!this.pendingNext;
@@ -98,7 +104,7 @@ window.GardenGuardian=class {
   else for(const [id] of q.fields){const raw=form.elements[id].value;this.draft[id]=raw;if(!raw.trim())return;values[id]=Number(raw);}
   const ok=GardenGuardian.check(q,values);this.onAnswer?.(values,ok);
   if(ok){
-   this.stage++;this.draft={};Sound.tone(440+this.stage*90,.16,'sine',.07);
+   this.stage++;if(this.stage===2)this.questionBags[2]=GUARDIAN_QUESTIONS.map(q=>q.id).filter(id=>id!==this.calculationId);this.draft={};Sound.tone(440+this.stage*90,.16,'sine',.07);
    if(this.stage===3){this.solved=true;this.close();Sound.tone(95,.7,'triangle',.06);this.onEvent('guardian-solved');}
    else {this.pendingNext=true;document.querySelector('#guardian-form').hidden=true;document.querySelector('#guardian-next').hidden=false;document.querySelector('#guardian-feedback').textContent=I18n.t('Un sello se ha encendido. Escucha la siguiente prueba.');document.querySelector('#guardian-progress').textContent=`${this.stage} / 3 sellos`;this.onEvent('guardian-progress');this.updateAid();}
   }else{this.nextQuestion();document.querySelector('#guardian-feedback').textContent=I18n.t('Respuesta incorrecta. El sello propone otra pregunta; conservas los sellos anteriores.');Sound.tone(170,.15,'triangle',.07);this.updateAid();this.onEvent('guardian-answer');}
@@ -106,19 +112,22 @@ window.GardenGuardian=class {
  updateAid(){document.querySelector('#guardian-palma').hidden=this.pendingNext||!this.canPalma?.();}
  hideVoices(){for(const who of ['book','rodrigo']){const e=document.querySelector('#guardian-voice-'+who);if(e)e.hidden=true;}}
  close(){this.hideVoices();if(!this.panel.hidden){this.panel.hidden=true;document.querySelector('#game').focus({preventScroll:true});}}
- snapshot(){return {version:4,conceptVariants:[...this.conceptVariants],questionBags:this.questionBags.map(b=>[...b]),voiceOrder:[...this.voiceOrder],arrived:this.arrived,solved:this.solved,stage:this.stage,truthful:this.truthful,calculationId:this.calculationId,draft:{...this.draft},gateProgress:this.gateProgress};}
+ snapshot(){return {version:5,conceptVariants:[...this.conceptVariants],questionBags:this.questionBags.map(b=>[...b]),voiceOrder:[...this.voiceOrder],arrived:this.arrived,solved:this.solved,stage:this.stage,truthful:this.truthful,calculationId:this.calculationId,draft:{...this.draft},gateProgress:this.gateProgress};}
  restore(data){
   if(typeof data?.arrived!=='boolean'||typeof data.solved!=='boolean')throw Error('Invalid guardian checkpoint');
-  if(![2,3,4].includes(data.version)){if(!GUARDIAN_QUESTIONS.some(q=>q.id===data.questionId))throw Error('Invalid old guardian question');this.calculationId=data.questionId;this.stage=data.solved?3:0;this.arrived=data.arrived;this.solved=data.solved;this.draft={};this.gateProgress=data.solved?1:0;}
+  if(![2,3,4,5].includes(data.version)){if(!GUARDIAN_QUESTIONS.some(q=>q.id===data.questionId))throw Error('Invalid old guardian question');this.calculationId=data.questionId;this.stage=data.solved?3:0;this.arrived=data.arrived;this.solved=data.solved;this.draft={};this.gateProgress=data.solved?1:0;}
   else{if(!Number.isInteger(data.stage)||data.stage<0||data.stage>3||data.solved!==(data.stage===3)||data.solved&&!data.arrived||!['book','rodrigo'].includes(data.truthful)||!GUARDIAN_QUESTIONS.some(q=>q.id===data.calculationId))throw Error('Invalid guardian seals');Object.assign(this,{stage:data.stage,arrived:data.arrived,solved:data.solved,truthful:data.truthful,calculationId:data.calculationId});const ids=this.question.choices?['choice']:this.question.fields.map(f=>f[0]);this.draft=Object.fromEntries(ids.filter(id=>Object.prototype.hasOwnProperty.call(data.draft||{},id)).map(id=>[id,String(data.draft[id]).slice(0,40)]));this.gateProgress=this.solved?Math.max(0,Math.min(1,Number(data.gateProgress)||0)):0;}
   if(data.version>=3){if(!Array.isArray(data.voiceOrder)||data.voiceOrder.length!==2||!data.voiceOrder.every(w=>['book','rodrigo'].includes(w)))throw Error('Invalid guardian voices');this.voiceOrder=[...data.voiceOrder];}
-  if(data.version===4){
+  if(data.version===5){
    if(!Array.isArray(data.conceptVariants)||data.conceptVariants.length!==2||!data.conceptVariants.every(n=>Number.isInteger(n)&&n>=0&&n<=2)||!Array.isArray(data.questionBags)||data.questionBags.length!==3)throw Error('Invalid guardian question pool');
-   for(let i=0;i<3;i++){const bag=data.questionBags[i],allowed=i<2?[0,1,2]:GUARDIAN_QUESTIONS.map(q=>q.id);if(!Array.isArray(bag)||bag.length>2||new Set(bag).size!==bag.length||!bag.every(v=>allowed.includes(v))||bag.includes(i<2?data.conceptVariants[i]:this.calculationId))throw Error('Invalid guardian question bag');}
+   for(let i=0;i<3;i++){const bag=data.questionBags[i],allowed=i===0?[0,1,2]:GUARDIAN_QUESTIONS.map(q=>q.id);if(!Array.isArray(bag)||bag.length>2||new Set(bag).size!==bag.length||!bag.every(v=>allowed.includes(v)))throw Error('Invalid guardian question bag');}
    this.conceptVariants=[...data.conceptVariants];this.questionBags=data.questionBags.map(b=>[...b]);
-  }else{this.conceptVariants=[0,0];this.questionBags=[[1,2],[1,2],GUARDIAN_QUESTIONS.map(q=>q.id).filter(id=>id!==this.calculationId)];}
-  // Old first-seal drafts refer to a different question; keep earned seals.
-  if(data.version<3&&this.stage===0)this.draft={};
+  }else{
+   // Earlier saves keep earned seals, but their second seal was conceptual.
+   this.conceptVariants=[data.version===4?data.conceptVariants?.[0]||0:0,0];
+   this.questionBags=[[0,1,2].filter(n=>n!==this.conceptVariants[0]),...Array.from({length:2},()=>GUARDIAN_QUESTIONS.map(q=>q.id).filter(id=>id!==this.calculationId))];
+   this.draft={};
+  }
   this.gateOpened=this.gateProgress===1;this.pendingNext=false;this.onTile=false;this.close();
  }
  floor(x,y){

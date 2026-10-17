@@ -29,15 +29,21 @@ window.SpaceCinematic=class {
    const c=this.library.ctx,t=this.currentTime||0;
    // The ejection, landing and prison speech have distinct villain poses.
    const frame=t<20?6:t<32.4?3:Math.floor(t*6)%3===1?5:4;
-   c.save();c.globalAlpha*=alpha;RPGCast.action(c,this.library.images.ericAir,frame,x,y+height/2,height,{rotation});c.restore();return;
+   c.save();c.globalAlpha*=alpha;this.drawEric(frame,x,y+height/2,height,{rotation});c.restore();return;
   }
   const {ctx:c,images}=this.library,image=images[key];if(!image?.complete||!image.naturalWidth)return;
   const width=height*image.naturalWidth/image.naturalHeight;c.save();c.globalAlpha*=alpha;c.translate(x,y);c.rotate(rotation);c.drawImage(image,-width/2,-height/2,width,height);c.restore();
  }
+ // Content bounds exclude detached scraps of adjacent poses without changing
+ // the shared foot/head anchor or rescaling a speaking frame.
+ drawEric(frame,x,feet,height,options={}){
+  const bounds={2:[76,0,203,320],4:[85,0,196,320],5:[85,0,192,320]};
+  RPGCast.action(this.library.ctx,this.library.images.ericAir,frame,x,feet,height,{...options,sourceBounds:bounds[frame]});
+ }
  parachute(x,feet,height,opening=1){
   const c=this.library.ctx,t=this.currentTime||0;
   const frame=t>21.2&&Math.floor(t*6)%4===2?2:Math.floor(t*3)%2;
-  RPGCast.action(c,this.library.images.ericAir,frame,x,feet,height);
+  this.drawEric(frame,x,feet,height);
   const top=feet-height*1.9,radius=height*.83*opening;
   c.save();c.strokeStyle='#dce3d6';c.lineWidth=Math.max(1,height*.014);
   for(const k of [-1,-.5,.5,1]){c.beginPath();c.moveTo(x+radius*k,top);c.lineTo(x+Math.sign(k)*height*.22,feet-height*.88);c.stroke();}

@@ -18,9 +18,9 @@ await p.evaluate(()=>{
  }
  g.stage=0;g.solved=false;const legacy={...g.snapshot(),version:2,draft:{choice:'book'}};delete legacy.voiceOrder;g.restore(legacy);
  if(g.stage!==0||Object.keys(g.draft).length)throw Error('Obsolete first-seal answer survived migration');
- g.stage=2;if(g.question.hint!==GUARDIAN_CALCULATIONS.circle.hint)throw Error('Calculation guidance changed');
+ g.stage=2;if(g.question.hint!==GUARDIAN_FOLLOWUPS.circle.hint)throw Error('Calculation guidance changed');
  g.stage=0;if(g.question.hint.length>85||/aceleración|velocidad/.test(g.question.hint))throw Error('Paola reveals first riddle');
- g.stage=1;if(g.question.hint.length>85||/desplazamiento/.test(g.question.hint))throw Error('Paola reveals second riddle');
+ g.stage=1;if(g.question.hint!==GUARDIAN_CALCULATIONS.circle.hint)throw Error('First calculation must retain helpful guidance');
 });
 for(const calc of ['circle','position','drone'])for(const truth of ['book','rodrigo']){
  await enter(calc,truth);
@@ -32,9 +32,9 @@ for(const calc of ['circle','position','drone'])for(const truth of ['book','rodr
  await answer(truth==='book'?'rodrigo':'book');assert.equal(await p.evaluate(()=>corridor.guardian.stage),0);
  await answer(await p.evaluate(()=>corridor.guardian.question.answer));assert.equal(await p.evaluate(()=>corridor.guardian.stage),1);
  await p.evaluate(()=>corridor.guardian.submit());assert.equal(await p.evaluate(()=>corridor.guardian.stage),1,'duplicate submit cannot skip a seal');
- await p.locator('#guardian-next').click();await answer('distance');assert.equal(await p.evaluate(()=>corridor.guardian.stage),1,'earned seal persists');await answer(await p.evaluate(()=>corridor.guardian.question.answer));
+ await p.locator('#guardian-next').click();await answer(await p.evaluate(()=>{const q=corridor.guardian.question;return q.choices.find(([id])=>id!==q.answer)[0]}));assert.equal(await p.evaluate(()=>corridor.guardian.stage),1,'earned seal persists');await answer(await p.evaluate(()=>corridor.guardian.question.answer));
  await p.locator('#guardian-next').click();assert.equal(await p.locator('#guardian-fields input[type=radio]').count(),4);assert.equal(await p.locator('#guardian-fields input[type=number]').count(),0);
- const right={circle:'c',position:'b',drone:'d'}[calc];await answer(right);assert.equal(await p.evaluate(()=>corridor.guardian.stage),3);assert.equal(await p.evaluate(()=>opened),false,'collision closed while gate animates');
+ const right={circle:'a',position:'c',drone:'b'}[await p.evaluate(()=>corridor.guardian.calculationId)];await answer(right);assert.equal(await p.evaluate(()=>corridor.guardian.stage),3);assert.equal(await p.evaluate(()=>opened),false,'collision closed while gate animates');
  await p.evaluate(()=>corridor.tick(1.4,player));assert.equal(await p.evaluate(()=>opened),false);assert(Math.abs(await p.evaluate(()=>corridor.guardian.gateProgress)-.5)<.001);
  await p.evaluate(()=>corridor.tick(1.41,player));assert(await p.evaluate(()=>opened));assert(await p.evaluate(()=>classroom.solved()));
 }
@@ -45,7 +45,7 @@ assert.equal(await p.evaluate(()=>corridor.guardian.stage),1);assert.equal(await
 async function draw(){await p.evaluate(async()=>{const g=corridor.guardian;await Promise.all([g.statue,g.rodrigo,g.frame,g.leaves,g.fountain].map(i=>i.decode()));renderer.draw(rooms[index],player,opened,0,0);if(renderer.outdoor.rpgCastle)await renderer.outdoor.rpgCastle.decode();renderer.draw(rooms[index],player,opened,0,0);corridor.draw(renderer,player,renderer.actors);renderer.outdoor.draw(renderer,rooms[index],player,renderer.actors,0);});}
 await draw();await p.locator('.scene-view').screenshot({path:'/tmp/epik-twin-dialogue.png'});
 await p.evaluate(()=>corridor.guardian.close());await draw();await p.locator('#game').screenshot({path:'/tmp/epik-twin-gate.png'});
-await p.evaluate(()=>interact());await answer('d');await p.evaluate(()=>{corridor.tick(1,player);recovery.save()});await p.reload();await p.evaluate(()=>document.querySelector('#epik-dev')?.close());await p.locator('#recovery-yes').click();assert.equal(await p.evaluate(()=>corridor.guardian.stage),3);assert.equal(await p.evaluate(()=>opened),false);await p.evaluate(()=>corridor.tick(2,player));assert(await p.evaluate(()=>opened));await draw();await p.locator('#game').screenshot({path:'/tmp/epik-twin-open.png'});
+await p.evaluate(()=>interact());await answer({circle:'a',position:'c',drone:'b'}[await p.evaluate(()=>corridor.guardian.calculationId)]);await p.evaluate(()=>{corridor.tick(1,player);recovery.save()});await p.reload();await p.evaluate(()=>document.querySelector('#epik-dev')?.close());await p.locator('#recovery-yes').click();assert.equal(await p.evaluate(()=>corridor.guardian.stage),3);assert.equal(await p.evaluate(()=>opened),false);await p.evaluate(()=>corridor.tick(2,player));assert(await p.evaluate(()=>opened));await draw();await p.locator('#game').screenshot({path:'/tmp/epik-twin-open.png'});
 assert.equal(await p.evaluate(()=>EpikRanks.room(classroom.session,rooms[index]).stars),1);
 await p.evaluate(()=>{Object.assign(player,{x:67.4,y:4.5,angle:0});keys.add('w');for(let i=0;i<12;i++)tick(last+40);keys.clear()});assert(await p.evaluate(()=>!!rooms[index].boss));
 await p.setViewportSize({width:390,height:844});await enter('position','book');await draw();await p.screenshot({path:'/tmp/epik-twin-mobile.png'});const boxes=await p.locator('.guardian-voice').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height}}));assert(boxes.every(r=>r.x>=0&&r.x+r.w<=390));assert(boxes[0].x+boxes[0].w<=boxes[1].x+2,'mobile voices do not overlap');await p.locator('#guardian-form button').scrollIntoViewIfNeeded();

@@ -14,13 +14,19 @@ Solo se puede responder desde esa baldosa. Los tres retos son de elección múlt
 
 1. Reposo instantáneo: velocidad cero no implica aceleración cero. Elegir la
    afirmación justificada, sin atribuir un papel permanente a la estatua.
-2. Vuelta a la fuente: el desplazamiento es cero al regresar; la distancia no.
-3. Un inciso de uno de los tres ejercicios originales (selección estable):
-   - Trigonométrico: componentes de velocidad a t=0, con ω=1 rad/s explícito.
-     Solución (-5,0) m/s.
-   - Polinómico: velocidad media de t=2 a t=4, con a,b,c,d ya numéricos.
-     Solución (1,.75) m/s.
-   - Dron: componentes de velocidad a t=3. Solución (6,-2) m/s.
+2. Un inciso de cálculo de uno de los tres ejercicios originales:
+   - Trigonométrico: velocidad a t=0, con ω=1 rad/s. (-5,0) m/s.
+   - Polinómico: velocidad media de t=2 a t=4, con a,b,c,d numéricos. (1,.75) m/s.
+   - Dron: velocidad a t=3. (6,-2) m/s.
+3. Otro inciso del mismo ejercicio que se resolvió en el sello anterior:
+   - Trigonométrico: aceleración a t=0. (0,5) m/s².
+   - Polinómico: rapidez instantánea a t=2. √1.25 ≈ 1.12 m/s.
+   - Dron: posición a t=3, con r₀=(2,1) m. (15.5,4) m.
+
+Un error cambia a otro ejercicio dentro del sello actual; el siguiente acierto
+no reutiliza la misma pregunta. Cada sello numérico tiene su propia bolsa de tres
+variantes. Al pasar al tercer sello se conserva la familia de ejercicio, con un
+inciso distinto. Solo el primer sello es teórico.
 
 Las voces se sortean independientemente para cada sello y se guardan: una
 estatua puede acertar o engañar en cualquier prueba. Al fallar se elige otra pregunta y se asignan de nuevo las voces; reabrir o
@@ -34,8 +40,8 @@ al terminar la animación. El antiguo botón de preparación no permite saltarse
 
 ## Ayudas, registro y recuperación
 
-Paola solo ofrece una observación breve en los dos acertijos conceptuales, sin
-identificar al guardián ni revelar la relación física. En el tercer sello conserva
+Paola solo ofrece una observación breve en el acertijo conceptual, sin
+identificar al guardián ni revelar la relación física. En los dos sellos de cálculo conserva
 la orientación completa para el ejercicio. Palma se ofrece después de tres errores en el sello
 actual; en el cálculo deja la sustitución sin evaluar. Su uso mantiene la penalización
 existente de una estrella para el corredor. Intentos y errores se registran por sello;
@@ -80,3 +86,7 @@ una distinta de la bolsa restante, limpia la respuesta y conserva los sellos.
 El identificador de objetivo es estable por sello; las variantes se registran
 por separado, sin reiniciar el conteo de fallos ni el umbral de Palma. Guardado v4
 preserva la bolsa; v1–v3 conservan el avance y reciben bolsas compatibles.
+
+Guardado v5: conserva el orden teoría/cálculo/cálculo. Los guardados anteriores
+conservan los sellos ganados; se descarta su selección pendiente para no aplicarla
+a un inciso distinto.

@@ -5,11 +5,12 @@ window.RPGCast={
  actionCell:{w:384,h:320,body:284,foot:304,x:192},
  clips:{idle:[0,0,0,0,0,0,0,0,1,0,0,0],talk:[0,2,3,2,0,2,3,0],walk:[4,5,6,7],greet:[0,8,9,8,9,8,0],explain:[0,10,10,10,0],think:[11],clap:[12,13],surprise:[14],laugh:[15,3,15,15]},
  frame(pose,t=0){const frames=this.clips[pose]||this.clips.idle,fps=pose==='idle'?3:pose==='walk'?7:pose==='greet'?5:pose==='clap'?6:pose==='explain'?2:8;return frames[Math.floor(Math.max(0,t)*fps)%frames.length];},
- draw(c,image,pose,t,x,feet,height,{rotation=0,flip=false,frame=null,cell=this.cell}={}){
+ draw(c,image,pose,t,x,feet,height,{rotation=0,flip=false,frame=null,cell=this.cell,sourceBounds=null}={}){
   if(!image?.complete||!image.naturalWidth)return false;
   const f=frame??this.frame(pose,t),k=height/cell.body;
   c.save();c.translate(x,feet);c.rotate(rotation);c.scale(flip?-k:k,k);c.imageSmoothingEnabled=false;
-  c.drawImage(image,f%4*cell.w,Math.floor(f/4)*cell.h,cell.w,cell.h,-cell.x,-cell.foot,cell.w,cell.h);c.restore();return true;
+  const [sx,sy,sw,sh]=sourceBounds||[0,0,cell.w,cell.h];
+  c.drawImage(image,f%4*cell.w+sx,Math.floor(f/4)*cell.h+sy,sw,sh,-cell.x+sx,-cell.foot+sy,sw,sh);c.restore();return true;
  },
  action(c,image,frame,x,feet,height,options={}){return this.draw(c,image,'idle',0,x,feet,height,{...options,frame,cell:this.actionCell});},
  portrait(canvas,image,speaking,time=0){

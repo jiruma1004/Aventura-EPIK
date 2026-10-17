@@ -5,11 +5,11 @@ window.EpikCredits=class {
    ['Idea original, diseño y dirección del proyecto','Original concept, design and project direction',['Jesús Iván Ruiz Martínez']],
    ['Diseño de la aventura y aportación de ideas','Adventure design and idea development',['Eric Fransico Chavez']],
    ['Colaboración creativa y seguimiento del desarrollo','Creative collaboration and development follow-up',['Leidy Paola Quiroga']],
-   ['Comunidad estudiantil Ignitia','Ignitia student community',['José Luis · Responsable del grupo estudiantil Ignitia','Grupo estudiantil Ignitia']],
-   ['Coordinación de la unidad de formación y agradecimiento','Course unit coordination and acknowledgement',['Luis Rico · Coordinador de la unidad de formación'], 'Por permitir incorporar esta aventura como actividad de aprendizaje.','For making this adventure part of the learning activities.'],
+   ['Comunidad estudiantil Ignitia','Ignitia student community',['José Luis Henriquez Mercado · Líder del grupo estudiantil Ignitia','Grupo estudiantil Ignitia']],
+   ['Coordinación de la unidad de formación y agradecimiento','Course unit coordination and acknowledgement',['Luis Manuel Rico Gutiérrez · Coordinador de la unidad de formación'], 'Por permitir incorporar esta aventura como actividad de aprendizaje.','For making this adventure part of the learning activities.'],
    ['Agradecimiento por su visto bueno','Acknowledgement for her approval',['Angélica Sanchez · Directora del Departamento de Ciencias'],'Por dar su visto bueno a esta iniciativa educativa.','For approving this educational initiative.'],
    ['Coordinación del área de Ciencias y pruebas del juego','Sciences area coordination and game testing',['Karla Lucia · Coordinadora del Área de Ciencias']],
-   ['Pruebas y retroalimentación','Testing and feedback',['Rodrigo Gamboa']],
+   ['Pruebas y retroalimentación','Testing and feedback',['Rodrigo Gamboa Goñi']],
    ['Aportación musical','Music contribution',['Pablo Alejandro']],
    ['Herramientas de apoyo al desarrollo','Development tools',['Codex · OpenAI'],'Asistencia en programación, iteración y pruebas, bajo la dirección del creador del proyecto.','Assistance with programming, iteration and testing, under the direction of the project creator.']
   ];

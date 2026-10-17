@@ -122,7 +122,7 @@ function openNearbyDoor(angle=player.angle,screenY=null){
  if(maze){const door=maze.doorAt(hit.cx,hit.cy);if(door?.stage!==maze.stage)return false;maze.choose(door,player);return true;}
  opened=room.canUnlock({prototypeMode:true});if(opened){Sound.click();document.querySelector('#door-status').textContent='PUERTA ABIERTA';message.textContent='Cruza la puerta para continuar.';}return opened;
 }
-function bossEvent(type){if(type==='flame'){die('flame');return;}if(type==='potion'){die('potion');return;}if(type!=='solved')return;classroom.solve();boss.resetAttacks();Sound.stop('laugh');companions.closeHelp();document.querySelector('#ask-paola').hidden=true;ignitia.startEscape(player);keys.clear();return;}
+function bossEvent(type){if(type==='stun'){companions.toast('¡Descarga! Eric queda aturdido durante 15 segundos. Aprovecha los láseres.');recovery?.save();return;}if(type==='flame'){die('flame');return;}if(type==='potion'){die('potion');return;}if(type!=='solved')return;classroom.solve();boss.resetAttacks();Sound.stop('laugh');companions.closeHelp();document.querySelector('#ask-paola').hidden=true;ignitia.startEscape(player);keys.clear();return;}
 function ignitiaEvent(type){
  if(type==='moon'){ignitia.closeConsole();ignitia.speaking=false;document.querySelector('#ignitia-dialog').hidden=true;die('moon');return;}
  if(type==='launch'){classroom.solve();classroom.session.finish();mission.finish();keys.clear();camera.release();companions.closeHelp();Object.assign(player,{x:3,y:7.5,angle:0,pitch:.10,jumpHeight:0,jumpVelocity:0});return;}
@@ -277,7 +277,7 @@ function captureRecovery() {
  if(room.roulette)world.roulette={current:roulette.current?.id,selected:roulette.selected,remaining:roulette.remaining,solved:[...roulette.solved],angle:roulette.angle};
  if(maze)world.maze={...pick(maze,mazeRecoveryFields),map:room.map,environment:room.environment,doors:maze.doors,
   passed:[...maze.passed],openDoors:[...maze.openDoors],usedFreezeButtons:[...maze.usedFreezeButtons]};
- if(boss)world.boss={support:boss.puzzle.support.id,cuts:boss.puzzle.cuts};
+ if(boss)world.boss={support:boss.puzzle.support.id,cuts:boss.puzzle.cuts,stun:boss.stun.snapshot()};
  if(room.rocket)world.rocket={...pick(ignitia.simulator,['params','missionTime','attempts','launchEpoch','ready']),ending:classroom.session.finished!==null};
  return {world,session:classroom.session.recoverySnapshot(),remaining:mission.remaining,
   clockComplete:mission.state==='complete',language:I18n.lang};
@@ -323,7 +323,7 @@ function restoreRecovery(saved,away) {
  }
  if(boss&&w.boss){
   const support=EricVariants.bank.find(v=>v.id===w.boss.support);if(!support)throw Error('Unknown puzzle');
-  boss.puzzle=new ParabolaPuzzle(support);boss.puzzle.cuts=w.boss.cuts;
+  boss.puzzle=new ParabolaPuzzle(support);boss.puzzle.cuts=w.boss.cuts;boss.stun.restore(w.boss.stun,away/1000);
   document.querySelector('#boss-parabola').textContent='y = '+support.parabolaText;
   document.querySelector('#boss-line').textContent='y = '+support.lineText;
   document.querySelector('#boss-equality').textContent=support.parabolaText+' = '+support.lineText;

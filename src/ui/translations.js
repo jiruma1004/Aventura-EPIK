@@ -1256,3 +1256,25 @@ Object.assign(window.ENGLISH,{
  'Como la caída es libre, las dos componentes conservan su valor inicial.':'Because it is in free fall, both components retain their initial values.',
  'Separa los ejes. Con gravedad solo vertical, aₓ = 0 y aᵧ = −g. Decide en qué eje no cambia la velocidad.':'Separate the axes. With purely vertical gravity, aₓ = 0 and aᵧ = −g. Decide along which axis velocity does not change.'
 });
+
+Object.assign(window.ENGLISH,{
+ 'Paola · Formulario general':'Paola · Formula reference',
+ 'Aquí tienes un formulario general. Identifica tus datos, elige las ecuaciones y despeja lo que te piden.':'Here is a general formula reference. Identify your data, choose the equations and solve for the requested quantity.',
+ 'Segundo sello · El instante del movimiento':'Second seal · The instant of motion',
+ 'Segundo sello · Dos maneras de mirar el tiempo':'Second seal · Two ways of looking at time',
+ 'Segundo sello · El mensajero del cielo':'Second seal · The messenger of the sky',
+ 'El mismo movimiento: x(t) = −5 sen(ωt), y(t) = 4 − 5 cos(ωt), con ω = 1 rad/s. Ahora calcula las componentes de la aceleración en t = 0 s.':'The same motion: x(t) = −5 sin(ωt), y(t) = 4 − 5 cos(ωt), with ω = 1 rad/s. Now find the acceleration components at t = 0 s.',
+ 'Con a = 1 m/s, b = 1 m, c = 0.125 m/s² y d = 1 m: x(t) = t + 1; y(t) = 0.125t² + 1. Ahora calcula la rapidez instantánea en t = 2 s.':'With a = 1 m/s, b = 1 m, c = 0.125 m/s² and d = 1 m: x(t) = t + 1; y(t) = 0.125t² + 1. Now find the instantaneous speed at t = 2 s.',
+ 'El dron parte de r₀ = (2, 1) m, con v₀ = (3, 4) m/s y a = (1, −2) m/s² constantes. Ahora calcula su posición en t = 3 s.':'The drone starts at r₀ = (2, 1) m, with v₀ = (3, 4) m/s and constant a = (1, −2) m/s². Now find its position at t = 3 s.',
+ 'Deriva cada coordenada dos veces. Evalúa en t = 0; cuida los signos y recuerda el factor ω².':'Differentiate each coordinate twice. Evaluate at t = 0; watch the signs and the ω² factor.',
+ 'Deriva x(t) e y(t) para obtener las componentes de velocidad. La rapidez es √(vₓ² + vᵧ²); no es la suma de las componentes.':'Differentiate x(t) and y(t) to obtain velocity components. Speed is √(vₓ² + vᵧ²), not the sum of the components.',
+ 'Aplica r = r₀ + v₀t + ½at² por componentes. Incluye la posición inicial y conserva el signo de aᵧ.':'Apply r = r₀ + v₀t + ½at² by components. Include the initial position and keep the sign of aᵧ.',
+ 'Cada inciso pide una magnitud distinta: revisa las unidades antes de elegir.':'Each part asks for a different quantity: check the units before choosing.',
+ 'La respuesta del inciso anterior sirve igual, aunque ahora pidan otra magnitud.':'The previous part’s answer works just as well, even if a different quantity is requested now.',
+ 'Evalúa en radianes y elige el vector resultante.':'Evaluate in radians and choose the resulting vector.',
+ 'Termina el cálculo y redondea a dos decimales.':'Finish the calculation and round to two decimal places.',
+ 'Resuelve ambas operaciones y elige la posición.':'Evaluate both expressions and choose the position.',
+ '¡Mi propia máquina! ¡Esto es una descarga de traición!':'My own machine! What a shocking betrayal!',
+ '¡Descarga! Eric queda aturdido durante 15 segundos. Aprovecha los láseres.':'Discharge! Eric is stunned for 15 seconds. Use the lasers.',
+ 'Si la máquina suelta una chispa, recógela: aturde a Eric 15 segundos y solo puede usarse una vez.':'If the machine drops a spark, collect it: it stuns Eric for 15 seconds and can only be used once.'
+});
