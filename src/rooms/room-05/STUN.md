@@ -1,8 +1,8 @@
 # Chispa de la máquina
 
-La máquina suelta una chispa tras un intervalo aleatorio uniforme de 30 a 50
+La máquina suelta una chispa tras un intervalo aleatorio uniforme de 20 a 40
 segundos, escogido de nuevo en cada aparición (también para la primera).
-La media es 40 s, aproximadamente 1.5 chispas por minuto a largo plazo; no es
+La media es 30 s, aproximadamente 2 chispas por minuto a largo plazo; no es
 una cuota por minuto. Funciona en ambos modos. El contador avanza también
 mientras Eric está aturdido, pero se pausa con el juego o la pestaña oculta.
 
@@ -22,7 +22,7 @@ estrellas. Al terminar, los ataques continúan; el ciclo de la chispa mantiene s
 Pausas y pestaña oculta detienen la simulación. El guardado conserva contador, destino aleatorio,
 todas las chispas en vuelo/suelo, el próximo intervalo y el aturdimiento restante (descontando el tiempo fuera).
 Morir cancela el aturdimiento, pero conserva el contador y las chispas pendientes.
-La migración conserva una chispa ya liberada en partidas anteriores e inicia un intervalo de 30–50 s.
+La migración conserva una chispa ya liberada en partidas anteriores e inicia un intervalo de 20–40 s.
 Resolver la batalla cancela el efecto y oculta las chispas.
 
 La supernova empieza a los 121.5 s de combate activo: carga 2 s, pantalla verde

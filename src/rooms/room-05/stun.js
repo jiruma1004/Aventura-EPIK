@@ -1,8 +1,8 @@
-/* Independent random 30–50 s intervals average 1.5 sparks/minute. Pickups persist
+/* Independent random 20–40 s intervals average 2 sparks/minute. Pickups persist
    on the floor; collecting resets, never adds to, the 15-second stun. */
 window.EricSpark=class {
- static minInterval=30;
- static maxInterval=50;
+ static minInterval=20;
+ static maxInterval=40;
  static flight=1.2;
  static duration=15;
  static legacyLanding={x:14.4,y:7.5,z:.38};
@@ -46,16 +46,19 @@ window.EricSpark=class {
   return dt-paused;
  }
  cancel(){this.left=0;this.beam=0;}
- snapshot(){return {version:5,landing:{...this.landing},age:this.age,cycle:this.cycle,interval:this.interval,sparks:this.sparks.map(s=>({landing:{...s.landing},flightAge:s.flightAge})),left:this.left};}
+ snapshot(){return {version:6,landing:{...this.landing},age:this.age,cycle:this.cycle,interval:this.interval,sparks:this.sparks.map(s=>({landing:{...s.landing},flightAge:s.flightAge})),left:this.left};}
  restore(data,away=0){
   if(!data)return;
   if(!Number.isFinite(data.age)||data.age<0||!Number.isFinite(data.left)||data.left<0||data.left>EricSpark.duration)throw Error('Invalid spark checkpoint');
   let cycle=0,interval=this.rollInterval(),sparks=[];
   const landing=data.version>=4?data.landing:EricSpark.legacyLanding;
   if(!EricSpark.safeLanding(landing))throw Error('Invalid spark landing');
-  if(data.version===5){
+  if(data.version===5||data.version===6){
    cycle=data.cycle;interval=data.interval;sparks=data.sparks;
-   if(!Number.isFinite(interval)||interval<EricSpark.minInterval||interval>EricSpark.maxInterval||!Array.isArray(sparks))throw Error('Invalid spark interval');
+   const legacy=data.version===5;
+   if(!Number.isFinite(interval)||interval<(legacy?30:EricSpark.minInterval)||interval>(legacy?50:EricSpark.maxInterval)||!Array.isArray(sparks))throw Error('Invalid spark interval');
+   // Preserve progress through an old 30–50 s interval when adopting 20–40 s.
+   if(legacy){cycle*=((interval-10)/interval);interval-=10;}
   }else{
    let flightAge=-1;
    if([4,3,2].includes(data.version)){

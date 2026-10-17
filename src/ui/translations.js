@@ -1276,5 +1276,5 @@ Object.assign(window.ENGLISH,{
  'Resuelve ambas operaciones y elige la posición.':'Evaluate both expressions and choose the position.',
  '¡Mi propia máquina! ¡Esto es una descarga de traición!':'My own machine! What a shocking betrayal!',
  '¡Descarga! Eric queda aturdido durante 15 segundos. Aprovecha los láseres.':'Discharge! Eric is stunned for 15 seconds. Use the lasers.',
- 'La máquina suelta chispas cada 30–50 segundos. Recoge una para aturdir a Eric 15 segundos; otra reinicia ese tiempo.':'The machine drops sparks every 30–50 seconds. Collect one to stun Eric for 15 seconds; another resets that timer.'
+ 'La máquina suelta chispas cada 20–40 segundos. Recoge una para aturdir a Eric 15 segundos; otra reinicia ese tiempo.':'The machine drops sparks every 20–40 seconds. Collect one to stun Eric for 15 seconds; another resets that timer.'
 });
