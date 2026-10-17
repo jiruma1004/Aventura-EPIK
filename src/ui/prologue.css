@@ -13,8 +13,8 @@
 .prologue .story-portrait.full-body{background:transparent;border:0;padding:0}.prologue .full-body canvas{display:block;width:224px;height:auto;margin:auto}
 @media(max-width:750px){.prologue .story-portrait.full-body{width:140px}.prologue .full-body canvas{width:136px;height:auto}}
 
-/* El periódico completo ya contiene sus titulares y conserva sus colores originales. */
-.prologue .story-portrait.missing-newspaper{padding:0;border:0;background:none;box-shadow:none;transform:none}
-.prologue .missing-newspaper canvas{width:100%;height:auto;filter:none;border:0;outline:0;background:transparent;image-rendering:auto}
-.prologue .missing-newspaper #story-person{display:none}
-@media(max-width:750px){.prologue .story-portrait.missing-newspaper{width:168px;padding:0}}
+/* Restored newspaper typography and frame; retain the current approved portrait. */
+.prologue .story-portrait.missing-newspaper{padding:12px;border:1px solid #777;background:repeating-linear-gradient(0deg,#efefeb 0px,#efefeb 3px,#e5e5e0 4px);box-shadow:3px 5px 0 #060b1566;transform:rotate(-2deg);color:#222}
+.prologue .missing-headline{border-color:#333}.prologue .missing-headline strong,.prologue .missing-headline small,.prologue .missing-caption,.prologue .missing-newspaper #story-person{color:#222;text-shadow:none}.prologue .missing-caption{border-color:#777}
+.prologue .missing-newspaper canvas{filter:none;background:#deded8;border:2px solid #333;outline:1px solid #999;outline-offset:-5px;width:100%;height:auto;image-rendering:auto}
+@media(max-width:750px){.prologue .story-portrait.missing-newspaper{width:192px;padding:8px}.prologue .missing-newspaper canvas{width:132px;height:132px}}

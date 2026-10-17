@@ -72,7 +72,8 @@ window.EpikRanks = {
     const academic = this.academicValue(errors);
     const survival = Math.max(0, 100 - (kind === 'corridor' ? 15 : 10) * state.deaths);
     const eligible = state.solved;
-    const score = eligible ? state.assisted ? 20 : Math.round(kind === 'corridor' ? survival : academic * .8 + survival * .2) : 0;
+    const calculation = kind !== 'corridor' || events.some(e => e.objective_id?.startsWith('guardian-'));
+    const score = eligible ? state.assisted ? 20 : Math.round(!calculation ? survival : academic * .8 + survival * .2) : 0;
     return {
       id: room.id, name: room.name, kind, solved: state.solved, assisted: state.assisted,
       score, stars: eligible ? this.stars(score) : 0,

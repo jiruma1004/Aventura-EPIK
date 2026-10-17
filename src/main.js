@@ -71,6 +71,7 @@ function load(i,reason='transition'){
  if(classroom?.session.current&&classroom.session.current!==rooms[i].id&&reason==='transition'&&classroom.session.started!==null){if(!classroom.solved()||!opened||death)return false;classroom.session.interrupt('room_exit');classroom.session.leave();}
  if(classroom)classroom.session.interrupt('room_reload');
  if(reason==='preview')classroom.session.preview=true;
+const gardenState=index===i&&reason==='transition'?corridor?.guardian.snapshot():null;corridor?.guardian.close();
 if(arrival.active)arrival.finish();cinematics.close();measurement.reset(rooms[i]);ignitia.reset(rooms[i]);document.querySelector('.scene-view').classList.toggle('has-rocket',!!rooms[i].rocket);document.querySelector('.scene-view').classList.toggle('has-measurement',!!rooms[i].measurement);Sound.stop('laugh');boss?.supernova.reset();boss?.close();for(const id of ['boss-mission','boss-panel'])if(document.getElementById(id))document.getElementById(id).hidden=true;document.querySelector('#eric-ready').close();clearDeath();Sound.selectBackground(rooms[i].trial?'grassland':rooms[i].roulette?'seal':rooms[i].conceptual?'maze':rooms[i].corridor?'corridor':rooms[i].boss?'stand':rooms[i].rocket?'phase':'music');Sound.recover(true);index=i;player=spawnPlayer(rooms[i]);opened=false;completed=false;keys.clear();flash=0;const room=rooms[i];cinematics.assets.prepare(room);document.querySelector('#fire-shortcut').hidden=!!(room.rocket||room.measurement||room.trial);document.querySelector('#station-fire').disabled=!!(room.rocket||room.measurement||room.trial);
  document.querySelector('#room-title').textContent=`UMBRAL ${room.label||['I','II','III','IV','V','VI'][i]} / ${room.name.toUpperCase()}`;
  document.querySelector('#door-status').textContent=room.trial?'SALTO 1 / 5':room.measurement?'SELLO DE MEDICIÓN':room.physics?'PUENTE DESACTIVADO':room.roulette?'SELLO CERRADO':room.conceptual?'LABERINTO · 1 / 4':room.corridor?'CAMINO A LA SALA PRINCIPAL':'PUERTA BLOQUEADA';
@@ -81,8 +82,9 @@ if(arrival.active)arrival.finish();cinematics.close();measurement.reset(rooms[i]
  if(room.physics)lab.reset(room);if(room.roulette){roulette.reset();roulette.syncReset(classroom.session.state(room.id));}
  boss=room.boss?new EricEncounter(bossEvent):null;if(boss)boss.canFire=()=>canPlay()&&boss.active===boss.near(player,renderer,rooms[index],opened);
  trial=room.trial?new ApproachTrial(room,trialEvent):null;room.approach=trial;
- corridor=room.corridor?new RelaxCorridor(corridorEvent):null;
- maze=room.conceptual?new ConceptMaze(room,mazeEvent):null;room.maze=maze;companions.load(room,roulette,maze);if(room.corridor)companions.toast('Cuidado, el Dr. Eric te está lanzando ecuaciones desde el otro lado');checkpoint={room:index,stage:0,position:spawnPlayer(room)};
+ corridor=room.corridor?new RelaxCorridor(corridorEvent):null;room.guardian=corridor?.guardian;
+ if(corridor){const g=corridor.guardian;g.canUse=canPlay;g.canAnswer=()=>g.near(player);g.onPaola=()=>companions.help();g.onPalma=()=>classroom.aid.open();g.canPalma=()=>classroom.aid.eligible()&&classroom.session.available(classroom.context().objective_id)&&canPlay();if(gardenState)g.restore(gardenState);}
+ maze=room.conceptual?new ConceptMaze(room,mazeEvent):null;room.maze=maze;companions.load(room,roulette,maze);companions.guardian=corridor?.guardian;if(room.corridor)companions.toast('Cuidado, el Dr. Eric te está lanzando ecuaciones desde el otro lado');checkpoint={room:index,stage:0,position:spawnPlayer(room)};if(corridor?.guardian.arrived){checkpoint={room:index,stage:1,position:{...spawnPlayer(room),...GUARDIAN_GARDEN.checkpoint}};player={...checkpoint.position};}
  classroom?.enter();return true;
 }
 function trialEvent(type,position){
@@ -128,10 +130,17 @@ function ignitiaEvent(type){
  if(type!=='escapeDone')return;opened=rooms[index].canUnlock({parabolaCut:true});companions.toast('Eric escapó. Cruza el puente central hacia el cohete de Ignitia.');document.querySelector('#door-status').textContent='SOPORTE CORTADO · PASO ABIERTO';}
 function corridorEvent(type,text){
  if(type==='hit'){die('symbol');return;}
- if(type==='ready'){if(opened)return;keys.clear();camera.release();document.querySelector('#eric-ready').showModal();return;}
+ if(type==='garden'){checkpoint={room:index,stage:1,position:{...spawnPlayer(rooms[index]),...GUARDIAN_GARDEN.checkpoint}};document.querySelector('#door-status').textContent=I18n.t('EL GUARDIÁN DE EPITHEA');classroom.session.event('checkpoint',classroom.context());companions.toast('Has llegado al jardín. Punto seguro guardado. Pisa la baldosa de piedra frente a las dos estatuas.');recovery?.save();return;}
+ if(type==='guardian-speaking'){keys.clear();camera.release();companions.closeHelp();Object.assign(player,{angle:0,pitch:.10});checkpoint={room:index,stage:1,position:{...spawnPlayer(rooms[index]),...GUARDIAN_GARDEN.tile,angle:0,pitch:.10}};recovery?.save();return;}
+ if(type==='guardian-progress'){classroom.aid.close();recovery?.save();return;}
+ if(type==='guardian-answer'){recovery?.save();return;}
+ if(type==='guardian-gate-open'){opened=rooms[index].canUnlock({ready:true,guardianSolved:corridor.guardian.solved,gateOpened:corridor.guardian.gateOpened});classroom.solve();document.querySelector('#door-status').textContent=I18n.t('PUERTA ABIERTA · TRES SELLOS');companions.toast('«El pacto se ha cumplido. Cruza el umbral, viajero.»');recovery?.save();return;}
+ if(type==='guardian-solved'){classroom.aid.close();Sound.click();document.querySelector('#door-status').textContent=I18n.t('ACERTIJO RESUELTO');keys.clear();companions.toast('Tres sellos encendidos. Las puertas de Epithea se están abriendo…');recovery?.save();return;}
+ if(type==='guardian-reminder'){companions.toast('«Has ganado el paso. La puerta está detrás de mí, viajero.»');return;}
+ if(type==='ready'){if(!opened)companions.toast(corridor.guardian.solved?'Espera a que termine de abrirse la puerta.':'Pisa la baldosa de piedra. Los guardianes esperan tus tres respuestas.');return;}
  companions.toast(text);Sound.tone(310,.08,'triangle',.06);
 }
-document.querySelector('#eric-ready-yes').onclick=()=>{document.querySelector('#eric-ready').close();if(!corridor||opened||death||!canPlay()||!corridor.nearExit(player))return;opened=rooms[index].canUnlock({ready:true});classroom.session.attempt(classroom.context(),'exit',classroom.snapshot(),true);classroom.solve();Sound.click();document.querySelector('#door-status').textContent='PUERTA DE ROBLE ABIERTA';companions.toast('Respira hondo. La sala principal te espera.');canvas.focus({preventScroll:true});};
+document.querySelector('#eric-ready-yes').onclick=()=>{document.querySelector('#eric-ready').close();if(!corridor||opened||death||!canPlay()||!corridor.nearExit(player)||!corridor.guardian.gateOpened)return;opened=rooms[index].canUnlock({ready:true,guardianSolved:corridor.guardian.solved,gateOpened:corridor.guardian.gateOpened});classroom.solve();Sound.click();document.querySelector('#door-status').textContent='PUERTA DE ROBLE ABIERTA';companions.toast('Respira hondo. La sala principal te espera.');canvas.focus({preventScroll:true});};
 document.querySelector('#eric-ready-wait').onclick=()=>{document.querySelector('#eric-ready').close();canvas.focus({preventScroll:true});};
 async function interact(){
  if(!canPlay())return;
@@ -141,6 +150,7 @@ async function interact(){
  if(rooms[index].rocket){if(!ignitia.open(player))companions.toast('Acércate a la consola de operaciones de Ignitia y pulsa E.');return;}
  if(rooms[index].physics){if(!cannon.open(player,renderer,opened))companions.toast('Acércate al cañón y míralo para abrir sus controles.');return;}
  if(maze?.activateFreeze(player,renderer))return;
+ if(corridor?.guardian.open(player)){keys.clear();return;}
  if(openNearbyDoor())return;
  if(boss){if(boss.open(player,renderer,rooms[index],opened))keys.clear();else companions.toast('Acércate a uno de los láseres laterales y mira su panel.');return;}
  if(maze){companions.toast('Acércate a una puerta. Ábrela con clic o E para explorar su respuesta.');return;}
@@ -153,6 +163,7 @@ function worldClick(x,y){
  if(!canPlay())return false;
  companions.closeHelp();
  if(bonusInteraction(player.angle+Math.atan((x/canvas.width*2-1)*.66)))return true;
+ if(corridor?.guardian.open(player)){keys.clear();return true;}
  if(rooms[index].measurement)return measurement.open(player);
  if(rooms[index].rocket)return ignitia.open(player);
  const contains=b=>b&&x>b.x&&x<b.x+b.w&&y>b.y&&y<b.y+b.h;
@@ -172,11 +183,11 @@ async function shoot(){if(!canPlay()||rooms[index].rocket||rooms[index].measurem
 function jump(){if(!canPlay()||player.jumpHeight>0||player.jumpVelocity!==0||!supported(player.x,player.y))return;player.jumpVelocity=2.1;controlTutorial?.mark('jump');}
 window.addEventListener('keydown',e=>{if(!canPlay()||e.target.closest('button,a,input,select,textarea,summary'))return;const key=e.key.toLowerCase();if(['w','a','s','d','arrowleft','arrowright',' ','e','f','h','shift'].includes(key)){e.preventDefault();keys.add(key);if(key===' '&&!e.repeat)jump();if(key==='f'&&!e.repeat)shoot();if(key==='e'&&!e.repeat)interact();if(key==='h'&&!e.repeat)companions.help();}});
 window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
-window.addEventListener('keydown',e=>{if(e.key==='Escape'){camera.release();classroom.aid.close();measurement.close();ignitia.closeConsole();cannon.close();boss?.close();companions.closeHelp();companions.closeConsole();}});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'){corridor?.guardian.close();camera.release();classroom.aid.close();measurement.close();ignitia.closeConsole();cannon.close();boss?.close();companions.closeHelp();companions.closeConsole();}});
 document.querySelector('#station-fire').onclick=()=>shoot();
 document.querySelector('#jump').onclick=()=>{jump();canvas.focus({preventScroll:true});};
 // Panels own the fingers while open. Do not leave a movement gesture running behind them.
-const touchPanels=['#paola-dialog','#answer-console','#boss-panel','#rocket-console','#extra-help-panel'];
+const touchPanels=['#guardian-panel','#paola-dialog','#answer-console','#boss-panel','#rocket-console','#extra-help-panel'];
 const canTouchPlay=()=>canPlay()&&!cannon.isOpen&&!touchPanels.some(id=>{const p=document.querySelector(id);return p&&!p.hidden;});
 touch=new TouchControls(canvas,{canUse:canTouchPlay,jump,interact,releaseCamera:()=>camera.release()});
 controlTutorial=new ControlTutorial({isTouch:()=>touch.enabled,onDone:({saved})=>beginFirstChallenge(saved)});
@@ -184,8 +195,8 @@ function walkable(x,y){const room=rooms[index];if(opened&&room.bridge){const b=r
 // El abismo permite caminar: perder el suelo inicia la caída.
 function supported(x,y){const room=rooms[index];if(room.trial)return trial.supports(x,y);if(room.lava)return room.lava.supports(x,y);const tile=room.floorTile?room.floorTile(x,y):room.map[Math.floor(y)]?.[Math.floor(x)];return tile!==3||(opened&&Math.floor(y)===(rooms[index].boss?7:3));}
 function clearDeath(){death=null;camera.release();canvas.style.transform='';canvas.style.opacity='';const dialog=document.querySelector('#death-dialog');if(dialog.open)dialog.close();}
-function die(type,soundKind=null){if(death)return;classroom.death(type,soundKind==='wood');boss?.stopAttacks();if(type==='fall'||type==='pit')gravityFalls++;if(type==='potion'||type==='flame')potionDeaths++;cannon.close();boss?.close();death={type,t:0,shown:false,startedAt:performance.now()};camera.release();companions.closeHelp();companions.closeConsole();lab.hologram.hide();keys.clear();lab.dead=true;lab.lock(true);if(lab.shot&&!lab.shot.done){lab.shot.done=true;lab.history.push('Lanzamiento interrumpido por el fin del intento.');lab.renderHistory();}Sound.failure(soundKind||type);message.textContent=type==='moon'?'Eric ha llegado a la Luna.':type==='lava'?'¡Has tocado la lava!':type==='fall'?'Has perdido pie…':type==='ivan'?'¡EPI Ivan te alcanzó!':type==='symbol'?'¡Un símbolo te alcanzó!':type==='flame'?'¡La onda verde te alcanzó!':type==='potion'?'¡La poción de Eric te alcanzó!':type==='pit'?'Has caído en la fosa.':'¡Sobrecarga de la torreta!';}
-function checkpointLabel(){return rooms[checkpoint.room].name+(rooms[checkpoint.room].conceptual?` · tramo ${checkpoint.stage+1}`:'');}
+function die(type,soundKind=null){corridor?.guardian.close();if(death)return;classroom.death(type,soundKind==='wood');boss?.stopAttacks();if(type==='fall'||type==='pit')gravityFalls++;if(type==='potion'||type==='flame')potionDeaths++;cannon.close();boss?.close();death={type,t:0,shown:false,startedAt:performance.now()};camera.release();companions.closeHelp();companions.closeConsole();lab.hologram.hide();keys.clear();lab.dead=true;lab.lock(true);if(lab.shot&&!lab.shot.done){lab.shot.done=true;lab.history.push('Lanzamiento interrumpido por el fin del intento.');lab.renderHistory();}Sound.failure(soundKind||type);message.textContent=type==='moon'?'Eric ha llegado a la Luna.':type==='lava'?'¡Has tocado la lava!':type==='fall'?'Has perdido pie…':type==='ivan'?'¡EPI Ivan te alcanzó!':type==='symbol'?'¡Un símbolo te alcanzó!':type==='flame'?'¡La onda verde te alcanzó!':type==='potion'?'¡La poción de Eric te alcanzó!':type==='pit'?'Has caído en la fosa.':'¡Sobrecarga de la torreta!';}
+function checkpointLabel(){return rooms[checkpoint.room].name+(rooms[checkpoint.room].conceptual?` · tramo ${checkpoint.stage+1}`:rooms[checkpoint.room].corridor&&checkpoint.stage===1?' · jardín del guardián':'');}
 function animateDeath(dt){if(!death)return;death.t=(performance.now()-death.startedAt)/1000;const t=death.t,c=renderer.ctx,w=canvas.width,h=canvas.height;
  if(death.type==='moon'){c.fillStyle=`rgba(5,15,30,${Math.min(.95,t)})`;c.fillRect(0,0,w,h);c.save();c.translate(w/2,h/2);c.scale(4,4);ignitia.simulator.drawMoon.call({ctx:c},{x:0,y:0});c.restore();}
  else if(death.type==='potion'||death.type==='flame'){
@@ -208,7 +219,7 @@ function animateDeath(dt){if(!death)return;death.t=(performance.now()-death.star
 function respawn(){
  if(!death)return;clearDeath();player={...checkpoint.position,pitch:0,jumpHeight:0,jumpVelocity:0};keys.clear();
  if(trial)trial.restore();if(rooms[index].rocket)ignitia.reset(rooms[index]);
- if(corridor)corridor=new RelaxCorridor(corridorEvent);if(boss)boss.resetAttacks();
+ if(corridor)corridor.resetHazards();if(boss)boss.resetAttacks();
  if(maze){player={...maze.restoreCheckpoint(checkpoint.stage),pitch:0,jumpHeight:0,jumpVelocity:0};opened=false;companions.updateConcept();companions.revealQuestion();document.querySelector('#door-status').textContent=`LABERINTO · ${maze.stage+1} / 4`;}
  lab.dead=false;lab.destroyed=false;if(rooms[index].physics){lab.lock(false);lab.update();document.querySelector('#loaded-status').textContent=lab.loaded?`● Cargada: ${lab.loaded.name} · ${lab.loaded.mass} kg`:'Recámara vacía. Elige una bala y cárgala.';document.querySelector('#feedback').textContent='Nuevo intento: conservas el registro. Revisa el aviso de carga antes de disparar.';}
  classroom.respawn();Sound.recover();message.textContent=`Punto seguro: ${checkpointLabel()}. `+(trial?(trial.finished?'Sigue el camino hacia el bosque.':'Lee la afirmación y prepara el siguiente salto.'):maze?'Una presencia sigue recorriendo las galerías.':opened?'El puente sigue activo.':'Tienes otro intento.');companions.toast(message.textContent);canvas.focus({preventScroll:true});
@@ -258,6 +269,7 @@ function captureRecovery() {
  if(mission.state==='expired')return {expired:true};
  classroom.session.clock(!document.hidden&&canPlay());
  const room=rooms[index], world={room:room.id,opened,checkpoint,gravityFalls,potionDeaths,chaseAnnounced:!!companions.chaseAnnounced};
+ if(corridor)world.corridor=corridor.guardian.snapshot();
  if(trial)world.trial={stage:trial.stage,finished:trial.finished,broken:[...trial.broken]};
  if(room.physics)world.cannon={target:pick(lab.target,['index','misses']),physics:{...room.physics},
   values:[lab.v.value,lab.a.value,lab.az.value],history:lab.history,selected:lab.selected,loaded:lab.loaded,
@@ -285,6 +297,7 @@ function restoreRecovery(saved,away) {
  opened=!!w.opened;gravityFalls=w.gravityFalls||0;potionDeaths=w.potionDeaths||0;
  checkpoint=w.checkpoint||checkpoint;
  player={...checkpoint.position,pitch:0,jumpHeight:0,jumpVelocity:0};
+ if(corridor){if(w.corridor)corridor.guardian.restore(w.corridor);if(corridor.guardian.arrived)corridor.symbols=[];opened=corridor.guardian.gateOpened;if(opened)classroom.solve();}
  if(trial&&w.trial){Object.assign(trial,{stage:w.trial.stage,finished:w.trial.finished,broken:new Set(w.trial.broken)});companions.updateTrial();}
  if(rooms[i].physics&&w.cannon){
   Object.assign(rooms[i].physics,w.cannon.physics);Object.assign(lab.target,w.cannon.target);
@@ -337,7 +350,7 @@ function restoreRecovery(saved,away) {
  }
 }
 
-classroom=new EpikClassroom(ADVENTURE_ORDER,()=>({room:rooms[index],lab,maze,roulette,boss,trial,ignitia,opened}),()=>canPlay());
+classroom=new EpikClassroom(ADVENTURE_ORDER,()=>({room:rooms[index],lab,maze,roulette,boss,trial,corridor,ignitia,opened}),()=>canPlay());
 document.querySelector('#reset-lab').onclick=()=>load(index);document.querySelector('#reset-roulette').onclick=()=>{if(!rooms[index].roulette||!roulette.requestReset())return;classroom.session.event('roulette_reset');load(index,classroom.session.preview?'preview':'transition');recovery?.save();};load(rooms.findIndex(r=>r.trial),'new');mission.notify();document.querySelector('#adventure-intro').showModal();Sound.enable({automatic:true});requestAnimationFrame(tick);
 recovery=new EpikRecovery({capture:captureRecovery,restore:restoreRecovery,reset:()=>{
  StoryRoute.reset();companions.chaseAnnounced=false;classroom.newSession();classroom.session.studentName='';

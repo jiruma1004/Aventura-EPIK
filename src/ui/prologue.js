@@ -16,8 +16,8 @@ window.AdventurePrologue=class {
   document.querySelector('#adventure-start').onclick=()=>this.advance();document.querySelector('#story-skip').onclick=()=>{if(this.acceptName())this.finish(true);};dialog.addEventListener('cancel',e=>{e.preventDefault();});this.renderPage();
  }
  renderPage(){const p=this.pages[this.step];this.chars=[...I18n.t(p.text)];this.count=0;this.clock=0;this.elapsed=0;this.speaking=this.started;
-  this.posterDrawn=false;const face=document.querySelector('#story-face');face.width=p.portrait==='ivan'?480:224;face.height=p.portrait==='ivan'?600:224;document.querySelector('.story-portrait').classList.remove('full-body');
-  const missing=p.portrait==='ivan';document.querySelector('.story-portrait').classList.toggle('missing-newspaper',missing);document.querySelector('.missing-headline').hidden=true;document.querySelector('.missing-caption').hidden=true;document.querySelector('#story-person').hidden=missing;
+  this.posterDrawn=false;const face=document.querySelector('#story-face');face.width=face.height=224;document.querySelector('.story-portrait').classList.remove('full-body');
+  const missing=p.portrait==='ivan';document.querySelector('.story-portrait').classList.toggle('missing-newspaper',missing);document.querySelector('.missing-headline').hidden=!missing;document.querySelector('.missing-caption').hidden=!missing;document.querySelector('#story-person').hidden=false;
   document.querySelector('#adventure-title').textContent=p.title;document.querySelector('#story-person').textContent=p.name;document.querySelector('#story-face').setAttribute('aria-label',missing?'La Gaceta de Aventura EPIK. Desaparecido: EPI Iván. Último rastro: el bosque. Su paradero sigue siendo un misterio.':p.name);document.querySelector('#story-text').textContent=this.started?'':'Una historia antes de la aventura. Pulsa «Escuchar a Paola» para comenzar.';document.querySelector('#story-announcement').textContent=this.started?p.text:'';
   document.querySelector('#story-progress').textContent=`PRÓLOGO · ${this.step+1} / ${this.pages.length}`;document.querySelector('#adventure-start').textContent=this.started?'Mostrar todo':'Escuchar a Paola';Sound.selectBackground(p.cue);this.drawFace();
  }
@@ -32,8 +32,8 @@ window.AdventurePrologue=class {
    const image=this.images.ivan;if(this.posterDrawn||!image.complete||!image.naturalWidth)return;
    const c=canvas.getContext('2d'),scale=image.naturalWidth/1254;
    c.clearRect(0,0,canvas.width,canvas.height);c.imageSmoothingEnabled=true;
-   // Excluir únicamente el margen exterior y la etiqueta de propuesta «B».
-   c.drawImage(image,150*scale,48*scale,960*scale,1190*scale,0,0,canvas.width,canvas.height);
+   // Preserve the approved face; the newspaper frame and headings are native HTML.
+   c.drawImage(image,390*scale,478*scale,480*scale,452*scale,0,0,canvas.width,canvas.height);
    this.posterDrawn=true;return;
   }
   RPGCast.portrait(canvas,this.images[p.portrait],this.speaking,this.elapsed);

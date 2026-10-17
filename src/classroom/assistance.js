@@ -83,6 +83,7 @@ Set your calculator to degrees.`);
       const d = maze.doors.find(d => d.correct && (maze.dungeon || d.stage === maze.stage));
       return say('Elige la puerta: ', 'Choose the door: ') + I18n.t(d?.text || '') + '. ' + I18n.t(q.hint);
     }
+    if(room.corridor&&g.corridor?.guardian.arrived)return I18n.t(g.corridor.guardian.question.setup);
     if (room.corridor) return say('En la lava puedes seguir los apoyos de la izquierda: primero el central izquierdo, luego los dos cercanos al muro izquierdo y después vuelve hacia el centro para salir. Corre con Shift, suelta el avance al aterrizar y salta con Espacio. Los símbolos avanzan rectos: cambia de carril.', 'Across the lava, follow the left supports: start on the middle-left stone, then the two near the left wall, then return towards the center to exit. Sprint with Shift, release forward movement on landing, and jump with Space. Symbols travel straight: change lanes.');
     if (room.boss) {
       const s = boss.puzzle.support;
@@ -135,7 +136,7 @@ window.EpikAssistance = class {
   }
   eligible() {
     const room = this.game().room;
-    return !!(room.trial || room.physics || room.roulette || room.boss);
+    return !!(room.trial || room.physics || room.roulette || room.boss || room.corridor&&this.game().corridor?.guardian.arrived&&!this.game().corridor.guardian.solved);
   }
   position(left, top) {
     const scene = this.panel.parentElement;

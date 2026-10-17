@@ -23,3 +23,5 @@ for(let errors=0;errors<6;errors++){
 }
 session.events=[];state.deaths=1;assert.equal(R.room(session,room).stars,4);
 console.log('PASS stricter error scale, first-death penalty, one-star AI floor');
+
+state.deaths=1;session.events=[{room_id:'bridge',objective_id:'guardian-drone',event_type:'attempt_result',result:'incorrect',submitted_answer:{vx:0}}];assert.equal(R.room(session,corridor).score,81,'Guardian calculations weigh 80%, corridor deaths 20%');

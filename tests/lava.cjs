@@ -1,4 +1,4 @@
-const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');const w={};w.window=w;vm.createContext(w);for(const f of ['src/engine/difficulty.js','src/rooms/room-04/room.js','src/rooms/room-04/corridor.js'])vm.runInContext(fs.readFileSync(f,'utf8'),w);
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');const w={Image:class {},document:{querySelector:()=>({hidden:true})}};w.window=w;vm.createContext(w);for(const f of ['src/engine/difficulty.js','src/rooms/room-04/room.js','src/rooms/room-04/guardian.js','src/rooms/room-04/corridor.js'])vm.runInContext(fs.readFileSync(f,'utf8'),w);
 const lava=w.CORRIDOR_LAVA,room=w.ESCAPE_ROOMS[0],corridor=new w.RelaxCorridor(()=>{});
 assert.equal(lava.visualDepth,.31);
 for(const p of lava.platforms){const original=p.id==='cross'?1.35:p.id==='exit'?1.9:1.7;assert(Math.abs(p.size*p.size/original**2-.7)<1e-10);}

@@ -47,6 +47,8 @@ window.EpikClassroom = class {
       objective = g.maze.dungeon ? 'dungeon-' + g.maze.question.title : 'gallery-' + g.maze.stage;
       question = g.maze.question.title;
       variant = g.maze.dungeon ? 'visit-' + g.maze.dungeonVisit : objective;
+    } else if (r.corridor && g.corridor.guardian.arrived) {
+      question=g.corridor.guardian.question.id;objective='guardian-'+question;
     } else if (r.boss) {
       objective = 'cut-' + (g.boss.active < 0 ? g.boss.puzzle.cuts[0] ? 1 : 0 : g.boss.active);
       variant = String(g.boss.puzzle.support.id);
@@ -73,6 +75,7 @@ window.EpikClassroom = class {
       stage: g.maze.stage,
       dungeon: g.maze.dungeon
     };
+    if(r.corridor&&g.corridor.guardian.arrived)return {id:g.corridor.guardian.question.id,text:g.corridor.guardian.question.text};
     if (r.boss) {
       const s = g.boss.puzzle.support;
       return {
@@ -100,6 +103,7 @@ window.EpikClassroom = class {
       this.session.attempt(this.context(), answer, this.snapshot(), correct, reason);
       if (correct) this.session.event('objective_completed', this.context());
     };
+    if(g.corridor)g.corridor.guardian.onAnswer=(values,ok)=>attempt(values,ok,ok?'':'wrong_vector');
     if (g.trial) g.trial.onAnswer = (answer, ok) => attempt(answer, ok, ok ? '' : 'wrong_platform');
     if (g.maze) g.maze.onAnswer = door => attempt(door.text, door.correct, door.correct ? '' : 'wrong_door');
     if (g.boss) g.boss.onAnswer = q => attempt({
@@ -126,7 +130,7 @@ window.EpikClassroom = class {
   solved() {
     const g = this.game(),
       r = g.room;
-    return r.trial ? g.trial.finished : r.physics ? !!g.lab.shot?.result.hit && !!g.lab.shot?.done : r.roulette ? g.roulette.solved.size > 0 : r.conceptual ? g.maze.finished : r.corridor ? g.opened : r.boss ? g.boss.puzzle.solved : r.rocket ? g.ignitia.simulator.ready : false;
+    return r.trial ? g.trial.finished : r.physics ? !!g.lab.shot?.result.hit && !!g.lab.shot?.done : r.roulette ? g.roulette.solved.size > 0 : r.conceptual ? g.maze.finished : r.corridor ? g.opened && g.corridor.guardian.solved : r.boss ? g.boss.puzzle.solved : r.rocket ? g.ignitia.simulator.ready : false;
   }
   solve() {
     if (this.solved()) this.session.solve();

@@ -62,6 +62,7 @@ window.EscapeRenderer = class {
           else if(tile===3){const bridge=opened&&Math.floor(wy)===3;if(bridge)c.fillStyle=wx%1<.08?'#a6d6f8':'#4b6586';else{const bx=(wx-(room.bridge.start+room.bridge.end)/2)/((room.bridge.end-room.bridge.start)*.367),by=(wy-3.5)/1.65,r=Math.hypot(bx,by),swirl=Math.sin(Math.atan2(by,bx)*3-r*25+time*.001);c.fillStyle=r<.53?'#010208':r<.62?'#c1a2e1':r<1.05&&swirl>.3?(r<.8?'#895d9c':'#504775'):'#070b18';}}
           else if(room.environment?.shop)c.fillStyle=InteriorAtmosphere.shopFloor(wx,wy);
           else if(room.environment?.kind==='forest'){const noise=Math.sin(Math.floor(wx*9)*12.9898+Math.floor(wy*9)*78.233)*43758.5453,grain=noise-Math.floor(noise);c.fillStyle=grain>.85?'#405435':grain>.4?'#344a30':'#293f2c';}
+          else if(room.guardian&&wx>=GUARDIAN_GARDEN.start)c.fillStyle=room.guardian.floor(wx,wy);
           else if(room.environment?.kind==='courtyard'){const center=room.corridor?4.5:7.5,onPath=Math.abs(wy-center)<1.05,seam=((wx%0.55)+.55)%.55<.04||((wy%0.45)+.45)%.45<.035;c.fillStyle=onPath?(seam?'#776445':'#b19b75'):(seam?'#29313b':'#495052');}
           else {const seam=wx%1<.035||wy%1<.035;c.fillStyle=seam?'#151b25':(Math.floor(wx)+Math.floor(wy))%2?'#3b3c40':'#303339';}
           c.fillRect(sx,sy,6,4);
@@ -92,6 +93,7 @@ window.EscapeRenderer = class {
       if(hit.tile===2&&room.environment?.ceilingHeight>1){const u=(((hit.axis==='x'?hit.py:hit.px)%1)+1)%1,art=room.environment.shop?this.art.shopWall:this.art.moss;c.drawImage(art,u*511,0,1,170,x,horizon-(room.environment.ceilingHeight-eye)*height,3,(room.environment.ceilingHeight-1)*height);}
       if(hit.tile===2&&room.castleGate){c.fillStyle='#15212a';c.fillRect(x,horizon-(2.8-eye)*height,3,height*2.8);continue;}
       if(hit.tile===4||(hit.tile===2&&room.measurement)){const along=side?hit.py:hit.px,u=((along%1)+1)%1,art=this.measurementArt||(this.measurementArt=MeasurementArt.texture());c.drawImage(art,Math.min(899,Math.floor(u*900)),0,1,800,x,top,3,height);continue;}
+      if(hit.tile===2&&room.guardian)continue;
       if(hit.tile===2&&room.oakDoor&&hit.cx===room.oakDoor.x&&hit.cy===room.oakDoor.y){const u=((hit.py%1)+1)%1;c.drawImage(this.art.oak,Math.min(511,Math.floor(u*512)),0,1,512,x,top,3,height);continue;}
       if(hit.tile===2&&room.maze){const door=room.maze.doorAt(hit.cx,hit.cy);if(door){const art=this.actors.doorTexture(door),u=((hit.py%1)+1)%1;c.drawImage(art,Math.min(511,Math.floor(u*512)),0,1,512,x,top,3,height);continue;}}
       if(hit.tile===2&&room.environment?.portal){const u=hit.py-Math.floor(hit.py);c.drawImage(this.art.portalSealed,Math.min(511,Math.floor(u*512)),0,1,512,x,top,3,height);continue;}
