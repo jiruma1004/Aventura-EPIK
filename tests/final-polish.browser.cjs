@@ -31,7 +31,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
    await p.locator('#ceremony-certificate').screenshot({path:'/tmp/diploma-'+viewport.width+'.png'});
    await p.click('#certificate-flip');await p.waitForTimeout(60);
    assert(await fits(),'Rank page fits '+JSON.stringify(viewport));
-   assert.equal(await p.locator('.rank-card').nth(1).locator('.rank-stars').innerText(),'★☆☆☆☆');
+   assert.equal((await p.locator('.rank-card').nth(1).locator('.rank-stars').innerText()).replace(/\s/g,''),'★☆☆☆☆');
    const seen=new Set();
    do{
     for(const id of await p.locator('.rank-card').evaluateAll(es=>es.map(e=>e.dataset.room)))seen.add(id);

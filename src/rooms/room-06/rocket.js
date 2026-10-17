@@ -17,6 +17,7 @@ window.IgnitiaMission=class {
  constructor(onEvent){
   this.onEvent=onEvent;this.mode='idle';this.time=0;this.scene=null;this.rocket=new Image();this.rocket.src='assets/cinematics/ignitia-star-rocket.webp';this.jose=new Image();this.jose.src='assets/cast/jose-medieval-portrait.webp';this.rider=new Image();this.rider.src='assets/cast/eric-cockpit-b-v1.webp';this.jose.onload=()=>this.drawPortrait();this.ivan=new Image();this.ivan.src='assets/cast/ivan-medieval.webp';this.launchIgnited=false;
   document.querySelector('.scene-view').insertAdjacentHTML('beforeend',`<aside id="ignitia-dialog" hidden><canvas id="ignitia-portrait" width="160" height="160" aria-label="José Luis hablando"></canvas><div><p class="eyebrow">JOSÉ LUIS · LÍDER DE IGNITIA</p><p id="ignitia-text"></p><button id="ignitia-next">Mostrar todo</button></div></aside><section id="rocket-console" class="world-console" hidden></section><div id="flight-banner" hidden role="status"></div>`);
+  this.dialog=document.querySelector('#ignitia-dialog');this.banner=document.querySelector('#flight-banner');
   this.simulator=new InterceptionConsole(document.querySelector('#rocket-console'),this.rider,this.rocket,()=>this.startLaunch());this.simulator.canRun=()=>this.canLaunch?.();this.simulator.onFail=()=>this.onEvent('moon');
   document.querySelector('#rocket-close').onclick=()=>this.closeConsole();
   this.panic=new Image();this.panic.src='assets/cast/ivan-action-v2.webp';this.walk=new Image();this.walk.src='assets/cast/ivan-gait-v4.webp';this.paola=new Image();this.paola.src='assets/cast/paola-b-v1-portrait.webp';this.speaker='jose';
@@ -51,7 +52,7 @@ window.IgnitiaMission=class {
   this.credits.open(()=>{if(this.mode!=='credits')return;this.mode='ending';document.querySelector('#chapter-ending-text').textContent=I18n.lang==='en'?'Thank you for playing · Aventura EPIK':'Gracias por jugar · Aventura EPIK';document.querySelector('#chapter-ending').hidden=false;});
  }
  updateCamera(player){if(this.scene?.rocket&&['launch','debrief','complete','epilogue','applause','credits','ending'].includes(this.mode))player.pitch=RocketFinaleScene.state(this.time).pitch;}
- tick(dt){if(document.hidden)return;this.simulator.tick(dt);if(!['sequence','ceremony','debrief','complete','epilogue','applause','credits','ending'].includes(this.mode))this.time+=dt;this.voiceTime=(this.voiceTime||0)+dt;this.drawPortrait();
+ tick(dt){if(document.hidden)return;this.simulator.tick(dt);if(!['sequence','ceremony','debrief','complete','epilogue','applause','credits','ending'].includes(this.mode))this.time+=dt;this.voiceTime=(this.voiceTime||0)+dt;if(!this.dialog.hidden)this.drawPortrait();
   if(this.speaking){this.clock-=dt;if(this.clock<=0){this.count=Math.min(this.text.length,this.count+2);document.querySelector('#ignitia-text').textContent=this.text.slice(0,this.count);Sound.dialogueBlip(this.count);this.clock=.035;if(this.count===this.text.length)this.reveal();}}
   if(this.mode==='escape'){
    if(this.time>=2.5)Sound.silence=true;
@@ -62,12 +63,12 @@ window.IgnitiaMission=class {
   if(this.mode==='launch'&&this.time>=8.5&&!this.launchIgnited){this.launchIgnited=true;Sound.play('rocket',true);}
   if(this.mode==='launch'&&this.time>=RocketFinaleScene.impactAt&&!this.impactPlayed){this.impactPlayed=true;Sound.stop('rocket');Sound.play('explosion',true);}
   if(this.mode==='launch'&&this.time>=RocketFinaleScene.dialogueAt){this.time=RocketFinaleScene.dialogueAt;Sound.stop('rocket');this.mode='debrief';this.speak('Ese era nuestro mejor cohete… La carga inesperada de Iván alteró el centro de masa y, al soltarse, dejó desajustado el control de vuelo. Sin querer, ha echado a perder nuestros planes. Tus cálculos eran correctos; ahora tendremos que diseñar un cohete nuevo. ¡Ignitia no se rinde!');}
-  const banner=document.querySelector('#flight-banner');banner.hidden=!(this.mode==='escape'||this.mode==='launch'&&this.time>=4&&this.time<RocketFinaleScene.diveAt&&(!IvanLaunchScene.state(this.time).scream||this.time>=RocketFinaleScene.releaseAt));banner.textContent=this.mode==='escape'?(this.time<4?'El soporte cede…':'¡Eric está escapando!'):this.time>=RocketFinaleScene.releaseAt?RocketFinaleScene.state(this.time).caption:window.IvanLaunchScene.state(this.time).caption;
+  const banner=this.banner;banner.hidden=!(this.mode==='escape'||this.mode==='launch'&&this.time>=4&&this.time<RocketFinaleScene.diveAt&&(!IvanLaunchScene.state(this.time).scream||this.time>=RocketFinaleScene.releaseAt));if(!banner.hidden)banner.textContent=this.mode==='escape'?(this.time<4?'El soporte cede…':'¡Eric está escapando!'):this.time>=RocketFinaleScene.releaseAt?RocketFinaleScene.state(this.time).caption:window.IvanLaunchScene.state(this.time).caption;
  }
  draw(renderer,player,actors){
   if(this.mode==='escape'&&this.time>=4){const h=4.8,z=-h+(this.time-4)**2*.48;this.drawRocket(renderer,player,actors,21,7.5,z,h,true);}
-  if(this.scene?.rocket&&!['sequence','ceremony','epilogue','applause','credits','ending'].includes(this.mode)){const c=renderer.ctx,deck=[[13,5],[19,5],[19,10],[13,10]].map(([x,y])=>actors.project(renderer,player,x,y,.04));if(deck.every(Boolean)){c.fillStyle='#465d72';c.strokeStyle='#a2d8e7';c.lineWidth=3;c.beginPath();deck.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fill();c.stroke();}
-   for(const [x,y] of [[12,4.5],[12,10.5],[18,4.5],[18,10.5]]){const p=actors.project(renderer,player,x,y,0);if(p){c.fillStyle='#85d7ef';c.fillRect(p.x-4,p.y-p.scale,8,p.scale);}}
+  if(this.scene?.rocket&&!['sequence','ceremony','epilogue','applause','credits','ending'].includes(this.mode)){
+   IgnitiaLaunchpad.draw(renderer,player,actors,this.time);
    const launching=['launch','debrief','complete','epilogue','applause','credits','ending'].includes(this.mode),flight=(this.flightModel||RocketFinaleScene).state(this.time),z=launching?flight.rocketZ:0;if(!launching||flight.visible!==false)this.drawRocket(renderer,player,actors,launching?flight.x:16,launching?flight.y:7.5,z,5,false,launching?flight.rotation:0);if(launching){this.drawIvanLaunch(renderer,player,actors);this.drawImpact(renderer);}else this.drawCable(renderer,player,actors,{x:15.2,y:9.125,z:.025},0,false);
    if(!launching)IgnitiaOperationsConsole.draw(renderer,player,actors,this.time);
   }

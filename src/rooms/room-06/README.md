@@ -22,3 +22,46 @@ La Luna pixelada se dibuja con bloques locales en Canvas en el extremo de la rut
 El vuelo y la intercepción se reproducen continuos, sin detenerse en cada texto. La ceremonia espera clics; el diploma abre el epílogo de la ruta elegida, también por clic. El destino lunar permanece en (252, 120) km al cambiar la rapidez de Eric.
 
 Rapidez actual de Eric: 0,28 km/s exactos. Se normaliza la dirección (11,5), conservando la Luna en (252,120) km; la llegada se calcula como distancia/rapidez. Las ecuaciones y el reloj visibles derivan de los mismos valores.
+
+## Patio de lanzamiento (17 octubre 2026)
+
+`launchpad.js` añade una plataforma circular empotrada en el pavimento, sendero
+con ribetes de latón y guía turquesa hacia la consola, cuatro balizas,
+estandartes y una estructura de servicio detrás del cohete. Conserva las
+coordenadas de interacción, las colisiones y el diseño/tamaño de la consola.
+El escudo del fuselaje continúa usando el arte de Ignitia existente.
+
+Las tres texturas decorativas se generan al entrar y se reutilizan: 256 × 512
+cada una, aproximadamente 1.5 MiB RGBA en total, sin descargas nuevas de imágenes.
+No hay filtros de desenfoque animados ni partículas adicionales.
+
+### Optimización del motor compartido
+
+- Seno/coseno de la cámara calculados una vez por cuadro para las muestras del suelo.
+- Muestras contiguas del mismo color agrupadas en un solo rectángulo.
+- Búfer de profundidad de muros reutilizado, actualizado en todas las columnas utilizadas.
+- Retrato de José Luis omitido cuando el diálogo está oculto; el aviso de vuelo
+  deja de calcular texto de la secuencia cuando no se muestra.
+
+En Chrome headless, vista 1280 × 800, una vista fija por sala con inclinación y
+salto, las llamadas `fillRect` de `renderer.draw` fueron:
+
+| Sala | Antes | Después |
+| --- | ---: | ---: |
+| Puente | 8843 | 2736 |
+| Cañón | 8693 | 1975 |
+| Ruleta | 16450 | 10106 |
+| Laberinto | 16464 | 8815 |
+| Corredor | 9001 | 1880 |
+| Eric | 8985 | 1620 |
+
+La comparación de los píxeles RGBA de esas seis vistas dio cero diferencias.
+La reducción de llamadas no es una medición de FPS; el rendimiento final depende
+del equipo, la resolución y la escena. El peso de audios/sprites no cambia.
+
+Prueba: `tests/launchpad-performance.browser.cjs`. Para reproducir la comparación,
+extraer `src/engine/renderer.js` del commit `1dcffa0` a un archivo temporal y pasar
+su ruta mediante `BASELINE_RENDERER`. `PLAYWRIGHT_MODULE` puede apuntar al módulo
+local de Playwright y `BASE_URL` al servidor de pruebas con `?dev=1` habilitado.
+La prueba también comprueba escritorio/móvil, interacción de consola,
+intercepción, caché de adornos y ausencia de dibujos del retrato oculto.

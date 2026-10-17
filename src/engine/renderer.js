@@ -6,6 +6,7 @@ window.EscapeRenderer = class {
   decorate(room,hit,x,top,height,player){
     RoomDetails.wall(this,room,hit,x,top,height,player);
     if(room.boss)EricArena.wall(this,room,hit,x,top,height);
+    if(room.rocket){IgnitiaLaunchpad.wall(this,hit,x,top,height);return;}
     if(room.conceptual&&!room.maze?.dungeon&&hit.axis==='x'&&hit.cx===44&&hit.py>=7.95&&hit.py<8.95&&this.choiceMeme){
       // Cache pequeña creada una sola vez. Una tira por rayo, igual que los muros.
       const art=this.choiceMeme,u=hit.py-7.95,sourceX=Math.min(art.width-1,Math.floor(u*art.width));
@@ -44,7 +45,10 @@ window.EscapeRenderer = class {
     return {distance:80,tile:0,px:0,py:0};
   }
   draw(room,player,opened,flash,time,lab,roulette){
-    this.tableButton=null;this.cannonBounds=null;this.depths=[];
+    this.tableButton=null;this.cannonBounds=null;
+    // Reuse the wall-depth buffer; every sampled column is overwritten below.
+    this.depths??=[];this.depths.length=this.canvas.width;
+    const cosAngle=Math.cos(player.angle),sinAngle=Math.sin(player.angle);
     const c=this.ctx,w=this.canvas.width,h=this.canvas.height,horizon=h*(.5+(player.pitch||0)),eye=.5+(player.jumpHeight||0);
     const sky=c.createLinearGradient(0,0,0,horizon);sky.addColorStop(0,'#080e29');sky.addColorStop(1,'#25345c');c.fillStyle=sky;c.fillRect(0,0,w,horizon);if(room.environment?.kind!=='interior')for(let i=0;i<45;i++){c.fillStyle='rgba(190,215,255,'+(.2+.3*Math.sin(time/2200+i)**2)+')';c.fillRect((i*137.5)%w,(i*53.8)%(horizon*.86),1.8,1.8);}
     const floor=c.createLinearGradient(0,horizon,0,h);floor.addColorStop(0,'#17213f');floor.addColorStop(1,'#465477');c.fillStyle=floor;c.fillRect(0,horizon,w,h-horizon);
@@ -53,22 +57,31 @@ window.EscapeRenderer = class {
     if(room.environment?.kind==='interior')this.drawCeiling(room,player,horizon,eye);
     if(room.trial||room.physics||room.environment?.kind==='interior'||room.environment?.kind==='courtyard'){
       // Proyección del suelo: el abismo y el puente ocupan las mismas casillas que las colisiones.
-      for(let sy=Math.max(0,horizon+2);sy<h;sy+=4){const depth=(h*eye)/(sy-horizon);
+      for(let sy=Math.max(0,horizon+2);sy<h;sy+=4){const depth=(h*eye)/(sy-horizon);let runX=0,runColor=null;
         for(let sx=0;sx<w;sx+=6){const lateral=(sx/w*2-1)*.66;
-          const wx=player.x+depth*(Math.cos(player.angle)-Math.sin(player.angle)*lateral),wy=player.y+depth*(Math.sin(player.angle)+Math.cos(player.angle)*lateral);
+          const rayX=cosAngle-sinAngle*lateral,rayY=sinAngle+cosAngle*lateral;
+          const wx=player.x+depth*rayX,wy=player.y+depth*rayY;
+          let floorColor;
           const tile=room.floorTile?room.floorTile(wx,wy):room.map[Math.floor(wy)]?.[Math.floor(wx)];
-          if(room.trial){c.fillStyle=room.approach.color(wx,wy);}
-          else if(room.lava?.contains(wx,wy)){c.fillStyle=room.lava.rayColor(player,Math.cos(player.angle)-Math.sin(player.angle)*lateral,Math.sin(player.angle)+Math.cos(player.angle)*lateral,depth,eye,time);}
-          else if(tile===3&&room.boss){c.fillStyle=EricArena.pitColor(player,Math.cos(player.angle)-Math.sin(player.angle)*lateral,Math.sin(player.angle)+Math.cos(player.angle)*lateral,depth,eye,time,opened);}
-          else if(tile===3){const bridge=opened&&Math.floor(wy)===3;if(bridge)c.fillStyle=wx%1<.08?'#a6d6f8':'#4b6586';else{const bx=(wx-(room.bridge.start+room.bridge.end)/2)/((room.bridge.end-room.bridge.start)*.367),by=(wy-3.5)/1.65,r=Math.hypot(bx,by),swirl=Math.sin(Math.atan2(by,bx)*3-r*25+time*.001);c.fillStyle=r<.53?'#010208':r<.62?'#c1a2e1':r<1.05&&swirl>.3?(r<.8?'#895d9c':'#504775'):'#070b18';}}
-          else if(room.boss)c.fillStyle=EricArena.floor(wx,wy);
-          else if(room.environment?.shop)c.fillStyle=InteriorAtmosphere.shopFloor(wx,wy);
-          else if(room.environment?.kind==='forest'){const noise=Math.sin(Math.floor(wx*9)*12.9898+Math.floor(wy*9)*78.233)*43758.5453,grain=noise-Math.floor(noise);c.fillStyle=grain>.85?'#405435':grain>.4?'#344a30':'#293f2c';}
-          else if(room.guardian&&wx>=GUARDIAN_GARDEN.start)c.fillStyle=room.guardian.floor(wx,wy);
-          else if(room.environment?.kind==='courtyard'){const center=room.corridor?4.5:7.5,onPath=Math.abs(wy-center)<1.05,seam=((wx%0.55)+.55)%.55<.04||((wy%0.45)+.45)%.45<.035;c.fillStyle=onPath?(seam?'#776445':'#b19b75'):(seam?'#29313b':'#495052');}
-          else {const seam=wx%1<.035||wy%1<.035;c.fillStyle=seam?'#151b25':(Math.floor(wx)+Math.floor(wy))%2?'#3b3c40':'#303339';}
-          c.fillRect(sx,sy,6,4);
+          if(room.trial){floorColor=room.approach.color(wx,wy);}
+          else if(room.lava?.contains(wx,wy)){floorColor=room.lava.rayColor(player,rayX,rayY,depth,eye,time);}
+          else if(tile===3&&room.boss){floorColor=EricArena.pitColor(player,rayX,rayY,depth,eye,time,opened);}
+          else if(tile===3){const bridge=opened&&Math.floor(wy)===3;if(bridge)floorColor=wx%1<.08?'#a6d6f8':'#4b6586';else{const bx=(wx-(room.bridge.start+room.bridge.end)/2)/((room.bridge.end-room.bridge.start)*.367),by=(wy-3.5)/1.65,r=Math.hypot(bx,by),swirl=Math.sin(Math.atan2(by,bx)*3-r*25+time*.001);floorColor=r<.53?'#010208':r<.62?'#c1a2e1':r<1.05&&swirl>.3?(r<.8?'#895d9c':'#504775'):'#070b18';}}
+          else if(room.boss)floorColor=EricArena.floor(wx,wy);
+          else if(room.rocket)floorColor=IgnitiaLaunchpad.floor(wx,wy);
+          else if(room.environment?.shop)floorColor=InteriorAtmosphere.shopFloor(wx,wy);
+          else if(room.environment?.kind==='forest'){const noise=Math.sin(Math.floor(wx*9)*12.9898+Math.floor(wy*9)*78.233)*43758.5453,grain=noise-Math.floor(noise);floorColor=grain>.85?'#405435':grain>.4?'#344a30':'#293f2c';}
+          else if(room.guardian&&wx>=GUARDIAN_GARDEN.start)floorColor=room.guardian.floor(wx,wy);
+          else if(room.environment?.kind==='courtyard'){const center=room.corridor?4.5:7.5,onPath=Math.abs(wy-center)<1.05,seam=((wx%0.55)+.55)%.55<.04||((wy%0.45)+.45)%.45<.035;floorColor=onPath?(seam?'#776445':'#b19b75'):(seam?'#29313b':'#495052');}
+          else {const seam=wx%1<.035||wy%1<.035;floorColor=seam?'#151b25':(Math.floor(wx)+Math.floor(wy))%2?'#3b3c40':'#303339';}
+          // Adjacent samples with the same color share a draw call. This is
+          // pixel-identical to the individual 6px rectangles, including depth.
+          if(floorColor!==runColor){
+            if(runColor!==null){c.fillStyle=runColor;c.fillRect(runX,sy,sx-runX,4);}
+            runX=sx;runColor=floorColor;
+          }
         }
+        if(runColor!==null){c.fillStyle=runColor;c.fillRect(runX,sy,w-runX,4);}
       }
     }
     if(room.trial)room.approach.drawCrater(this,player);
