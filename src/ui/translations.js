@@ -1,7 +1,7 @@
 window.ENGLISH={
   "Bienvenido al reino de Epithea. Soy EPI Paola y voy a acompañarte. Antes de cruzar las puertas, hay algo que debes saber: todo empezó con el Dr. Eric… y unas gráficas sin título.": "Welcome to the kingdom of Epithea. I’m EPI Paola, and I’ll be your guide. Before you cross the gates, there is something you should know: it all began with Dr. Eric… and some untitled graphs.",
   "El Dr. Eric era un químico respetado. Hasta que se cansó de corregir gráficas sin título. Ahora ha tomado el castillo y prepara una máquina capaz de distorsionar el tiempo y el espacio. Sí… se lo tomó bastante mal.": "Dr. Eric was a respected chemist. Until he grew tired of marking untitled graphs. Now he has taken the castle and is building a machine that can distort time and space. Yes… he took it rather badly.",
-  "Tenemos una hora para detenerlo. El reloj empezará cuando entres al mundo. Lleva tus apuntes contigo: observar, calcular y volver a intentar será más útil que correr sin mirar.": "We have one hour to stop him. The clock starts when you enter the world. Keep your notes close: observing, calculating and trying again will help more than running blindly.",
+  "Tenemos 80 minutos para detenerlo. El reloj empezará cuando entres al mundo. Lleva tus apuntes contigo: observar, calcular y volver a intentar será más útil que correr sin mirar.": "We have 80 minutes to stop him. The clock starts when you enter the world. Keep your notes close: observing, calculating and trying again will help more than running blindly.",
   "Si te atoras, pulsa H o toca mi globo de ayuda. Te daré una pista para empezar. Respira, revisa tus cálculos y confía en lo que sabes. Ah… esta vez sí ponles título a tus gráficas.": "If you get stuck, press H or tap my help bubble. I’ll give you a hint to get started. Take a breath, check your calculations and trust what you know. Oh… do title your graphs this time.",
   "Hasta aquí llega la carreta. Ese cráter no estaba en el camino… El Dr. Eric no nos lo ha puesto fácil. Bajemos: mira cada afirmación y elige dónde saltar. Yo iré contigo, paso a paso.": "The cart can go no farther. That crater wasn’t on the road… Dr. Eric hasn’t made this easy. Let’s get down: read each statement and choose where to jump. I’ll be with you, step by step.",
   "Aquí José Luis. Camisa de rayas, cohete listo: solo falta tu trayectoria. Acércate a la consola iluminada y pulsa E. Ajusta los controles o arrastra la curva para encontrarte con Eric en el mismo lugar y al mismo tiempo. Prueba tu rumbo antes de lanzar; su reloj sigue corriendo.": "José Luis here. Striped shirt, rocket ready: all we need is your trajectory. Approach the glowing console and press E. Adjust the controls or drag the curve to meet Eric at the same place and time. Test your course before launch; his clock keeps ticking.",
@@ -680,8 +680,8 @@ window.ENGLISH={
   "Hola, soy Epi Paola. Hay algo que debes saber antes de entrar al castillo. Todo empezó con el Dr. Eric… y unas gráficas.": "Hi, I’m Epi Paola. There’s something you should know before entering the castle. It all began with Dr. Eric… and some graphs.",
   "El origen de un villano": "The origin of a villain",
   "Este es el Dr. Eric. Se cansó de que los alumnos nunca pusieran títulos a las gráficas. Su paciencia se convirtió en furia, y ahora prepara la divergencia: quiere unificar la gravedad y el espacio.": "This is Dr. Eric. He grew tired of students never giving their graphs titles. His patience turned into fury, and now he is preparing the divergence: he wants to unify gravity and space.",
-  "Una hora para detenerlo": "One hour to stop him",
-  "Nadie sabe qué podría ocurrir si termina su experimento. Te esperan siete umbrales y varias pruebas de física. Tendrás sesenta minutos desde que entres al mundo; usa tus conocimientos y observa a tu alrededor.": "Nobody knows what could happen if he finishes his experiment. Seven gateways and several physics challenges await. You have sixty minutes from entering the world; use your knowledge and observe your surroundings.",
+  "80 minutos para detenerlo": "80 minutes to stop him",
+  "Nadie sabe qué podría ocurrir si termina su experimento. Te esperan siete umbrales y varias pruebas de física. Tendrás ochenta minutos desde que entres al mundo; usa tus conocimientos y observa a tu alrededor.": "Nobody knows what could happen if he finishes his experiment. Seven gateways and several physics challenges await. You have eighty minutes from entering the world; use your knowledge and observe your surroundings.",
   "EPI Iván · desaparecido": "EPI Iván · missing",
   "Una desaparición sin resolver": "An unsolved disappearance",
   "El EPI Iván también está desaparecido desde que Eric se fue. Nadie sabe dónde se encuentra. Se dice que se perdió en un bosque… pero nadie ha podido confirmar esa historia.": "EPI Iván has also been missing since Eric left. Nobody knows where he is. People say he got lost in a forest… but nobody has confirmed that story.",
@@ -697,7 +697,7 @@ window.ENGLISH={
   "Escuchar a Paola": "Listen to Paola",
   "Saltar relato y entrar": "Skip story and enter",
   "Una historia antes de la aventura. Pulsa «Escuchar a Paola» para comenzar.": "A story before the adventure. Press “Listen to Paola” to begin.",
-  "Entrar al mundo · 60 minutos": "Enter the world · 60 minutes",
+  "Entrar al mundo · 80 minutos": "Enter the world · 80 minutes",
   "PRÓLOGO": "PROLOGUE",
   "♫ Activar sonido": "♫ Enable sound",
   "♫ Sonido activado": "♫ Sound enabled",
@@ -717,7 +717,7 @@ window.ENGLISH={
   "TU AVENTURA EN AVENTURA EPIK": "YOUR ADVENTURE IN AVENTURA EPIK",
   "El castillo": "The castle",
   "de la divergencia.": "of divergence.",
-  "Seis umbrales. Una hora. El Dr. Eric te espera.": "Seven gateways. One hour. Dr. Eric awaits.",
+  "Seis umbrales. 80 minutos. El Dr. Eric te espera.": "Seven gateways. 80 minutes. Dr. Eric awaits.",
   "LOS SEIS UMBRALES": "THE SIX GATEWAYS",
   "Caminar": "Walk",
   "Mouse para mirar": "Mouse to look",
@@ -1045,7 +1045,7 @@ Object.assign(window.ENGLISH,{
  'Eric ya te considera parte de los reactivos. ¡Cambia el procedimiento!':'Eric now counts you among the reactants. Change the procedure!',
  'Conservas tus aciertos; si caes, vuelves al inicio del puente.':'Your correct answers are saved; if you fall, you return to the start of the bridge.',
  'Lee la afirmación y salta a Verdadero o Falso. Shift para correr, Espacio para saltar. Un error rompe la plataforma; regresas al inicio del puente y conservas tus aciertos. Pulsa H si necesitas una pista.':'Read the statement and jump to True or False. Shift to sprint, Space to jump. A wrong answer breaks the platform; you return to the start of the bridge with your correct answers saved. Press H for a hint.',
- 'Siete umbrales. Una hora. El Dr. Eric te espera.':'Seven thresholds. One hour. Dr. Eric awaits.',
+ 'Siete umbrales. 80 minutos. El Dr. Eric te espera.':'Seven thresholds. 80 minutes. Dr. Eric awaits.',
  'Siete umbrales. A tu ritmo.':'Seven thresholds. At your pace.',
  'ACADEMIA DE LOS SIETE UMBRALES':'ACADEMY OF THE SEVEN THRESHOLDS'
 });
@@ -1276,5 +1276,5 @@ Object.assign(window.ENGLISH,{
  'Resuelve ambas operaciones y elige la posición.':'Evaluate both expressions and choose the position.',
  '¡Mi propia máquina! ¡Esto es una descarga de traición!':'My own machine! What a shocking betrayal!',
  '¡Descarga! Eric queda aturdido durante 15 segundos. Aprovecha los láseres.':'Discharge! Eric is stunned for 15 seconds. Use the lasers.',
- 'Si la máquina suelta una chispa, recógela: aturde a Eric 15 segundos y solo puede usarse una vez.':'If the machine drops a spark, collect it: it stuns Eric for 15 seconds and can only be used once.'
+ 'Cada cinco ataques, la máquina suelta una chispa. Recógela: aturde a Eric durante 15 segundos.':'Every five attacks, the machine drops a spark. Collect it: it stuns Eric for 15 seconds.'
 });
