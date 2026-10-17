@@ -766,7 +766,7 @@ window.ENGLISH={
   "resueltos": "solved",
   "Acércate al sello de la puerta y míralo para responder.": "Approach and look at the door seal to answer.",
   "Introduce números válidos, sin unidades. Puedes usar coma o punto decimal.": "Enter valid numbers without units. You may use a decimal point or comma.",
-  "✦ Respuesta correcta. El sello de la puerta se ha abierto. Puedes continuar o girar otra vez.": "✦ Correct answer. The door seal is open. Continue or spin again.",
+  "✦ Respuesta correcta. El sello de la puerta se ha abierto. Puedes continuar.": "✦ Correct answer. The door seal is open. Continue or spin again.",
   "revisa el planteamiento y las unidades": "check your setup and units",
   "correcto": "correct",
   "Completa tu propuesta numérica antes de disparar.": "Complete your numerical proposal before firing.",
@@ -1276,5 +1276,5 @@ Object.assign(window.ENGLISH,{
  'Resuelve ambas operaciones y elige la posición.':'Evaluate both expressions and choose the position.',
  '¡Mi propia máquina! ¡Esto es una descarga de traición!':'My own machine! What a shocking betrayal!',
  '¡Descarga! Eric queda aturdido durante 15 segundos. Aprovecha los láseres.':'Discharge! Eric is stunned for 15 seconds. Use the lasers.',
- 'Cada 20 segundos, la máquina suelta una chispa. Recógela: aturde a Eric durante 15 segundos.':'Every 20 seconds, the machine drops a spark. Collect it: it stuns Eric for 15 seconds.'
+ 'La máquina suelta chispas cada 30–50 segundos. Recoge una para aturdir a Eric 15 segundos; otra reinicia ese tiempo.':'The machine drops sparks every 30–50 seconds. Collect one to stun Eric for 15 seconds; another resets that timer.'
 });

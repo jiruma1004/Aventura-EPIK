@@ -7,7 +7,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
   boss.supernova.elapsed=EricSupernova.triggerAt-1;boss.tick(.5,playerTest,renderer,rooms[index],false);const early=boss.supernova.active;
   boss.tick(.5,playerTest,renderer,rooms[index],false);const triggered=boss.supernova.active;boss.supernova.age=2.5;boss.supernova.draw(renderer,playerTest,renderer.actors);
   const shake=renderer.canvas.style.transform;const pixel=Array.from(renderer.ctx.getImageData(0,0,1,1).data);boss.tick(.01,playerTest,renderer,rooms[index],false);const wave= boss.wave.phase;const attacks=boss.potions.bottles.length+boss.potions.pools.length;
-  const noEarlySpark=boss.stun.flightAge===-1;boss.supernova.age=4.99;const stillBlind=boss.supernova.blind;boss.supernova.age=5;const released=!boss.supernova.blind;
+  const noEarlySpark=boss.stun.sparks.length===0;boss.supernova.age=4.99;const stillBlind=boss.supernova.blind;boss.supernova.age=5;const released=!boss.supernova.blind;
   boss.supernova.age=5.5;const fading=boss.supernova.active;boss.supernova.age=6;const ended=!boss.supernova.active;
   for(let i=0;i<90;i++)boss.tick(.1,playerTest,renderer,rooms[index],false);
   boss.supernova.draw(renderer,playerTest,renderer.actors);const cleared=renderer.canvas.style.transform==='';

@@ -40,6 +40,8 @@ window.EpikSession = class {
       attemptCounts: {},
       revealedObjectives: {},
       rouletteResets: 0,
+      rouletteSpins: 0,
+      rouletteSelected: null,
       entered: null,
       solvedAt: null,
       passedAttempt: null,

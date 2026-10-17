@@ -1,15 +1,17 @@
 # Chispa de la máquina
 
-Cada 20 segundos de juego activo aparece una chispa, independientemente del
-número de ataques y en ambos modos. El contador avanza también durante el
-aturdimiento, pero se pausa al pausar el juego u ocultar la pestaña.
+La máquina suelta una chispa tras un intervalo aleatorio uniforme de 30 a 50
+segundos, escogido de nuevo en cada aparición (también para la primera).
+La media es 40 s, aproximadamente 1.5 chispas por minuto a largo plazo; no es
+una cuota por minuto. Funciona en ambos modos. El contador avanza también
+mientras Eric está aturdido, pero se pausa con el juego o la pestaña oculta.
 
 La chispa recorre en 1.2 s un arco desde la máquina a un destino aleatorio
 sobre suelo accesible: x entre 2 y 16, y entre 2 y 13. Evita los láseres
 (margen de 1.35), la fosa y las paredes; queda al menos a 1.5 del jugador
 y a 2 del destino anterior. El vuelo interpola ambos ejes. Al pasar a menos de .65 unidades y con altura de salto
-inferior a .65 se recoge, sin tecla. Si queda una sin recoger a los 20 segundos
-siguientes, se reemplaza: nunca se acumulan varias en el suelo.
+inferior a .65 se recoge, sin tecla. Las chispas sin recoger permanecen en el suelo y se acumulan. Cada recogida
+reinicia el aturdimiento a 15 s; nunca suma esos segundos al tiempo restante.
 
 El rayo visual y el efecto sintetizado respetan silencio/volumen. Durante los
 15 segundos de aturdimiento se detienen los ataques, se limpian pociones,
@@ -18,10 +20,10 @@ Se puede caminar, usar ayudas y programar láseres. No resuelve cortes ni afecta
 estrellas. Al terminar, los ataques continúan; el ciclo de la chispa mantiene su ritmo.
 
 Pausas y pestaña oculta detienen la simulación. El guardado conserva contador, destino aleatorio,
-chispa en vuelo/suelo y aturdimiento restante (descontando el tiempo fuera).
-Morir cancela el aturdimiento, pero conserva el contador y la chispa pendiente.
-La migración conserva una chispa ya liberada en partidas anteriores e inicia el nuevo ciclo de 20 s.
-Resolver la batalla cancela el efecto y oculta la chispa.
+todas las chispas en vuelo/suelo, el próximo intervalo y el aturdimiento restante (descontando el tiempo fuera).
+Morir cancela el aturdimiento, pero conserva el contador y las chispas pendientes.
+La migración conserva una chispa ya liberada en partidas anteriores e inicia un intervalo de 30–50 s.
+Resolver la batalla cancela el efecto y oculta las chispas.
 
 La supernova empieza a los 121.5 s de combate activo: carga 2 s, pantalla verde
 opaca 3 s y desvanecimiento 1 s. La onda comienza al entrar en la ceguera.
