@@ -1,18 +1,16 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const world={Image:class{}};world.window=world;vm.createContext(world);vm.runInContext(fs.readFileSync('src/rooms/room-05/stun.js','utf8'),world);
 let pickups=0;const spark=new world.EricSpark(()=>pickups++),far={x:3,y:7.5},near={x:14.4,y:7.5};
-spark.tick(100,far);assert(!spark.ready);assert.equal(spark.flightAge,-1);
-for(let cycle=0;cycle<3;cycle++){
- for(let i=0;i<4;i++)spark.attack();assert.equal(spark.flightAge,-1);
- spark.attack();assert.equal(spark.flightAge,0);spark.tick(1.19,far);assert(!spark.ready);spark.tick(.02,far);assert(spark.ready);
- spark.tick(.01,near);assert.equal(pickups,cycle+1);assert.equal(spark.left,15);
- spark.attack();assert.equal(spark.attacks,0);assert.equal(spark.tick(14,near),0);assert.equal(spark.tick(2,far),1);
-}
-for(let i=0;i<5;i++)spark.attack();spark.tick(2,far);assert(spark.ready);
-for(let i=0;i<5;i++)spark.attack();assert.equal(spark.flightAge,0,'Uncollected spark is replaced, never stacked');
-spark.attack();const saved=spark.snapshot(),restored=new world.EricSpark(()=>{});restored.restore(saved);assert.deepEqual(restored.snapshot(),saved);
-restored.tick(2,near);const active=restored.snapshot();spark.restore(active,4);assert.equal(spark.left,11);assert.equal(spark.attacks,1);spark.cancel();assert.equal(spark.left,0);assert.equal(spark.attacks,1);
-spark.restore({age:20,used:true,left:9},3);assert.equal(spark.left,6);assert.equal(spark.flightAge,-1);
-spark.restore({age:14,used:false,left:0});assert(spark.ready);spark.restore({age:5,used:false,left:0});assert.equal(spark.flightAge,-1);
-assert.throws(()=>spark.restore({...saved,attacks:5}));assert.throws(()=>spark.restore({...saved,flightAge:-2}));
-console.log('PASS: recurring five-attack sparks, no timed spawn, 15s stun, single pickup, saved cycles and legacy migration.');
+spark.tick(19.99,far);assert.equal(spark.flightAge,-1);spark.tick(.01,far);assert.equal(spark.flightAge,0);
+spark.tick(1.19,far);assert(!spark.ready);spark.tick(.02,near);assert.equal(pickups,1);assert.equal(spark.left,15);
+assert.equal(spark.tick(14,far),0);assert.equal(spark.tick(2,far),1);
+spark.tick(2.79,far);assert.equal(spark.flightAge,0,'Second release at 40 seconds, including stun time');
+spark.tick(1.21,near);assert.equal(pickups,2);assert.equal(spark.left,15);
+const saved=spark.snapshot(),restored=new world.EricSpark(()=>{});restored.restore(saved,4);assert.equal(restored.left,11);assert.equal(restored.cycle,saved.cycle);
+restored.cancel();assert.equal(restored.left,0);assert.equal(restored.cycle,saved.cycle);
+const other=new world.EricSpark(()=>{});other.tick(40.5,far);assert.equal(other.flightAge,.5);assert.equal(other.cycle,.5);other.tick(20,far);assert.equal(other.flightAge,.5,'Only newest uncollected spark remains');
+other.restore({version:2,age:20,attacks:3,flightAge:2,left:0});assert(other.ready);assert.equal(other.cycle,0);
+other.restore({age:20,used:true,left:9},3);assert.equal(other.left,6);assert.equal(other.flightAge,-1);
+other.restore({age:14,used:false,left:0});assert(other.ready);
+assert.throws(()=>other.restore({...saved,cycle:20}));assert.throws(()=>other.restore({...saved,flightAge:-2}));
+console.log('PASS: 20-second spark cycle, flight, repeated pickups, 15s stun, save recovery and legacy migration.');

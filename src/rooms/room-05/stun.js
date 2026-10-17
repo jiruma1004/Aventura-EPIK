@@ -1,24 +1,21 @@
-/* Every five executed attacks release one collectible. A new release replaces
+/* Every 20 seconds of active gameplay release one collectible. A new release replaces
    an uncollected spark; checkpoint state preserves the cycle and active stun. */
 window.EricSpark=class {
- static attacksPerSpark=5;
+ static interval=20;
  static flight=1.2;
  static duration=15;
  static landing={x:14.4,y:7.5,z:.38};
  constructor(onCollect){
-  this.onCollect=onCollect;this.age=0;this.attacks=0;this.flightAge=-1;this.left=0;this.beam=0;
+  this.onCollect=onCollect;this.age=0;this.cycle=0;this.flightAge=-1;this.left=0;this.beam=0;
   this.sprite=new Image();this.sprite.src='assets/cast/divergence-spark-v1.webp';
   this.eric=new Image();this.eric.src='assets/cast/eric-stunned-v1.webp';
- }
- attack(){
-  if(this.active)return;
-  this.attacks++;
-  if(this.attacks===EricSpark.attacksPerSpark){this.attacks=0;this.flightAge=0;}
  }
  get ready(){return this.flightAge>=EricSpark.flight;}
  get active(){return this.left>0;}
  tick(dt,player){
   const paused=Math.min(dt,this.left);this.left=Math.max(0,this.left-dt);this.beam=Math.max(0,this.beam-dt);this.age+=dt;if(this.flightAge>=0)this.flightAge+=dt;
+  this.cycle+=dt;
+  if(this.cycle>=EricSpark.interval){this.cycle%=EricSpark.interval;this.flightAge=this.cycle;}
   const p=EricSpark.landing;
   if(this.ready&&Math.hypot(player.x-p.x,player.y-p.y)<.65&&(player.jumpHeight||0)<.65){
    this.flightAge=-1;this.left=EricSpark.duration;this.beam=.85;this.onCollect();return 0;
@@ -26,20 +23,20 @@ window.EricSpark=class {
   return dt-paused;
  }
  cancel(){this.left=0;this.beam=0;}
- snapshot(){return {version:2,age:this.age,attacks:this.attacks,flightAge:this.flightAge,left:this.left};}
+ snapshot(){return {version:3,age:this.age,cycle:this.cycle,flightAge:this.flightAge,left:this.left};}
  restore(data,away=0){
   if(!data)return;
   if(!Number.isFinite(data.age)||data.age<0||!Number.isFinite(data.left)||data.left<0||data.left>EricSpark.duration)throw Error('Invalid spark checkpoint');
-  let attacks=0,flightAge=-1;
-  if(data.version===2){
-   attacks=data.attacks;flightAge=data.flightAge;
-   if(!Number.isInteger(attacks)||attacks<0||attacks>=EricSpark.attacksPerSpark||!Number.isFinite(flightAge)||(flightAge<0&&flightAge!==-1)||(data.left>0&&flightAge!==-1))throw Error('Invalid spark cycle');
+  let cycle=0,flightAge=-1;
+  if(data.version===3||data.version===2){
+   cycle=data.version===3?data.cycle:0;flightAge=data.flightAge;
+   if(!Number.isFinite(cycle)||cycle<0||cycle>=EricSpark.interval||!Number.isFinite(flightAge)||(flightAge<0&&flightAge!==-1))throw Error('Invalid spark cycle');
   }else{
    if(typeof data.used!=='boolean'||data.left>0&&!data.used)throw Error('Invalid legacy spark checkpoint');
-   // Keep an already released legacy spark; future ones use the five-attack cycle.
+   // Keep an already released legacy spark; future ones use the 20-second cycle.
    if(!data.used&&data.age>=12)flightAge=data.age-12;
   }
-  this.age=data.age;this.attacks=attacks;this.flightAge=flightAge;this.left=Math.max(0,data.left-Math.max(0,away));this.beam=0;
+  this.age=data.age;this.cycle=cycle;this.flightAge=flightAge;this.left=Math.max(0,data.left-Math.max(0,away));this.beam=0;
  }
  frame(){return [0,1,2,1,0,3][Math.floor(this.age*6)%6];}
  position(){const t=Math.max(0,Math.min(1,this.flightAge/EricSpark.flight)),p=EricSpark.landing;return {x:23.5+(p.x-23.5)*t,y:p.y,z:2.6+(p.z-2.6)*t+Math.sin(t*Math.PI)*1.2};}

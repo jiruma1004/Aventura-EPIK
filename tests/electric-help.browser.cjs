@@ -13,10 +13,9 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
   const outcome=await p.evaluate(async mode=>{
    EpikDifficulty.select(mode);load(rooms.findIndex(r=>r.boss));document.querySelector('#maze-notice').hidden=true;await boss.stun.eric.decode();await boss.stun.sprite.decode();await boss.eric.decode();
    let attacks=0;boss.potions.tick=dt=>{attacks+=dt};boss.wave.tick=()=>{};
-   boss.tick(13.3,{x:3,y:7.5},renderer,rooms[index],false);const noTimedSpawn=boss.stun.flightAge===-1;
-   boss.wave.onEvent('warning');boss.potions.onEvent('splash');const noWarningCount=boss.stun.attacks===0;
-   for(let n=0;n<4;n++)boss.potions.onEvent('throw');const noEarlySpawn=boss.stun.flightAge===-1;
-   if(mode==='normal')boss.wave.onEvent('launch');else boss.potions.onEvent('throw');
+   boss.tick(19.99,{x:3,y:7.5},renderer,rooms[index],false);const noEarlySpawn=boss.stun.flightAge===-1;
+   for(let n=0;n<5;n++)boss.potions.onEvent('throw');const noAttackSpawn=boss.stun.flightAge===-1;
+   boss.tick(.02,{x:3,y:7.5},renderer,rooms[index],false);const launched=boss.stun.flightAge>=0;
    boss.tick(1.21,{x:3,y:7.5},renderer,rooms[index],false);const ready=boss.stun.ready;
    boss.potions.bottles=[{}];boss.potions.pools=[{}];boss.wave.phase='wave';boss.supernova.age=3;boss.supernova.used=true;
    Object.assign(player,{x:14.4,y:7.5,angle:0,pitch:.14,jumpHeight:0});boss.tick(.01,player,renderer,rooms[index],false);
@@ -25,11 +24,11 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
    window.electricTest={bossTick:boss.tick.bind(boss),before};
    boss.tick(14.99,player,renderer,rooms[index],false);const paused=attacks===before;boss.tick(.02,player,renderer,rooms[index],false);const resumed=attacks>before;
    boss.tick(1,player,renderer,rooms[index],false);const single=boss.stun.flightAge===-1&&!boss.stun.active;
-   for(let n=0;n<5;n++)boss.potions.onEvent('throw');boss.tick(1.21,{x:3,y:7.5},renderer,rooms[index],false);const recurring=boss.stun.ready;
+   boss.tick(5,{x:3,y:7.5},renderer,rooms[index],false);const recurring=boss.stun.ready;
    const saved=boss.stun.snapshot();boss.stun.restore(saved);const same=JSON.stringify(saved)===JSON.stringify(boss.stun.snapshot());
-   boss.resetAttacks();return {ready,atPickup,paused,resumed,single,same,recurring,noTimedSpawn,noWarningCount,noEarlySpawn,readyAfterDeath:boss.stun.ready};
+   boss.resetAttacks();return {ready,atPickup,paused,resumed,single,same,recurring,launched,noAttackSpawn,noEarlySpawn,readyAfterDeath:boss.stun.ready};
   },mode);
-  assert(outcome.ready);assert.deepEqual(outcome.atPickup,{left:15,bottles:0,pools:0,wave:'idle',nova:false});assert(outcome.paused&&outcome.resumed&&outcome.single&&outcome.same&&outcome.readyAfterDeath&&outcome.recurring&&outcome.noTimedSpawn&&outcome.noWarningCount&&outcome.noEarlySpawn,mode);
+  assert(outcome.ready);assert.deepEqual(outcome.atPickup,{left:15,bottles:0,pools:0,wave:'idle',nova:false});assert(outcome.paused&&outcome.resumed&&outcome.single&&outcome.same&&outcome.readyAfterDeath&&outcome.recurring&&outcome.launched&&outcome.noAttackSpawn&&outcome.noEarlySpawn,mode);
  }
  await p.evaluate(()=>{load(rooms.findIndex(r=>r.boss));document.querySelector('#maze-notice').hidden=true;Object.assign(player,{x:12,y:7.5,angle:0,pitch:.14});boss.stun.flightAge=-1;boss.stun.left=15;boss.stun.beam=.8;});
  await p.evaluate(async()=>{await boss.stun.eric.decode();await boss.stun.sprite.decode();await boss.eric.decode();renderer.draw(rooms[index],player,false,0,0);boss.draw(renderer,player,renderer.actors)});await p.locator('#game').screenshot({path:'/tmp/epik-electric-stun.png'});
@@ -42,5 +41,5 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
  await p.evaluate(async()=>{cinematics.play('intercepcion-espacial');await cinematics.ready;cinematics.time=34.2;cinematics.draw();});
  await p.locator('.scene-view').screenshot({path:'/tmp/epik-eric-prison-clean.png'});
  const names=await p.evaluate(()=>{const credits=cinematics.credits??=new EpikCredits();return credits.entries.flat(2).join(' ')});for(const name of ['José Luis Henriquez Mercado','Rodrigo Gamboa Goñi','Luis Manuel Rico Gutiérrez'])assert(names.includes(name));
- assert.deepEqual(errors,[]);console.log('PASS formula reference desktop/mobile and no AI penalty; 15-second interrupt in both modes, cleared hazards, resumed attacks and five-attack recurring sparks and recovery; two calculation seals; credits and prison scene.');
+ assert.deepEqual(errors,[]);console.log('PASS formula reference desktop/mobile and no AI penalty; 15-second interrupt in both modes, cleared hazards, resumed attacks and 20-second recurring sparks and recovery; two calculation seals; credits and prison scene.');
 }finally{await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});
