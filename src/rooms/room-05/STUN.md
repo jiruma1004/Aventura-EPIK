@@ -4,8 +4,10 @@ Cada 20 segundos de juego activo aparece una chispa, independientemente del
 número de ataques y en ambos modos. El contador avanza también durante el
 aturdimiento, pero se pausa al pausar el juego u ocultar la pestaña.
 
-La chispa recorre en 1.2 s un arco desde la máquina a (14.4, 7.5), sobre suelo
-seguro antes de la fosa. Al pasar a menos de .65 unidades y con altura de salto
+La chispa recorre en 1.2 s un arco desde la máquina a un destino aleatorio
+sobre suelo accesible: x entre 2 y 16, y entre 2 y 13. Evita los láseres
+(margen de 1.35), la fosa y las paredes; queda al menos a 1.5 del jugador
+y a 2 del destino anterior. El vuelo interpola ambos ejes. Al pasar a menos de .65 unidades y con altura de salto
 inferior a .65 se recoge, sin tecla. Si queda una sin recoger a los 20 segundos
 siguientes, se reemplaza: nunca se acumulan varias en el suelo.
 
@@ -15,7 +17,7 @@ charcos y onda activa, y se cancela la supernova en curso sin renovar su uso.
 Se puede caminar, usar ayudas y programar láseres. No resuelve cortes ni afecta
 estrellas. Al terminar, los ataques continúan; el ciclo de la chispa mantiene su ritmo.
 
-Pausas y pestaña oculta detienen la simulación. El guardado conserva contador,
+Pausas y pestaña oculta detienen la simulación. El guardado conserva contador, destino aleatorio,
 chispa en vuelo/suelo y aturdimiento restante (descontando el tiempo fuera).
 Morir cancela el aturdimiento, pero conserva el contador y la chispa pendiente.
 La migración conserva una chispa ya liberada en partidas anteriores e inicia el nuevo ciclo de 20 s.

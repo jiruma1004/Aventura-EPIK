@@ -4,42 +4,61 @@ window.EricSpark=class {
  static interval=20;
  static flight=1.2;
  static duration=15;
- static landing={x:14.4,y:7.5,z:.38};
- constructor(onCollect){
-  this.onCollect=onCollect;this.age=0;this.cycle=0;this.flightAge=-1;this.left=0;this.beam=0;
+ static legacyLanding={x:14.4,y:7.5,z:.38};
+ static safeLanding(p){
+  return p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=2&&p.x<=16&&p.y>=2&&p.y<=13
+   &&[2.2,12.8].every(y=>Math.hypot(p.x-11.5,p.y-y)>=1.35);
+ }
+ constructor(onCollect,random=Math.random){
+  this.onCollect=onCollect;this.random=random;this.landing={...EricSpark.legacyLanding};this.age=0;this.cycle=0;this.flightAge=-1;this.left=0;this.beam=0;
   this.sprite=new Image();this.sprite.src='assets/cast/divergence-spark-v1.webp';
   this.eric=new Image();this.eric.src='assets/cast/eric-stunned-v1.webp';
+ }
+ chooseLanding(player){
+  const suitable=p=>EricSpark.safeLanding(p)&&Math.hypot(p.x-this.landing.x,p.y-this.landing.y)>=2
+   &&Math.hypot(p.x-player.x,p.y-player.y)>=1.5;
+  for(let i=0;i<48;i++){
+   const p={x:2+this.random()*14,y:2+this.random()*11,z:.38};
+   if(suitable(p)){this.landing=p;return;}
+  }
+  // Bounded fallback for unusual RNG output, still on accessible floor.
+  for(const x of [3,7,15])for(const y of [3,7.5,12]){
+   const p={x,y,z:.38};if(suitable(p)){this.landing=p;return;}
+  }
  }
  get ready(){return this.flightAge>=EricSpark.flight;}
  get active(){return this.left>0;}
  tick(dt,player){
   const paused=Math.min(dt,this.left);this.left=Math.max(0,this.left-dt);this.beam=Math.max(0,this.beam-dt);this.age+=dt;if(this.flightAge>=0)this.flightAge+=dt;
   this.cycle+=dt;
-  if(this.cycle>=EricSpark.interval){this.cycle%=EricSpark.interval;this.flightAge=this.cycle;}
-  const p=EricSpark.landing;
+  if(this.cycle>=EricSpark.interval){this.cycle%=EricSpark.interval;this.flightAge=this.cycle;this.chooseLanding(player);}
+  const p=this.landing;
   if(this.ready&&Math.hypot(player.x-p.x,player.y-p.y)<.65&&(player.jumpHeight||0)<.65){
    this.flightAge=-1;this.left=EricSpark.duration;this.beam=.85;this.onCollect();return 0;
   }
   return dt-paused;
  }
  cancel(){this.left=0;this.beam=0;}
- snapshot(){return {version:3,age:this.age,cycle:this.cycle,flightAge:this.flightAge,left:this.left};}
+ snapshot(){return {version:4,landing:{...this.landing},age:this.age,cycle:this.cycle,flightAge:this.flightAge,left:this.left};}
  restore(data,away=0){
   if(!data)return;
   if(!Number.isFinite(data.age)||data.age<0||!Number.isFinite(data.left)||data.left<0||data.left>EricSpark.duration)throw Error('Invalid spark checkpoint');
   let cycle=0,flightAge=-1;
-  if(data.version===3||data.version===2){
-   cycle=data.version===3?data.cycle:0;flightAge=data.flightAge;
+  if([4,3,2].includes(data.version)){
+   cycle=data.version>=3?data.cycle:0;flightAge=data.flightAge;
    if(!Number.isFinite(cycle)||cycle<0||cycle>=EricSpark.interval||!Number.isFinite(flightAge)||(flightAge<0&&flightAge!==-1))throw Error('Invalid spark cycle');
   }else{
    if(typeof data.used!=='boolean'||data.left>0&&!data.used)throw Error('Invalid legacy spark checkpoint');
    // Keep an already released legacy spark; future ones use the 20-second cycle.
    if(!data.used&&data.age>=12)flightAge=data.age-12;
   }
+  const landing=data.version===4?data.landing:EricSpark.legacyLanding;
+  if(!EricSpark.safeLanding(landing))throw Error('Invalid spark landing');
+  this.landing={x:landing.x,y:landing.y,z:.38};
   this.age=data.age;this.cycle=cycle;this.flightAge=flightAge;this.left=Math.max(0,data.left-Math.max(0,away));this.beam=0;
  }
  frame(){return [0,1,2,1,0,3][Math.floor(this.age*6)%6];}
- position(){const t=Math.max(0,Math.min(1,this.flightAge/EricSpark.flight)),p=EricSpark.landing;return {x:23.5+(p.x-23.5)*t,y:p.y,z:2.6+(p.z-2.6)*t+Math.sin(t*Math.PI)*1.2};}
+ position(){const t=Math.max(0,Math.min(1,this.flightAge/EricSpark.flight)),p=this.landing;return {x:23.5+(p.x-23.5)*t,y:7.5+(p.y-7.5)*t,z:2.6+(p.z-2.6)*t+Math.sin(t*Math.PI)*1.2};}
  draw(r,player,actors,head){
   const c=r.ctx;
   if(this.flightAge>=0){
@@ -49,7 +68,7 @@ window.EricSpark=class {
   }
   if(this.active)this.label(r,player,actors,head,(I18n.lang==='en'?'STUNNED':'ATURDIDO')+' · '+Math.ceil(this.left)+' s',.25);
   if(this.beam<=0)return;
-  const a=actors.project(r,player,EricSpark.landing.x,EricSpark.landing.y,.55)||{x:r.canvas.width*.5,y:r.canvas.height*1.03},b=actors.project(r,player,head.x,head.y,head.z-.7);if(!a||!b)return;
+  const a=actors.project(r,player,this.landing.x,this.landing.y,.55)||{x:r.canvas.width*.5,y:r.canvas.height*1.03},b=actors.project(r,player,head.x,head.y,head.z-.7);if(!a||!b)return;
   c.save();c.globalAlpha=Math.min(1,this.beam*3);c.lineJoin='round';
   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,phase=reduced?0:Math.floor(this.age*12);
   for(const [width,color] of [[9,'#4bcbd990'],[4,'#98ffff'],[1.5,'#ffffff']]){

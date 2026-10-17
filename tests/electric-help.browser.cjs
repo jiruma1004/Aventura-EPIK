@@ -18,7 +18,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
    boss.tick(.02,{x:3,y:7.5},renderer,rooms[index],false);const launched=boss.stun.flightAge>=0;
    boss.tick(1.21,{x:3,y:7.5},renderer,rooms[index],false);const ready=boss.stun.ready;
    boss.potions.bottles=[{}];boss.potions.pools=[{}];boss.wave.phase='wave';boss.supernova.age=3;boss.supernova.used=true;
-   Object.assign(player,{x:14.4,y:7.5,angle:0,pitch:.14,jumpHeight:0});boss.tick(.01,player,renderer,rooms[index],false);
+   Object.assign(player,{...boss.stun.landing,angle:0,pitch:.14,jumpHeight:0});boss.tick(.01,player,renderer,rooms[index],false);
    const atPickup={left:boss.stun.left,bottles:boss.potions.bottles.length,pools:boss.potions.pools.length,wave:boss.wave.phase,nova:boss.supernova.active},before=attacks;
    renderer.draw(rooms[index],player,false,0,0);boss.draw(renderer,player,renderer.actors);
    window.electricTest={bossTick:boss.tick.bind(boss),before};
