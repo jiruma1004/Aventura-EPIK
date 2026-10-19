@@ -36,19 +36,19 @@ window.EpikSolutions = {
     }
     return null;
   },
-  // Operaciones intermedias resueltas; quedan los despejes, nunca las respuestas.
+  // Despejes completos: el estudiante evalúa la última operación, sin respuestas numéricas.
   // Los coeficientes trigonométricos se conservan con seis decimales.
   rouletteSetups: {
-    1: '4.5·(d − 17.55) = 364.5\n4.5·(t − 0.65) = 27',
-    2: '0.6t² + 4t − 60 = 0; t > 0\nx − 4t = 60',
-    3: '0.40v = 11.2152\n19.62h = v²',
-    4: '4.905t² − 11.658224t − 35 = 0; t > 0\nR − 18.657058t = 0',
-    5: 'y + 12.036316 = 25.172989\nv_y + 15.367255 = 16.06969',
-    6: '19.62·(h_max − 20) = 100\n4.905t² − 10t − 20 = 0; t > 0',
-    7: 'D − 76.8 − 96 = 57.6\n19·v_media = D',
-    8: 'sen(2θ₁) = 0.68125; 0° < θ₁ < 45°\nθ₁ + θ₂ = 90°',
-    9: 'v/6 = 2\nΔx/18 = 2',
-    10: '4.905t² = 19.62; t > 0\nv − 9.81t = 0'
+    1: 'd = 17.55 + 364.5/4.5\nt = 0.65 + 27/4.5',
+    2: 't = (−4 + √(16 + 144))/1.2\nx = 60 + 4t',
+    3: 'v = 11.2152/0.40\nh = v²/19.62',
+    4: 't = (11.658224 + √(11.658224² + 4·4.905·35))/9.81\nR = 18.657058t',
+    5: 'y = 25.172989 − 12.036316\nv_y = 16.06969 − 15.367255',
+    6: 'h_max = 20 + 100/19.62\nt = (10 + √(100 + 4·4.905·20))/9.81',
+    7: 'D = 76.8 + 96 + 57.6\nv_media = D/19',
+    8: 'θ₁ = arcsen(0.68125)/2\nθ₂ = 90° − θ₁',
+    9: 'v = 2·6\nΔx = 2·18',
+    10: 't = √(19.62/4.905)\nv = 9.81t'
   },
   text(g) {
     const {
@@ -65,9 +65,9 @@ window.EpikSolutions = {
     if (room.trial) return say('La respuesta es ', 'The answer is ') + (trial.question.answer ? say('Verdadero.', 'True.') : say('Falso.', 'False.')) + ' ' + I18n.t(trial.question.hint) + say(' Salta tú a esa plataforma.', ' Jump onto that platform yourself.');
     if (room.physics) {
       const p=lab.room.physics,D=(p.targetX-p.originX)*p.metersPerCell,dy=p.targetHeight-p.height;
-      return say(`Elige y fija tú un ángulo θ. La rapidez inicial queda despejada así:
+      return say(`Elige y fija tú un ángulo θ (30°, 45° o 60°). La rapidez inicial queda despejada así:
 v₀ = √[(${p.gravity}·${D}²) / (2·cos²(θ)·(${D}·tan(θ) − (${dy})))]
-Usa grados en tu calculadora.`, `Choose and fix an angle θ yourself. The initial speed is isolated as follows:
+Usa grados en tu calculadora.`, `Choose and fix an angle θ yourself (30°, 45° or 60°). The initial speed is isolated as follows:
 v₀ = √[(${p.gravity}·${D}²) / (2·cos²(θ)·(${D}·tan(θ) − (${dy})))]
 Set your calculator to degrees.`);
     }
@@ -75,7 +75,7 @@ Set your calculator to degrees.`);
       const q = roulette.current;
       if(!q)return say('Primero gira la rueda.','Spin the wheel first.');
       const setup=this.rouletteSetups[q.id];
-      return say('Ya hice las operaciones intermedias. Solo te toca despejar los valores pedidos, en el orden de las ecuaciones. Conserva decimales hasta el final y usa grados en tu calculadora.\n', 'The intermediate calculations are done. Isolate the requested values in the order shown. Keep precision until the end and set your calculator to degrees.\n')+setup;
+      return say('Ya dejé las ecuaciones despejadas y los datos sustituidos. Evalúa las operaciones en orden; si aparece una variable anterior, usa el valor que acabas de calcular. Conserva decimales hasta el final y usa grados en tu calculadora.\n', 'The equations are isolated and the data substituted. Evaluate the operations in order; use your previous result wherever that variable appears. Keep precision until the end and set your calculator to degrees.\n')+setup;
     }
     if (room.conceptual) {
       const q = maze.question;
@@ -89,9 +89,10 @@ Set your calculator to degrees.`);
       const s = boss.puzzle.support;
       const sum=s.intersections[0][0]+s.intersections[1][0],constant=s.intersections[0][0]*s.intersections[1][0];
       const term=(n,variable='')=>(n<0?' − ':' + ')+Math.abs(n)+variable;
+      const factors=s.intersections.map(([x])=>'('+ 'x'+term(-x)+')').join('');
       return say('Iguala las dos curvas: ', 'Set the two curves equal: ')+s.parabolaText+' = '+s.lineText+'\n'+say(`Multiplica por ${s.d} y reúne términos:
 `, `Multiply by ${s.d} and collect terms:
-`)+'x²'+term(-sum,'x')+term(constant)+' = 0\n'+say('Resuelve esta cuadrática: puedes factorizar o usar la fórmula general. Sustituye cada raíz en y = ', 'Solve this quadratic by factoring or using the quadratic formula. Substitute each root into y = ')+s.lineText+'\n'+say('Calcula ambas coordenadas. La raíz negativa corresponde al láser izquierdo y la positiva al derecho.', 'Calculate both coordinates. The negative root belongs to the left laser and the positive root to the right laser.');
+`)+'x²'+term(-sum,'x')+term(constant)+' = 0\n'+say('Ya está factorizada: ', 'Already factored: ')+factors+' = 0\n'+say('Iguala cada factor a cero y despeja x. Sustituye cada raíz en y = ', 'Set each factor equal to zero and isolate x. Substitute each root into y = ')+s.lineText+'\n'+say('Calcula ambas coordenadas. La raíz negativa corresponde al láser izquierdo y la positiva al derecho.', 'Calculate both coordinates. The negative root belongs to the left laser and the positive root to the right laser.');
     }
     const q = this.intercept(ignitia.simulator);
     return q ? say(`Solución actualizada para t₀ = ${q.epoch.toFixed(1)} s: v₀ = ${q.speed} km/s, θ = ${q.angle}°, retraso = 0 s y vuelo = ${q.duration} s. Usa x = v₀ cosθ τ e y = v₀ senθ τ − ½gτ². Eric sigue avanzando: esta propuesta se recalcula mientras lees. Introduce los valores y ensaya de inmediato.`, `Updated solution for t₀ = ${q.epoch.toFixed(1)} s: v₀ = ${q.speed} km/s, θ = ${q.angle}°, delay = 0 s, flight = ${q.duration} s. Use x = v₀ cosθ τ and y = v₀ sinθ τ − ½gτ². Eric keeps moving: these values update while you read. Enter them and run the trial promptly.`) : say('Ya no queda tiempo para interceptarlo con los límites disponibles. Tras el game over, vuelve a intentarlo desde el punto seguro.', 'There is not enough time for an intercept within the available limits. After game over, try again from the checkpoint.');
