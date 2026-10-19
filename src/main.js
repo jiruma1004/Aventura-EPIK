@@ -1,5 +1,7 @@
-(()=>{
+(async()=>{
 'use strict';
+const development=['localhost','127.0.0.1'].includes(location.hostname)&&new URLSearchParams(location.search).get('dev')==='1';
+if(!development)await EpikGroupAccess.enter();
 const canvas=document.querySelector('#game'),renderer=new EscapeRenderer(canvas),keys=new Set(),rooms=window.ESCAPE_ROOMS,lab=new ProjectileLab();
 let index=0,player,opened=false,flash=0,last=0,completed=false,death=null,checkpoint=null;
 let gravityFalls=0,potionDeaths=0;
@@ -15,10 +17,18 @@ let classroom;
 let recovery;
 let touch=null;
 let controlTutorial=null;
-const development=['localhost','127.0.0.1'].includes(location.hostname)&&new URLSearchParams(location.search).get('dev')==='1';
+
 const mission=new AdventureClock({onChange:updateCountdown,onExpire:expireAdventure});
 const ignitia=new IgnitiaMission(ignitiaEvent);
-const cinematics=new CinematicLibrary();cinematics.legacySource=ignitia;cinematics.isComplete=()=>completed&&classroom.session.totals().valid;cinematics.resultSummary=()=>classroom.certificate();ignitia.cinematics=cinematics;
+ignitia.telemetry.onProgress=()=>recovery?.save();
+ignitia.telemetry.onAttempt=(stage,answer,correct)=>classroom.session.attempt({...classroom.context(),objective_id:'telemetry-'+stage,variant_id:'vertical-v1'},answer,{acceleration:5,cutoff:4,gravity:9.81},correct,'telemetry');
+ignitia.telemetry.onHint=()=>classroom.session.event('normal_help',{...classroom.context(),objective_id:'telemetry-'+ignitia.telemetry.stage});
+ignitia.telemetry.onPalma=()=>classroom.session.assist({...classroom.context(),objective_id:'telemetry-'+ignitia.telemetry.stage,variant_id:'vertical-v1'},{acceleration:5,cutoff:4,gravity:9.81});
+const cinematics=new CinematicLibrary();
+cinematics.vectors.onActive=active=>{if(!cinematics.story)return;if(active)mission.resume();else mission.pause();};
+cinematics.vectors.onAttempt=(answer,correct)=>cinematics.story&&classroom.session.attempt({...classroom.context(),objective_id:'parachute-vectors',variant_id:'winds-v1'},answer,{a:[40,20],b:[30,-10],prison:[20,50]},correct,'vectors');
+cinematics.vectors.onHint=()=>cinematics.story&&classroom.session.event('normal_help',{...classroom.context(),objective_id:'parachute-vectors'});
+cinematics.vectors.onPalma=()=>!cinematics.story||classroom.session.assist({...classroom.context(),objective_id:'parachute-vectors',variant_id:'winds-v1'},{a:[40,20],b:[30,-10],prison:[20,50]});cinematics.legacySource=ignitia;cinematics.isComplete=()=>completed&&classroom.session.totals().valid;cinematics.resultSummary=()=>classroom.certificate();ignitia.cinematics=cinematics;
 const measurement=new MeasurementRoom(()=>{opened=true;Sound.success();document.querySelector('#door-status').textContent='MEDICIÓN ACEPTADA';companions.toast('¡Medición aceptada! Cruza la puerta real para llegar a la sala II.');},returnFromMeasurement);
 const canPlay=()=>!trial?.zipline?.active&&!arrival.active&&!cinematics.active&&!measurement.isOpen&&!ignitia.blocking&&(mission.state==='running'||controlTutorial?.active)&&!completed&&!death&&!document.querySelector('#eric-ready').open&&document.querySelector('#maze-notice').hidden;
 const camera=new FirstPersonControls(canvas,{canPlay,look:(dx,dy)=>{player.angle+=dx*.0035;player.pitch=Math.max(-.24,Math.min(.24,player.pitch-dy*.0015));},click:worldClick,clearKeys:()=>{keys.clear();touch?.reset();}});
@@ -35,6 +45,7 @@ function updateCountdown({state,remaining,phase,phaseChanged,musicCue}){
  if(phaseChanged){window.dispatchEvent(new CustomEvent('astralia:urgency',{detail:{phase,remainingSeconds:remaining,musicCue}}));if(phase==='warning'||phase==='danger')document.querySelector('#timer-announcement').textContent='Quedan '+Math.ceil(remaining/60)+' minutos. '+hint;}
 }
 function expireAdventure(){
+ cinematics.close(false);
  recovery?.remove();
  measurement.close();ignitia.reset(rooms[index]);document.querySelector('#ignitia-dialog').hidden=true;
  document.querySelector('#eric-ready').close();boss?.close();
@@ -126,8 +137,8 @@ function openNearbyDoor(angle=player.angle,screenY=null){
 function bossEvent(type){if(type==='stun'){companions.toast('¡Descarga! Eric queda aturdido durante 15 segundos. Aprovecha los láseres.');recovery?.save();return;}if(type==='flame'){die('flame');return;}if(type==='potion'){die('potion');return;}if(type!=='solved')return;classroom.solve();boss.resetAttacks();Sound.stop('laugh');companions.closeHelp();document.querySelector('#ask-paola').hidden=true;ignitia.startEscape(player);keys.clear();return;}
 function ignitiaEvent(type){
  if(type==='moon'){ignitia.closeConsole();ignitia.speaking=false;document.querySelector('#ignitia-dialog').hidden=true;die('moon');return;}
- if(type==='launch'){classroom.solve();classroom.session.finish();mission.finish();keys.clear();camera.release();companions.closeHelp();Object.assign(player,{x:3,y:7.5,angle:0,pitch:.10,jumpHeight:0,jumpVelocity:0});return;}
- if(type==='complete'){if(mission.state==='complete'||mission.finish()){completed=true;keys.clear();document.querySelector('#door-status').textContent='SIETE PRUEBAS COMPLETADAS';message.textContent='Entrega tu captura y tus apuntes con los procedimientos de los ejercicios.';}return;}
+ if(type==='launch'){keys.clear();camera.release();companions.closeHelp();Object.assign(player,{x:3,y:7.5,angle:0,pitch:.10,jumpHeight:0,jumpVelocity:0});return;}
+ if(type==='complete'){if(mission.state==='complete'||mission.finish()){classroom.solve();classroom.session.finish();completed=true;keys.clear();document.querySelector('#door-status').textContent='SIETE PRUEBAS COMPLETADAS';message.textContent='Entrega tu captura y tus apuntes con los procedimientos de los ejercicios.';}return;}
  if(type!=='escapeDone')return;opened=rooms[index].canUnlock({parabolaCut:true});companions.toast('Eric escapó. Cruza el puente central hacia el cohete de Ignitia.');document.querySelector('#door-status').textContent='SOPORTE CORTADO · PASO ABIERTO';}
 function corridorEvent(type,text){
  if(type==='hit'){die('symbol');return;}
@@ -219,7 +230,7 @@ function animateDeath(dt){if(!death)return;death.t=(performance.now()-death.star
 }
 function respawn(){
  if(!death)return;clearDeath();player={...checkpoint.position,pitch:0,jumpHeight:0,jumpVelocity:0};keys.clear();
- if(trial)trial.restore();if(rooms[index].rocket)ignitia.reset(rooms[index]);
+ if(trial)trial.restore();if(rooms[index].rocket)ignitia.reset(rooms[index],{preserveTelemetry:true});
  if(corridor)corridor.resetHazards();if(boss)boss.resetAttacks();
  if(maze){player={...maze.restoreCheckpoint(checkpoint.stage),pitch:0,jumpHeight:0,jumpVelocity:0};opened=false;companions.updateConcept();companions.revealQuestion();document.querySelector('#door-status').textContent=`LABERINTO · ${maze.stage+1} / 4`;}
  lab.dead=false;lab.destroyed=false;if(rooms[index].physics){lab.lock(false);lab.update();document.querySelector('#loaded-status').textContent=lab.loaded?`● Cargada: ${lab.loaded.name} · ${lab.loaded.mass} kg`:'Recámara vacía. Elige una bala y cárgala.';document.querySelector('#feedback').textContent='Nuevo intento: conservas el registro. Revisa el aviso de carga antes de disparar.';}
@@ -232,9 +243,9 @@ companions.canHelp=()=>canPlay();
 window.addEventListener('astralia:help-open',()=>{classroom.session.event('normal_help',classroom.context());if(rooms[index].rocket){ignitia.speaking=false;document.querySelector('#ignitia-dialog').hidden=true;ignitia.closeConsole();}});
 ignitia.canLaunch=()=>canPlay()&&ignitia.near(player);
 ignitia.canPursue=()=>mission.state==='running'&&!death&&!cinematics.active;
-ignitia.simulator.canAdvance=()=>mission.state==='running'&&!death&&rooms[index].rocket&&ignitia.mode==='idle'&&!cinematics.active;
+ignitia.simulator.canAdvance=()=>!ignitia.telemetry.pending&&!ignitia.telemetry.visible&&mission.state==='running'&&!death&&rooms[index].rocket&&ignitia.mode==='idle'&&!cinematics.active;
 measurement.canSubmit=()=>mission.state==='running'&&!death&&rooms[index].measurement&&measurement.near(player);
-function tick(time){const simulationActive=ignitia.simulator.running&&ignitia.simulator.canAdvance();classroom.tick(Math.min((time-last)/1000,.04),mission.state==='running'&&(canPlay()||simulationActive||!!trial?.zipline?.active)&&!document.hidden&&mission.pausedAt===null);const dt=Math.min((time-last)/1000,.04);last=time;flash=Math.max(0,flash-dt);Sound.mix(dt);prologue.tick(dt);arrival.tick(dt,player);mission.tick();ignitia.tick(dt);
+function tick(time){const simulationActive=ignitia.simulator.running&&ignitia.simulator.canAdvance();classroom.tick(Math.min((time-last)/1000,.04),mission.state==='running'&&(canPlay()||ignitia.telemetry.visible||cinematics.vectors.visible||simulationActive||!!trial?.zipline?.active)&&!document.hidden&&mission.pausedAt===null);const dt=Math.min((time-last)/1000,.04);last=time;flash=Math.max(0,flash-dt);Sound.mix(dt);prologue.tick(dt);arrival.tick(dt,player);mission.tick();ignitia.tick(dt);
  if(trial?.zipline?.active&&!death&&!document.hidden&&mission.state==='running'&&mission.pausedAt===null)trial.tickZipline(dt,player);
  touch.sync();
  if(canPlay()){player.angle+=((keys.has('arrowright')?1:0)-(keys.has('arrowleft')?1:0))*dt*1.8;const f=(keys.has('w')?1:0)-(keys.has('s')?1:0)+touch.forward,s=(keys.has('d')?1:0)-(keys.has('a')?1:0)+touch.strafe,speed=(boss?.supernova.blind?0:dt)*2.3*((keys.has('shift')||touch.sprinting)?1.55:1)/Math.max(1,Math.hypot(f,s));const nx=player.x+(Math.cos(player.angle)*f-Math.sin(player.angle)*s)*speed,ny=player.y+(Math.sin(player.angle)*f+Math.cos(player.angle)*s)*speed;
@@ -253,7 +264,7 @@ function tick(time){const simulationActive=ignitia.simulator.running&&ignitia.si
  companions.tick(dt,player,renderer,opened,canPlay());cannon.tick(player,renderer,opened,canPlay());
  if(rooms[index].physics){const hint=document.querySelector('#interaction-hint');hint.hidden=!canPlay()||cannon.isOpen;hint.textContent=cannon.near(player,renderer,opened)?'Clic o E · Usar el cañón':'Acércate al cañón para configurar el disparo';}
  if(maze)document.querySelector('#chase-indicator').classList.toggle('frozen',maze.freezeLeft>0);
- if(rooms[index].rocket){const hint=document.querySelector('#interaction-hint');hint.hidden=!canPlay()||!document.querySelector('#rocket-console').hidden;hint.textContent=ignitia.near(player)?'Clic o E · Programar el cohete':'Acércate a la consola de operaciones de Ignitia';if(!ignitia.near(player)&&!document.querySelector('#rocket-console').hidden)ignitia.closeConsole();}
+ if(rooms[index].rocket){const hint=document.querySelector('#interaction-hint');hint.hidden=!canPlay()||!document.querySelector('#rocket-console').hidden;hint.textContent=ignitia.telemetry.pending?(ignitia.telemetry.near(player)?'Clic o E · Hablar con Paola':'Habla con Paola antes de usar la consola'):ignitia.near(player)?'Clic o E · Programar el cohete':'Acércate a la consola de operaciones de Ignitia';if(!ignitia.near(player)&&!document.querySelector('#rocket-console').hidden)ignitia.closeConsole();}
  if(rooms[index].measurement){const h=document.querySelector('#interaction-hint');h.hidden=!canPlay();h.textContent=opened?'Cruza la puerta real para continuar.':'Clic o E junto a la puerta · Medir';}
  if(rooms[index].measurementEntrance&&opened){const h=document.querySelector('#interaction-hint');h.hidden=!canPlay();h.textContent='Puerta lateral al norte · Sala 1.5 opcional';}
  if(boss)document.querySelector('#interaction-hint').textContent=boss.near(player,renderer,rooms[index],opened)>=0?'Clic o E · Programar láser':'Busca los láseres a ambos lados';
@@ -281,8 +292,8 @@ function captureRecovery() {
  if(maze)world.maze={...pick(maze,mazeRecoveryFields),map:room.map,environment:room.environment,doors:maze.doors,
   passed:[...maze.passed],openDoors:[...maze.openDoors],usedFreezeButtons:[...maze.usedFreezeButtons]};
  if(boss)world.boss={support:boss.puzzle.support.id,cuts:boss.puzzle.cuts,stun:boss.stun.snapshot(),escapeTime:ignitia.ignited?ignitia.simulator.missionTime:null};
- if(room.rocket)world.rocket={...pick(ignitia.simulator,['params','missionTime','attempts','launchEpoch','ready']),ending:classroom.session.finished!==null};
- return {world,session:classroom.session.recoverySnapshot(),remaining:mission.remaining,
+ if(room.rocket)world.rocket={intercepting:cinematics.active&&cinematics.story&&cinematics.item?.id==='ignitia-intercepcion',vectors:cinematics.vectors.snapshot(),telemetry:ignitia.telemetry.snapshot(),...pick(ignitia.simulator,['params','missionTime','attempts','launchEpoch','ready']),ending:classroom.session.finished!==null};
+ return {group:EpikGroupAccess.group,world,session:classroom.session.recoverySnapshot(),remaining:mission.remaining,
   clockComplete:mission.state==='complete',language:I18n.lang};
 }
 function restoreRecovery(saved,away) {
@@ -336,7 +347,8 @@ function restoreRecovery(saved,away) {
  }
  if(rooms[i].rocket&&w.rocket){
   Object.assign(ignitia.simulator,pick(w.rocket,['params','missionTime','attempts','launchEpoch','ready']));
-  if(!w.rocket.ending)ignitia.simulator.missionTime+=away/1000;
+  ignitia.telemetry.restore(w.rocket.telemetry);
+  if(!w.rocket.ending&&!w.rocket.intercepting&&!ignitia.telemetry.pending)ignitia.simulator.missionTime+=away/1000;
   ignitia.simulator.sync();ignitia.simulator.draw();
  }
  mission.pausedAt=null;mission.remaining=Math.max(0,saved.remaining-(saved.clockComplete?0:Math.ceil(away/1000)));
@@ -348,6 +360,13 @@ function restoreRecovery(saved,away) {
   // The completed assessment is preserved even if power failed during the ending.
   // Resume at the ceremony so the student can retrieve the named diploma and CSV.
   ignitia.mode='sequence';ignitia.beginCeremony();
+ }else if(w.rocket?.intercepting){
+  mission.tick();
+  if(mission.state==='running'){
+   ignitia.mode='sequence';
+   cinematics.play('ignitia-intercepcion',{story:true,onComplete:()=>ignitia.beginCeremony()});
+   cinematics.ready.then(()=>{if(!cinematics.active)return;cinematics.finish();cinematics.vectors.restore(w.rocket.vectors);});
+  }
  }else{
   mission.tick();
   if(mission.state==='running'&&rooms[i].rocket&&ignitia.simulator.missionTime>=InterceptionPhysics.moonTime)die('moon');
