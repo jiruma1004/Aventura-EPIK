@@ -3,7 +3,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
  const p=await browser.newPage({viewport:{width:1440,height:1050}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.addInitScript(()=>window.requestAnimationFrame=()=>0);await p.goto('http://127.0.0.1:8767/?dev=1');await p.evaluate(()=>{document.querySelector('#epik-dev')?.close();prologue.finish(true);load(rooms.findIndex(r=>r.physics));document.querySelector('#maze-notice').hidden=true});
  assert.deepEqual(await p.locator('#angle option').evaluateAll(options=>options.map(o=>o.value)),['30','45','60']);
  const initial=await p.locator('#cannon-target-live').innerText();assert(initial.includes('31 m'));assert(initial.includes('4.5 m'));assert(initial.includes('1.2 m'));
- const help=await p.evaluate(()=>cannonTargetHint(lab.room.physics));assert(help.includes('incógnita'));assert(!/pared|muro|espalda/.test(help));
+ const help=await p.evaluate(()=>cannonTargetHint(lab.room.physics));assert(help.includes('incógnita'));assert(help.includes('Voltea hacia atrás'));
  await p.evaluate(()=>{for(let i=0;i<3;i++)lab.target.miss();lab.update()});assert((await p.locator('#cannon-target-live').innerText()).includes('25 m'));
  await p.evaluate(()=>lab.reset(rooms[index]));
  assert.equal(await p.locator('#launch-mode').count(),0);assert.equal(await p.locator('#energy').count(),0);
