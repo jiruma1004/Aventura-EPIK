@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
-const world={};world.window=world;vm.createContext(world);
+const world={StoryRoute:{choose(){}}};world.window=world;vm.createContext(world);
 for(const file of ['src/engine/difficulty.js','src/rooms/room-03/room.js','src/rooms/room-03/maze.js','src/rooms/room-00/approach.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),world);
 const room=world.ESCAPE_ROOMS[0],events=[],maze=new world.ConceptMaze(room,(type,text)=>events.push({type,text}));
 const door=(stage,choice)=>maze.doors.find(d=>d.stage===stage&&d.choice===choice);
@@ -26,10 +26,10 @@ for(let i=0;i<cycle*3;i++)questions.push(maze.nextDungeonQuestion().title);
 for(let i=0;i<3;i++)assert.equal(new Set(questions.slice(i*cycle,(i+1)*cycle)).size,cycle,'Sin repetir dentro de cada ciclo');
 for(let i=1;i<questions.length;i++)assert.notEqual(questions[i],questions[i-1],'Sin repetición consecutiva entre ciclos');
 maze.nextDungeonQuestion();const remaining=maze.questionPool.length;maze.restoreCheckpoint(0);assert.equal(maze.questionPool.length,remaining,'Morir no reinicia el banco');
-maze.choose(door(0,0),traveler);maze.choose(maze.doors.find(d=>d.correct),traveler);assert.equal(maze.grace,5);assert(maze.returnGrace);
-const still={...maze.enemy};const near={x:still.x+.1,y:still.y};for(let i=0;i<49;i++)maze.tick(.1,near);
+maze.choose(door(0,0),traveler);maze.choose(maze.doors.find(d=>d.correct),traveler);assert.equal(maze.grace,10);assert(maze.returnGrace);
+const still={...maze.enemy};const near={x:still.x+.1,y:still.y};for(let i=0;i<99;i++)maze.tick(.1,near);
 assert.equal(maze.enemy.x,still.x);assert.equal(maze.enemy.y,still.y);assert(!maze.caught,'No captura durante el margen de regreso');maze.tick(.2,near);assert(maze.caught,'La persecución se reanuda al terminar el margen');
-console.log('OK: tres puertas en los primeros tramos y dos respuestas válidas en el último, banco de 12 sin repeticiones y margen de regreso de 5 segundos sin movimiento ni captura.');
+console.log('OK: tres puertas en los primeros tramos y dos respuestas válidas en el último, banco de 12 sin repeticiones y margen de regreso de 10 segundos sin movimiento ni captura.');
 
 maze.reset();
 assert.equal(room.oakDoor,null,'No shared exit door');
@@ -37,3 +37,30 @@ assert.equal(room.exitX,48.25);
 for(const x of [45,46,47,48,49])assert.equal(room.map[8][x],1,'A wall separates the red and blue passages');
 for(const choice of [0,1]){const d=door(3,choice);for(const x of [45,46,47,48,49])assert.equal(room.map[d.y][x],0,'Each door has its own passage');}
 console.log('OK: blue and red exits remain physically separate.');
+
+for(const mode of ['easy','normal']){
+ world.EpikDifficulty.select(mode);
+ for(const stage of [0,1,2]){
+  maze.restoreCheckpoint(stage);
+  const priorPasses=[...maze.passed],position=maze.checkpointPosition();
+  Object.assign(traveler,position);
+  maze.choose(maze.doors.find(d=>d.stage===stage&&!d.correct),traveler);
+  assert(maze.dungeon);
+  // A death in the dungeon must restore the checkpoint of the unanswered test.
+  const restored=maze.restoreCheckpoint(stage);
+  assert.equal(maze.stage,stage);
+  assert.equal(restored.x,position.x);
+  maze.choose(maze.doors.find(d=>d.stage===stage&&!d.correct),traveler);
+  maze.choose(maze.doors.find(d=>d.correct),traveler);
+  assert.equal(maze.stage,mode==='easy'?stage:0);
+  assert.equal(maze.checkpointPosition().x,mode==='easy'?position.x:room.spawn.x);
+  assert(priorPasses.every(s=>maze.passed.has(s)));
+  assert.equal(maze.grace,10);
+  assert.equal(maze.enemy.x,maze.stage*12+1.5);
+  const stationary={...maze.enemy};
+  maze.tick(9,maze.checkpointPosition());
+  assert.equal(maze.enemy.x,stationary.x);
+  assert(!maze.caught);
+ }
+}
+console.log('OK: easy dungeon return/death keeps latest test; normal dungeon return stays at entrance; progress and 10s grace preserved.');
