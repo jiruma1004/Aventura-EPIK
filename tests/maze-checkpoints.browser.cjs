@@ -23,26 +23,27 @@ const assert=require('node:assert/strict');
     await page.locator('#dev-room').selectOption(String(roomIndex));
     await page.locator('#dev-difficulty').selectOption(mode);
     await page.locator('#dev-go').click();
-    assert.equal(await ev(()=>mission.remaining),9000);
+    assert.equal(await ev(()=>mission.remaining),10800);
     await ev(()=>{
      document.querySelector('#maze-notice').hidden=true;
      for(let n=0;n<2;n++){
       const d=maze.doors.find(d=>d.stage===maze.stage&&d.correct);
       maze.choose(d,player);Object.assign(player,{x:d.x+5.3,y:d.y+.5});maze.tick(.016,player);
      }
-     maze.choose(maze.doors.find(d=>d.stage===2&&!d.correct),player);
+     maze.choose(maze.doors.find(d=>d.stage===2&&!d.correct&&!d.blocked),player);
      die('ivan');respawn();
     });
     assert.equal(await ev(()=>maze.stage),2,'Death in dungeon retains latest checkpoint');
     assert.equal(await ev(()=>player.x),25.5);
     await ev(()=>{
-     maze.choose(maze.doors.find(d=>d.stage===2&&!d.correct),player);
+     maze.choose(maze.doors.find(d=>d.stage===2&&!d.correct&&!d.blocked),player);
      maze.choose(maze.doors.find(d=>d.correct),player);
     });
     const stage=mode==='easy'?2:0;
     assert.equal(await ev(()=>maze.stage),stage);
     assert.equal(await ev(()=>player.x),mode==='easy'?25.5:await ev(()=>rooms[index].spawn.x));
     assert.equal(await ev(()=>maze.grace),10);
+    assert.equal(await ev(()=>{const d=maze.doors.find(d=>d.stage===2&&d.blocked);return d&&rooms[index].map[d.y][d.x]===2&&maze.choose(d,player)===null;}),true,'Used portal stays solid and rejects interaction');
     assert.equal(await ev(()=>rooms[index].map[Math.floor(player.y)][Math.floor(player.x)]),0);
     await ev(()=>{die('ivan');respawn()});
     assert.equal(await ev(()=>maze.stage),stage,'Return must update the death checkpoint too');
@@ -51,7 +52,7 @@ const assert=require('node:assert/strict');
     await p.keyboard.press('F2');await page.locator('#epik-dev').waitFor();
    }
    assert.deepEqual(errors,[]);
-   console.log('PASS '+(target.encrypted?'encrypted developer':'student/local')+': 150 minutes, dungeon death, easy return, subsequent death, safe spawn, normal mode unchanged.');
+   console.log('PASS '+(target.encrypted?'encrypted developer':'student/local')+': 180 minutes, dungeon death, easy return, subsequent death, safe spawn, normal mode unchanged.');
    await p.close();
   }
  }finally{await browser.close()}

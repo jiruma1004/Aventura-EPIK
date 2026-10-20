@@ -7,14 +7,14 @@ function pass(){const d=door(maze.stage,[world.CONCEPT_QUESTIONS[maze.stage].cor
 assert.equal(maze.choose(door(1,0)),null);
 const bad=door(0,0),traveler={x:7,y:3.5};assert.equal(room.map[3][10],1,'No hay cuarto vacío tras el portal');
 assert.equal(maze.choose(bad,traveler),false);assert.equal(maze.dungeon,true,'La selección castiga inmediatamente, sin esperar movimiento ni tick');assert.equal(traveler.x,6.5);assert.equal(maze.doors.length,2);assert.equal(room.environment.moss,true);assert.equal(maze.chasing,true);
-const saved=maze.savedWorld.map;assert.equal(saved[3][8],0);maze.choose(maze.doors.find(d=>!d.correct),traveler);assert(maze.dungeon,'Una respuesta incorrecta en el calabozo no permite salir');maze.choose(maze.doors.find(d=>d.correct),traveler);assert(!maze.dungeon);assert.equal(room.map,saved);assert.equal(maze.stage,0);assert(maze.openDoors.has('0:0'));assert.equal(events.at(-1).type,'return');
-traveler.x=8.1;traveler.y=3.5;maze.tick(.016,traveler);assert(maze.dungeon,'El portal conservado vuelve a funcionar al cruzarlo');maze.grace=0;
+const saved=maze.savedWorld.map;assert.equal(saved[3][8],2);maze.choose(maze.doors.find(d=>!d.correct),traveler);assert(maze.dungeon,'Una respuesta incorrecta en el calabozo no permite salir');maze.choose(maze.doors.find(d=>d.correct),traveler);assert(!maze.dungeon);assert.equal(room.map,saved);assert.equal(maze.stage,0);assert(maze.openDoors.has('0:0'));assert.equal(events.at(-1).type,'return');
+traveler.x=8.1;traveler.y=3.5;maze.tick(.016,traveler);assert(!maze.dungeon,'El portal usado no admite reentrada');assert.equal(maze.choose(bad,traveler),null);assert(bad.blocked);assert.equal(room.map[bad.y][bad.x],2);maze.choose(door(0,2),traveler);assert(maze.dungeon,'Otro error nuevo conserva su penalización');maze.grace=0;
 const initial={...maze.enemy};maze.tick(.1,traveler);assert(Math.abs(Math.hypot(maze.enemy.x-initial.x,maze.enemy.y-initial.y)-.08751645)<1e-8,'Velocidad 0.8751645 celdas/s');
 for(let i=0;i<1000&&!maze.caught;i++){maze.tick(.02,traveler);assert.equal(room.map[Math.floor(maze.enemy.y)][Math.floor(maze.enemy.x)],0);}
 assert(maze.caught);assert.equal(events.at(-1).type,'caught');const count=events.length;maze.tick(.2,traveler);assert.equal(events.length,count);
 maze.restoreCheckpoint(0);assert(!maze.dungeon);assert.equal(room.environment.moss,undefined);pass();assert.equal(maze.stage,1);assert(!maze.chasing);maze.choose(door(1,2));assert(maze.chasing,'Segunda puerta correcta despierta la presencia');maze.tick(.016,{x:25.3,y:10.5});assert.equal(maze.stage,2);pass();pass();assert(maze.finished);
 maze.restoreCheckpoint(1);assert.equal(maze.stage,1);assert(!maze.chasing);assert.equal(room.map[8][8],0);maze.restoreCheckpoint(2);assert(maze.chasing);assert(maze.grace>0);
-console.log('OK: penalización inmediata, sin cuartos vacíos, dos respuestas, retorno con puertas abiertas, reentrada, velocidad, captura y progreso correcto.');
+console.log('OK: penalización inmediata, sin cuartos vacíos, dos respuestas, retorno con portales rojos bloqueados, velocidad, captura y progreso correcto.');
 maze.reset();
 for(let stage=0;stage<4;stage++){
  const doors=maze.doors.filter(d=>d.stage===stage);assert.equal(doors.length,stage===3?2:3);assert.equal(doors.filter(d=>d.correct).length,stage===3?2:1);
@@ -41,16 +41,16 @@ console.log('OK: blue and red exits remain physically separate.');
 for(const mode of ['easy','normal']){
  world.EpikDifficulty.select(mode);
  for(const stage of [0,1,2]){
-  maze.restoreCheckpoint(stage);
+  maze.reset();maze.restoreCheckpoint(stage);
   const priorPasses=[...maze.passed],position=maze.checkpointPosition();
   Object.assign(traveler,position);
-  maze.choose(maze.doors.find(d=>d.stage===stage&&!d.correct),traveler);
+  maze.choose(maze.doors.find(d=>d.stage===stage&&!d.correct&&!d.blocked),traveler);
   assert(maze.dungeon);
   // A death in the dungeon must restore the checkpoint of the unanswered test.
   const restored=maze.restoreCheckpoint(stage);
   assert.equal(maze.stage,stage);
-  assert.equal(restored.x,position.x);
-  maze.choose(maze.doors.find(d=>d.stage===stage&&!d.correct),traveler);
+  assert.equal(restored.x,position.x);assert(maze.doors.some(d=>d.stage===stage&&d.blocked),'El portal sigue sellado tras morir');
+  maze.choose(maze.doors.find(d=>d.stage===stage&&!d.correct&&!d.blocked),traveler);
   maze.choose(maze.doors.find(d=>d.correct),traveler);
   assert.equal(maze.stage,mode==='easy'?stage:0);
   assert.equal(maze.checkpointPosition().x,mode==='easy'?position.x:room.spawn.x);
