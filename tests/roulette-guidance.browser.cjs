@@ -4,7 +4,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),assert=req
  await page.goto((process.env.BASE_URL||'http://127.0.0.1:8767')+'/?dev=1');
  await page.evaluate(()=>{document.querySelector('#epik-dev')?.close();prologue.finish(true);load(rooms.findIndex(r=>r.roulette),'preview');document.querySelector('#maze-notice').hidden=true;});
  assert.equal(await page.locator('#hint-details,#problem-hint').count(),0);assert(!await page.locator('.source-note').innerText().then(t=>t.includes('Diez problemas')));
- for(let i=0;i<10;i++){const text=await page.evaluate(i=>{roulette.present(i);return EpikSolutions.text({room:rooms[index],roulette})},i);assert(text.includes('Solo te toca despejar'));}
+ for(let i=0;i<6;i++){const text=await page.evaluate(i=>{roulette.present(i);return EpikSolutions.text({room:rooms[index],roulette})},i);assert(text.includes('ecuaciones despejadas'));}
  for(const method of ['world','reset']){
   const first=await page.evaluate(()=>{classroom.newSession();load(rooms.findIndex(r=>r.roulette),'preview');const before=roulette.requestReset();const ok=roulette.spin(),duplicate=roulette.spin();roulette.tick(4);return {before,ok,duplicate,id:roulette.current.id,spins:roulette.resetState.rouletteSpins}});
   assert.deepEqual({...first,id:0},{before:false,ok:true,duplicate:false,id:0,spins:1});assert(await page.locator('#reset-roulette').isEnabled());
